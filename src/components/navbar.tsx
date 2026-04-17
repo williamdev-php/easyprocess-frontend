@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
@@ -63,11 +64,15 @@ export default function Navbar() {
         <nav className="px-4 sm:px-6">
           <div className="flex h-14 items-center justify-between lg:h-16">
             {/* Logo */}
-            <Link
-              href="/"
-              className="text-xl font-bold tracking-tight text-white lg:text-2xl"
-            >
-              Qvicko
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo-sand-mist.png"
+                alt="Qvicko"
+                width={120}
+                height={40}
+                className="h-8 w-auto lg:h-10"
+                priority
+              />
             </Link>
 
             {/* Desktop nav */}

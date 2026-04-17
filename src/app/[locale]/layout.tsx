@@ -33,6 +33,9 @@ export async function generateMetadata({
         en: "/en",
       },
     },
+    icons: {
+      icon: "/favicon.png",
+    },
     openGraph: {
       title: messages.metadata.title,
       description: messages.metadata.description,
