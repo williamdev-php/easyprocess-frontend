@@ -40,7 +40,7 @@ function Skeleton({ className = "" }: { className?: string }) {
 
 function StatsCards() {
   const t = useTranslations("leads");
-  const { data, loading } = useQuery(GET_DASHBOARD_STATS, {
+  const { data, loading } = useQuery<any>(GET_DASHBOARD_STATS, {
     fetchPolicy: "cache-and-network",
   });
   const stats = (data as any)?.dashboardStats;
@@ -88,7 +88,7 @@ export default function LeadsPage() {
   const [newName, setNewName] = useState("");
   const [newIndustry, setNewIndustry] = useState("");
 
-  const { data, loading, refetch } = useQuery(GET_LEADS, {
+  const { data, loading, refetch } = useQuery<any>(GET_LEADS, {
     variables: {
       filter: {
         page,

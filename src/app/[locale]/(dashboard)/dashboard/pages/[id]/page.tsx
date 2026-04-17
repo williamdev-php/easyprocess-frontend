@@ -629,7 +629,7 @@ export default function SiteEditorPage() {
   const siteId = params.id as string;
   const t = useTranslations("siteEditor");
 
-  const { data, loading, error } = useQuery(MY_SITE, { variables: { id: siteId } });
+  const { data, loading, error } = useQuery<any>(MY_SITE, { variables: { id: siteId } });
   const [updateSiteData, { loading: saving }] = useMutation(UPDATE_SITE_DATA);
 
   const [siteData, setSiteData] = useState<SiteData | null>(null);

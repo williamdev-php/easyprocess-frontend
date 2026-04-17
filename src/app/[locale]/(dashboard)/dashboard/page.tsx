@@ -328,7 +328,7 @@ function UserOverview() {
   const t = useTranslations("dashboardOverview.user");
 
   // First, get user's sites to find the site ID
-  const { data: sitesData, loading: sitesLoading } = useQuery(MY_SITES);
+  const { data: sitesData, loading: sitesLoading } = useQuery<{ mySites: Array<{ id: string }> }>(MY_SITES);
 
   // Pick the first site (most users have one)
   const siteId = useMemo(() => {
@@ -337,7 +337,7 @@ function UserOverview() {
   }, [sitesData]);
 
   // Fetch analytics for that site
-  const { data: analyticsData, loading: analyticsLoading } = useQuery(
+  const { data: analyticsData, loading: analyticsLoading } = useQuery<{ siteAnalytics: { totalPageViews: number; totalVisitors: number; pagesPerSession: number; performanceScore: number; visitorsChangePct: number; pagesPerSessionPrev: number; performanceScorePrev: number; daily: Array<{ date: string; visitors: number; pageViews: number }> } }>(
     GET_SITE_ANALYTICS,
     {
       variables: { siteId, days: 7 },

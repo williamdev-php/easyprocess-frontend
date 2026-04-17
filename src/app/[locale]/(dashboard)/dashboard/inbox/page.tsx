@@ -152,7 +152,7 @@ export default function InboxPage() {
   if (viewFilter === "archived") filterVars.isArchived = true;
   if (viewFilter === "all" || viewFilter === "unread") filterVars.isArchived = false;
 
-  const { data, loading, refetch } = useQuery(GET_INBOX, {
+  const { data, loading, refetch } = useQuery<any>(GET_INBOX, {
     variables: { filter: filterVars },
     fetchPolicy: "cache-and-network",
   });

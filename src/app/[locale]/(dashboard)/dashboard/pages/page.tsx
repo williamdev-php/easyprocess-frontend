@@ -108,7 +108,7 @@ function SiteCard({ site }: { site: SiteItem }) {
 
 export default function PagesPage() {
   const t = useTranslations("userPages");
-  const { data, loading } = useQuery(MY_SITES);
+  const { data, loading } = useQuery<any>(MY_SITES);
 
   const sites: SiteItem[] = data?.mySites || [];
 

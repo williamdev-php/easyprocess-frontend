@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useAuth } from "@/lib/auth-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -61,8 +61,8 @@ export default function DomainPage() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Queries
-  const { data: domainsData, refetch: refetchDomains } = useQuery(MY_DOMAINS);
-  const { data: sitesData } = useQuery(MY_SITES);
+  const { data: domainsData, refetch: refetchDomains } = useQuery<{ myDomains: DomainItem[] }>(MY_DOMAINS);
+  const { data: sitesData } = useQuery<{ mySites: SiteItem[] }>(MY_SITES);
 
   // Mutations
   const [addDomain, { loading: adding }] = useMutation(ADD_DOMAIN);

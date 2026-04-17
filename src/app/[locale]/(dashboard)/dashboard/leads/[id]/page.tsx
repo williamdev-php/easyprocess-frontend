@@ -248,9 +248,9 @@ export default function LeadDetailPage() {
   const leadId = params.id as string;
   const t = useTranslations("leads");
 
-  const { data, loading, refetch } = useQuery(GET_LEAD, {
+  const { data, loading, refetch } = useQuery<any>(GET_LEAD, {
     variables: { id: leadId },
-  }) as { data: any; loading: boolean; refetch: () => Promise<any> };
+  });
 
   const [scrapeLead] = useMutation(SCRAPE_LEAD);
   const [sendEmail] = useMutation(SEND_OUTREACH_EMAIL);
