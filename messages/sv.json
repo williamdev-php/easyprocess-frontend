@@ -1,0 +1,568 @@
+{
+  "metadata": {
+    "title": "Qvicko — Automatiseringar, E-handel & Webblosningar",
+    "description": "Qvicko av William Soderstrom. Jag bygger AI-automatiseringar, skraddarsydda e-handelslosningar, moderna hemsidor och digitala AI-tjanster som driver tillvaxt for ditt foretag."
+  },
+  "nav": {
+    "home": "Hem",
+    "services": "Tjanster",
+    "about": "Om mig",
+    "process": "Process",
+    "contact": "Kontakt",
+    "login": "Logga in",
+    "register": "Kom igang",
+    "dashboard": "Dashboard",
+    "logout": "Logga ut",
+    "servicesDropdown": {
+      "automation": "AI-automatiseringar",
+      "automationDesc": "Intelligenta arbetsfloden som sparar tid",
+      "ecommerce": "E-handelslosningar",
+      "ecommerceDesc": "Skraddarsydda webbutiker som saljer",
+      "webdev": "Webbdesign & Utveckling",
+      "webdevDesc": "Moderna, snabba och responsiva hemsidor",
+      "ai": "AI-konsulting",
+      "aiDesc": "Strategisk radgivning inom AI och digitalisering"
+    }
+  },
+  "hero": {
+    "title": "Jag bygger digitala losningar",
+    "highlight": " som driver tillvaxt",
+    "description": "Hej, jag ar William Soderstrom — grundare av Qvicko. Jag hjalper foretag att automatisera, salja mer online och synas digitalt med AI-drivna losningar och modern webbteknik.",
+    "cta": "Skapa konto — borja idag",
+    "ctaSecondary": "Se mina tjanster"
+  },
+  "stats": {
+    "experience": "Ars erfarenhet",
+    "projects": "Levererade projekt",
+    "clients": "Nojda kunder",
+    "technologies": "Teknologier"
+  },
+  "services": {
+    "title": "Mina tjanster",
+    "subtitle": "Fran ide till lansering — jag hjalper dig med hela kedjan.",
+    "automation": {
+      "title": "AI-automatiseringar",
+      "description": "Jag bygger intelligenta automatiseringar som effektiviserar dina arbetsfloden. Fran datainsamling och rapportering till kundkommunikation — lat AI gora det tunga lyftet.",
+      "features": [
+        "Automatiserade arbetsfloden",
+        "AI-driven dataanalys",
+        "Integrationer mellan system",
+        "Chatbots & kundtjanst-AI"
+      ]
+    },
+    "ecommerce": {
+      "title": "E-handelslosningar",
+      "description": "Skraddarsydda e-handelslosningar som ar byggda for att konvertera. Headless arkitektur, snabba laddningstider och somlosa betalningsfloden.",
+      "features": [
+        "Headless e-handel",
+        "Betalningsintegrationer",
+        "Lagerhantering",
+        "Konverteringsoptimering"
+      ]
+    },
+    "webdev": {
+      "title": "Webbdesign & Utveckling",
+      "description": "Moderna hemsidor byggda med den senaste tekniken. Responsiva, snabba och SEO-optimerade — designade for att imponera och prestera.",
+      "features": [
+        "Responsiv design",
+        "SEO-optimering",
+        "Snabba laddningstider",
+        "CMS-integration"
+      ]
+    },
+    "ai": {
+      "title": "AI-konsulting & Digitala tjanster",
+      "description": "Strategisk radgivning for foretag som vill dra nytta av AI. Jag hjalper dig identifiera mojligheter, valja ratt verktyg och implementera losningar.",
+      "features": [
+        "AI-strategi",
+        "Verktygsval & implementation",
+        "Utbildning & workshops",
+        "Prototyper & proof-of-concept"
+      ]
+    }
+  },
+  "about": {
+    "title": "Om mig",
+    "subtitle": "Mannen bakom Qvicko",
+    "description": "Jag heter William Soderstrom och driver Qvicko — ett digitalt konsultforetag med fokus pa att hjalpa foretag vaxa med modern teknik och AI.",
+    "paragraph2": "Med erfarenhet inom webbutveckling, e-handel, automatiseringar och AI hjalper jag foretag — fran startups till etablerade verksamheter — att digitalisera och effektivisera.",
+    "paragraph3": "Nar du jobbar med mig far du en direktkontakt med personen som faktiskt bygger din losning. Ingen byrakrati, inga mellanhander — bara resultat.",
+    "values": {
+      "personal": "Personlig kontakt",
+      "personalDesc": "Du pratar alltid direkt med mig",
+      "quality": "Kvalitet forst",
+      "qualityDesc": "Jag levererar ingenting jag inte sjalv ar stolt over",
+      "results": "Resultatorienterad",
+      "resultsDesc": "Allt jag bygger ska ge mervarde for din verksamhet"
+    }
+  },
+  "process": {
+    "title": "Sa har jobbar jag",
+    "subtitle": "Fran forsta kontakt till lansering — en tydlig och transparent process.",
+    "step1": {
+      "title": "Konsultation",
+      "description": "Vi borjar med ett kostnadsfritt samtal dar jag lyssnar pa dina behov, mal och utmaningar. Tillsammans identifierar vi mojligheter."
+    },
+    "step2": {
+      "title": "Strategi & Planering",
+      "description": "Jag tar fram en tydlig plan med tidslinje, teknikval och budget. Du vet exakt vad du far och nar."
+    },
+    "step3": {
+      "title": "Utveckling & Design",
+      "description": "Jag bygger losningen med kontinuerlig dialog. Du far regelbundna uppdateringar och kan ge feedback genom hela processen."
+    },
+    "step4": {
+      "title": "Lansering & Support",
+      "description": "Nar allt ar klart lanserar vi tillsammans. Jag erbjuder support och underhall sa att din losning fortsatter prestera."
+    }
+  },
+  "portfolio": {
+    "title": "Utvalda projekt",
+    "subtitle": "Har ar nagra exempel pa vad jag har byggt.",
+    "project1": {
+      "title": "E-handelsplattform",
+      "category": "E-handel",
+      "description": "En skraddarsydd headless e-handelslosning med hog konverteringsgrad och blixsnabba laddningstider."
+    },
+    "project2": {
+      "title": "AI-automatisering for logistik",
+      "category": "Automatisering",
+      "description": "Automatiserat orderflode och lagerhantering med AI-driven prognostisering som sparade 20+ timmar per vecka."
+    },
+    "project3": {
+      "title": "Foretagshemsida & SEO",
+      "category": "Webbdesign",
+      "description": "Modern hemsida med SEO-strategi som okade organisk trafik med over 300% pa 6 manader."
+    },
+    "viewProject": "Visa projekt"
+  },
+  "whyWebizo": {
+    "title": "Varfor Qvicko?",
+    "subtitle": "Det som skiljer mig fran en stor byra.",
+    "personal": {
+      "title": "Personlig service",
+      "description": "Du pratar alltid direkt med utvecklaren. Inga saljare, inga projektledare — bara jag och din losning."
+    },
+    "modern": {
+      "title": "Modern teknik",
+      "description": "Jag anvander de senaste verktygen och ramverken. Din losning byggs med framtiden i atanke."
+    },
+    "results": {
+      "title": "Resultatfokus",
+      "description": "Jag mater framgang i affarsvarde — inte i rader kod. Varje losning ar designad for att ge dig konkreta resultat."
+    },
+    "transparent": {
+      "title": "Full transparens",
+      "description": "Tydlig kommunikation, fasta priser och inga overraskningar. Du vet alltid var vi star."
+    }
+  },
+  "testimonials": {
+    "title": "Vad mina kunder sager",
+    "subtitle": "Foretag som har valt att samarbeta med mig.",
+    "testimonial1": {
+      "quote": "William levererade en e-handelslosning som overtraffade vara forvantningar. Professionell, snabb och alltid tillganglig.",
+      "name": "Anna Lindqvist",
+      "title": "VD, Nordisk Handel AB"
+    },
+    "testimonial2": {
+      "quote": "Automatiseringarna som Qvicko byggde sparar oss over 20 timmar i veckan. Basta investeringen vi gjort.",
+      "name": "Erik Johansson",
+      "title": "Grundare, TechStart"
+    },
+    "testimonial3": {
+      "quote": "Att jobba med William ar en frisk flakt. Direkt kommunikation, hog kvalitet och losningar som faktiskt fungerar.",
+      "name": "Sara Bergstrom",
+      "title": "Marknadschef, CreativeFlow"
+    }
+  },
+  "cta": {
+    "title": "Redo att ta nasta steg?",
+    "description": "Skapa ett konto och fa tillgang till mina digitala tjanster. Automatiseringar, e-handel och webblosningar — allt pa ett stalle.",
+    "button": "Skapa konto nu",
+    "note": "Gratis att registrera — kom igang pa minuter"
+  },
+  "footer": {
+    "tagline": "Digitala losningar som driver tillvaxt.",
+    "services": "Tjanster",
+    "automation": "AI-automatiseringar",
+    "ecommerce": "E-handelslosningar",
+    "webdev": "Webbdesign",
+    "ai": "AI-konsulting",
+    "company": "Foretaget",
+    "aboutLink": "Om mig",
+    "processLink": "Sa jobbar jag",
+    "portfolioLink": "Portfolio",
+    "contactLink": "Kontakt",
+    "legal": "Juridiskt",
+    "privacy": "Integritetspolicy",
+    "terms": "Villkor",
+    "cookies": "Cookies",
+    "contact": "Kontakt",
+    "email": "hej@qvicko.se",
+    "phone": "+46 70 123 45 67",
+    "copyright": "© 2026 Qvicko. Alla rattigheter forbehallna."
+  },
+  "auth": {
+    "welcomeBack": "Valkommen tillbaka",
+    "loginTitle": "Logga in pa ditt konto",
+    "loginSubtitle": "Ange dina uppgifter for att komma till din dashboard.",
+    "email": "E-post",
+    "password": "Losenord",
+    "confirmPassword": "Bekrafta losenord",
+    "loginButton": "Logga in",
+    "loggingIn": "Loggar in...",
+    "noAccount": "Har du inget konto?",
+    "registerLink": "Skapa ett konto",
+    "getStarted": "Kom igang",
+    "registerTitle": "Skapa ditt konto",
+    "registerSubtitle": "Registrera dig for att fa tillgang till vara digitala tjanster.",
+    "stepAccount": "Konto",
+    "stepDetails": "Foretagsinfo",
+    "fullName": "Fullstandigt namn",
+    "companyName": "Foretagsnamn",
+    "companyNamePlaceholder": "Ditt Foretag AB",
+    "orgNumber": "Organisationsnummer",
+    "phone": "Telefon",
+    "optionalNote": "Dessa falt ar valfria. Du kan fylla i dem senare i din profil.",
+    "continue": "Fortsatt",
+    "back": "Tillbaka",
+    "registerButton": "Skapa konto",
+    "registering": "Skapar konto...",
+    "hasAccount": "Har du redan ett konto?",
+    "loginLink": "Logga in istallet",
+    "passwordMismatch": "Losenorden matchar inte",
+    "passwordMatch": "Losenorden matchar",
+    "passwordTooShort": "Losenordet maste vara minst 8 tecken",
+    "passwordWeak": "Svagt losenord",
+    "passwordOk": "Okej losenord",
+    "passwordStrong": "Starkt losenord",
+    "loginFailed": "Inloggning misslyckades",
+    "registerFailed": "Registrering misslyckades"
+  },
+  "dashboard": {
+    "welcome": "Valkommen, {name}",
+    "myListings": "Mina projekt",
+    "noListings": "Du har inga aktiva projekt an.",
+    "createListing": "Skapa projekt",
+    "myBids": "Mina forfragningar",
+    "noBids": "Du har inga aktiva forfragningar. Utforska vara tjanster!",
+    "browseAuctions": "Bladdra tjanster",
+    "loading": "Laddar..."
+  },
+  "dashboardHeader": {
+    "logout": "Logga ut",
+    "account": "Mitt konto"
+  },
+  "dashboardNav": {
+    "overview": "Oversikt",
+    "domain": "Doman",
+    "pages": "Mina sidor",
+    "account": "Konto",
+    "billing": "Betalning",
+    "leads": "Leads",
+    "inbox": "Inkorg",
+    "revenue": "Intakter",
+    "settings": "Installningar"
+  },
+  "dashboardOverview": {
+    "user": {
+      "greeting": "Hej, {name}",
+      "subtitle": "Har ar en oversikt over din webbplats.",
+      "visitors": "Besokare",
+      "visitorsTooltip": "Antal unika besokare pa din webbplats under vald period.",
+      "pagesPerSession": "Sidor per session",
+      "pagesPerSessionTooltip": "Genomsnittligt antal sidor en besokare tittar pa per besok.",
+      "performanceScore": "Prestanda-score",
+      "performanceTooltip": "Ett samlat betyg baserat pa laddningstid (LCP, FCP) och layoutstabilitet (CLS).",
+      "visitorsChart": "Besokare denna vecka",
+      "noData": "Ingen analysdata annu. Besokare visas nar din sida far trafik.",
+      "loading": "Laddar analys...",
+      "changePct": "{value}% denna vecka",
+      "changeAbs": "{value} fran foreg.",
+      "tipsTitle": "Tips for att forbattra",
+      "tip1Title": "Optimera laddningstider",
+      "tip1Desc": "Komprimera bilder och aktivera caching for att forbattra din webbplats prestanda och anvandarupplevelse.",
+      "tip2Title": "Oka engagemang",
+      "tip2Desc": "Lagg till tydliga call-to-actions och forbattra navigeringen for att halla besokare langre pa din sida."
+    },
+    "admin": {
+      "title": "Admin-oversikt",
+      "subtitle": "Oversikt over alla kunder och intakter.",
+      "totalLeads": "Totala leads",
+      "monthlyRevenue": "Manadsintakt",
+      "activeClients": "Aktiva kunder",
+      "revenueChart": "Intakter per manad (tkr)"
+    }
+  },
+  "cookies": {
+    "title": "Vi anvander cookies",
+    "description": "Vi anvander cookies for att forbattra din upplevelse pa var webbplats. Genom att fortsatta godkanner du var anvandning av cookies.",
+    "accept": "Godkann",
+    "decline": "Avvisa"
+  },
+  "collections": {
+    "title": "Vara tjanster",
+    "description": "Utforska vart kompletta utbud av digitala losningar och mediatjanster.",
+    "noResults": "Inga resultat hittades.",
+    "auction": "Tjanst",
+    "fixedPrice": "Fastpris",
+    "viewDetails": "Visa detaljer"
+  },
+  "product": {
+    "title": "Tjanstdetaljer",
+    "seller": "Kontakt",
+    "condition": "Status",
+    "location": "Plats",
+    "category": "Kategori",
+    "price": "Pris",
+    "buyNow": "Kom igang",
+    "contactSeller": "Kontakta oss",
+    "description": "Beskrivning",
+    "details": "Detaljer",
+    "notFound": "Tjansten hittades inte."
+  },
+  "auction": {
+    "title": "Projektdetaljer",
+    "currentBid": "Aktuell uppskattning",
+    "startingBid": "Startpris",
+    "endsAt": "Deadline",
+    "placeBid": "Begar offert",
+    "bidHistory": "Offerthistorik",
+    "noBids": "Inga offerter annu.",
+    "bidAmount": "Belopp",
+    "bidder": "Kund",
+    "time": "Tid",
+    "notFound": "Projektet hittades inte."
+  },
+  "leads": {
+    "title": "Leads",
+    "subtitle": "Hantera leads och genererade hemsidor.",
+    "addLead": "Lagg till lead",
+    "newLead": "Ny lead",
+    "urlPlaceholder": "https://example.se",
+    "namePlaceholder": "Foretagsnamn",
+    "industryPlaceholder": "Bransch",
+    "create": "Skapa",
+    "processing": "Arbetar...",
+    "searchPlaceholder": "Sok foretag, URL eller email...",
+    "allStatuses": "Alla statusar",
+    "business": "Foretag",
+    "contact": "Kontakt",
+    "status": "Status",
+    "site": "Hemsida",
+    "actions": "",
+    "noLeads": "Inga leads annu. Lagg till en URL for att borja.",
+    "showing": "Visar {from}-{to} av {total}",
+    "leadDetail": "Leaddetaljer",
+    "email": "E-post",
+    "phone": "Telefon",
+    "industry": "Bransch",
+    "address": "Adress",
+    "generatedSite": "Genererad hemsida",
+    "viewSite": "Visa hemsida",
+    "emailHistory": "Mejlhistorik",
+    "rescrape": "Skanna om",
+    "publish": "Publicera",
+    "sendEmail": "Skicka mejl",
+    "notFound": "Lead hittades inte.",
+    "statsTotal": "Totala leads",
+    "statsGenerated": "Genererade",
+    "statsEmailed": "Mejlade",
+    "statsCost": "AI-kostnad",
+    "messages": "Meddelanden",
+    "scrapedData": "Skrapade data",
+    "colors": "Farger",
+    "texts": "Texter",
+    "images": "Bilder",
+    "contactInfo": "Kontaktinfo",
+    "metaInfo": "Meta-info",
+    "logo": "Logotyp",
+    "conversation": "Konversation",
+    "noMessages": "Inga meddelanden annu.",
+    "all": "Alla",
+    "inbound": "Inkommande",
+    "outbound": "Utgaende",
+    "from": "Fran",
+    "to": "Till",
+    "sentAt": "Skickad",
+    "subject": "Amne",
+    "backToLeads": "Tillbaka till leads",
+    "qualityScore": "Kvalitetspoang",
+    "createdAt": "Skapad",
+    "updatedAt": "Uppdaterad"
+  },
+  "inbox": {
+    "title": "Inkorg",
+    "subtitle": "Inkommande mejl och svar fran leads.",
+    "searchPlaceholder": "Sok mejl...",
+    "allCategories": "Alla kategorier",
+    "unread": "Olasta",
+    "all": "Alla",
+    "archived": "Arkiverade",
+    "noEmails": "Inga mejl hittades.",
+    "markRead": "Markera som last",
+    "markUnread": "Markera som olast",
+    "archive": "Arkivera",
+    "unarchive": "Avarkivera",
+    "from": "Fran",
+    "to": "Till",
+    "subject": "Amne",
+    "category": "Kategori",
+    "summary": "AI-sammanfattning",
+    "spamScore": "Spampoang",
+    "matchedLead": "Matchad lead",
+    "viewLead": "Visa lead",
+    "showing": "Visar {from}-{to} av {total}",
+    "spam": "Spam",
+    "lead_reply": "Leadsvar",
+    "support": "Support",
+    "inquiry": "Forfragan",
+    "other": "Ovrigt"
+  },
+  "userPages": {
+    "title": "Mina sidor",
+    "subtitle": "Hantera dina hemsidor.",
+    "noPages": "Du har inga sidor annu",
+    "noPagesDesc": "Nar din hemsida ar klar kommer den att visas har.",
+    "statusPublished": "Publicerad",
+    "statusDraft": "Utkast",
+    "views": "visningar",
+    "editSite": "Redigera sida"
+  },
+  "siteEditor": {
+    "editingLabel": "Redigerar hemsida",
+    "saving": "Sparar...",
+    "saved": "Sparat!",
+    "saveError": "Kunde inte spara",
+    "autoSave": "Autospar aktivt",
+    "openPreview": "Oppna forhandsgranskning",
+    "notFound": "Sidan hittades inte",
+    "notFoundDesc": "Sidan du letar efter finns inte eller tillhor inte ditt konto.",
+    "backToPages": "Tillbaka till Mina sidor"
+  },
+  "userDomain": {
+    "title": "Doman",
+    "subtitle": "Hantera din domaninstaellning.",
+    "currentDomain": "Nuvarande doman",
+    "noDomain": "Ingen doman ansluten",
+    "noDomainDesc": "Du har inte anslutit nagon doman annu.",
+    "connectDomain": "Anslut doman",
+    "connectDesc": "Ange din doman nedan. Du kan skriva den med eller utan www och https.",
+    "connect": "Anslut",
+    "connecting": "Ansluter...",
+    "domainPlaceholder": "doman.se, www.doman.se eller https://doman.se",
+    "invalidDomain": "Ange en giltig doman, t.ex. mittforetag.se",
+    "formatHint": "Alla format fungerar: doman.se, www.doman.se, https://www.doman.se",
+    "dnsSetup": "DNS-installningar",
+    "step1Title": "Logga in hos din domanregistrar",
+    "step1Desc": "Ga till panelen dar du hanterar din doman (t.ex. Loopia, One.com, Namecheap).",
+    "step2Title": "Lagg till en CNAME-post",
+    "step2Desc": "Skapa en CNAME-post med foljande varden:",
+    "step3Title": "Vanta pa propagering",
+    "step3Desc": "Det kan ta upp till 24 timmar innan andringarna ar aktiva. Vi meddelar dig nar domanen ar redo.",
+    "dnsWait": "DNS-andringar kan ta upp till 24 timmar. Vi kollar automatiskt och meddelar dig via e-post nar allt ar klart.",
+    "myDomains": "Mina domaner",
+    "noDomains": "Du har inga domaner annu",
+    "addDomain": "Lagg till doman",
+    "removeDomain": "Ta bort",
+    "removing": "Tar bort...",
+    "assignToSite": "Koppla till hemsida",
+    "selectSite": "Valj hemsida",
+    "unassigned": "Ej kopplad",
+    "verified": "Verifierad",
+    "pending": "Vantar pa verifiering",
+    "failed": "Verifiering misslyckades",
+    "verify": "Verifiera DNS",
+    "verifying": "Verifierar...",
+    "domainAdded": "Doman tillagd!",
+    "domainRemoved": "Doman borttagen",
+    "domainAssigned": "Doman kopplad till hemsida",
+    "subdomain": "Subdomän",
+    "subdomainSection": "Standarddoman (subdomän)",
+    "subdomainDesc": "Varje hemsida far automatiskt en subdomän pa qvicko.se",
+    "subdomainPlaceholder": "mitt-foretag",
+    "setSubdomain": "Spara subdomän",
+    "settingSubdomain": "Sparar...",
+    "subdomainSet": "Subdomän sparad!",
+    "subdomainPreview": "Din hemsida visas pa:",
+    "customDomainSection": "Egna domaner",
+    "customDomainDesc": "Koppla din egen doman till en av dina hemsidor.",
+    "selectSiteFirst": "Valj en hemsida forst",
+    "status": "Status",
+    "actions": "Atgarder",
+    "site": "Hemsida"
+  },
+  "userAccount": {
+    "title": "Konto",
+    "subtitle": "Hantera din profil och installningar.",
+    "personalInfo": "Personuppgifter",
+    "name": "Namn",
+    "email": "E-post",
+    "company": "Foretag",
+    "orgNumber": "Org-nummer",
+    "phone": "Telefon",
+    "country": "Land",
+    "save": "Spara",
+    "saving": "Sparar...",
+    "saved": "Dina uppgifter har sparats.",
+    "saveFailed": "Kunde inte spara. Forsok igen.",
+    "autoSaveHint": "Andringar sparas automatiskt."
+  },
+  "subscriptionAlert": {
+    "paymentFailed": "Din senaste betalning misslyckades. Uppdatera ditt betalkort for att undvika avbrott.",
+    "expiringPlan": "Din plan gar ut om {days} dagar. Fornya for att behalla din hemsida aktiv.",
+    "siteDeletion": "Din hemsida ar schemalagd for radering om {days} dagar pa grund av utebliven betalning.",
+    "action": "Ga till Betalning",
+    "dismiss": "Stang"
+  },
+  "billing": {
+    "title": "Betalning",
+    "subtitle": "Hantera din plan, betalkort och faktureringsuppgifter.",
+    "currentPlan": "Nuvarande plan",
+    "free": "Gratis",
+    "starter": "Starter",
+    "pro": "Pro",
+    "freePriceLabel": "0 kr/man",
+    "starterPriceLabel": "299 kr/man",
+    "proPriceLabel": "799 kr/man",
+    "freeDesc": "For dig som vill testa",
+    "starterDesc": "For sma foretag",
+    "proDesc": "For vaxande foretag",
+    "freeFeatures": "1 hemsida, Grundlaggande statistik, Qvicko-subdoman",
+    "starterFeatures": "3 hemsidor, Fullstandig statistik, Egen doman, E-postsupport",
+    "proFeatures": "Obegransat antal hemsidor, Prioriterad support, Anpassad doman, SEO-verktyg",
+    "selected": "Vald plan",
+    "selectPlan": "Valj plan",
+    "paymentMethod": "Betalkort",
+    "cardNumber": "Kortnummer",
+    "cardExpiry": "Utgar",
+    "cardCvc": "CVC",
+    "noCard": "Inget kort tillagt annu.",
+    "addCard": "Lagg till kort",
+    "removeCard": "Ta bort kort",
+    "billingDetails": "Faktureringsuppgifter",
+    "companyDetails": "Foretagsuppgifter",
+    "billingName": "Kontaktperson",
+    "billingCompany": "Foretag",
+    "billingOrgNumber": "Org-nummer",
+    "billingVatNumber": "Momsnummer",
+    "contactDetails": "Kontaktuppgifter",
+    "billingEmail": "Faktura-email",
+    "billingPhone": "Telefon",
+    "billingAddress": "Faktureringsadress",
+    "billingAddressLine1": "Adressrad 1",
+    "billingAddressLine2": "Adressrad 2",
+    "billingZip": "Postnummer",
+    "billingCity": "Ort",
+    "billingCountry": "Land",
+    "saveBilling": "Spara uppgifter",
+    "savingBilling": "Sparar...",
+    "billingSaved": "Faktureringsuppgifter sparade.",
+    "billingSaveFailed": "Kunde inte spara. Forsok igen."
+  },
+  "notFound": {
+    "title": "Sidan hittades inte",
+    "description": "Sidan du letar efter finns inte eller har flyttats.",
+    "goHome": "Ga till startsidan"
+  }
+}

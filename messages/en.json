@@ -1,0 +1,568 @@
+{
+  "metadata": {
+    "title": "Qvicko — Automations, E-commerce & Web Solutions",
+    "description": "Qvicko by William Soderstrom. I build AI automations, custom e-commerce solutions, modern websites and digital AI services that drive growth for your business."
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "about": "About",
+    "process": "Process",
+    "contact": "Contact",
+    "login": "Log in",
+    "register": "Get started",
+    "dashboard": "Dashboard",
+    "logout": "Log out",
+    "servicesDropdown": {
+      "automation": "AI Automations",
+      "automationDesc": "Intelligent workflows that save time",
+      "ecommerce": "E-commerce Solutions",
+      "ecommerceDesc": "Custom online stores that sell",
+      "webdev": "Web Design & Development",
+      "webdevDesc": "Modern, fast and responsive websites",
+      "ai": "AI Consulting",
+      "aiDesc": "Strategic advice on AI and digitalization"
+    }
+  },
+  "hero": {
+    "title": "I build digital solutions",
+    "highlight": " that drive growth",
+    "description": "Hi, I'm William Soderstrom — founder of Qvicko. I help businesses automate, sell more online and grow digitally with AI-powered solutions and modern web technology.",
+    "cta": "Create account — start today",
+    "ctaSecondary": "View my services"
+  },
+  "stats": {
+    "experience": "Years experience",
+    "projects": "Projects delivered",
+    "clients": "Happy clients",
+    "technologies": "Technologies"
+  },
+  "services": {
+    "title": "My services",
+    "subtitle": "From idea to launch — I help you with the entire chain.",
+    "automation": {
+      "title": "AI Automations",
+      "description": "I build intelligent automations that streamline your workflows. From data collection and reporting to customer communication — let AI do the heavy lifting.",
+      "features": [
+        "Automated workflows",
+        "AI-powered data analysis",
+        "System integrations",
+        "Chatbots & customer service AI"
+      ]
+    },
+    "ecommerce": {
+      "title": "E-commerce Solutions",
+      "description": "Custom e-commerce solutions built to convert. Headless architecture, fast load times and seamless payment flows.",
+      "features": [
+        "Headless e-commerce",
+        "Payment integrations",
+        "Inventory management",
+        "Conversion optimization"
+      ]
+    },
+    "webdev": {
+      "title": "Web Design & Development",
+      "description": "Modern websites built with cutting-edge technology. Responsive, fast and SEO-optimized — designed to impress and perform.",
+      "features": [
+        "Responsive design",
+        "SEO optimization",
+        "Fast load times",
+        "CMS integration"
+      ]
+    },
+    "ai": {
+      "title": "AI Consulting & Digital Services",
+      "description": "Strategic consulting for businesses looking to leverage AI. I help you identify opportunities, choose the right tools and implement solutions.",
+      "features": [
+        "AI strategy",
+        "Tool selection & implementation",
+        "Training & workshops",
+        "Prototypes & proof-of-concept"
+      ]
+    }
+  },
+  "about": {
+    "title": "About me",
+    "subtitle": "The person behind Qvicko",
+    "description": "My name is William Soderstrom and I run Qvicko — a digital consultancy focused on helping businesses grow with modern technology and AI.",
+    "paragraph2": "With experience in web development, e-commerce, automations and AI, I help businesses — from startups to established companies — digitalize and streamline their operations.",
+    "paragraph3": "When you work with me, you get direct contact with the person actually building your solution. No bureaucracy, no middlemen — just results.",
+    "values": {
+      "personal": "Personal contact",
+      "personalDesc": "You always talk directly with me",
+      "quality": "Quality first",
+      "qualityDesc": "I deliver nothing I'm not proud of myself",
+      "results": "Results-oriented",
+      "resultsDesc": "Everything I build should add value to your business"
+    }
+  },
+  "process": {
+    "title": "How I work",
+    "subtitle": "From first contact to launch — a clear and transparent process.",
+    "step1": {
+      "title": "Consultation",
+      "description": "We start with a free call where I listen to your needs, goals and challenges. Together we identify opportunities."
+    },
+    "step2": {
+      "title": "Strategy & Planning",
+      "description": "I create a clear plan with timeline, tech choices and budget. You know exactly what you get and when."
+    },
+    "step3": {
+      "title": "Development & Design",
+      "description": "I build the solution with continuous dialogue. You get regular updates and can give feedback throughout the process."
+    },
+    "step4": {
+      "title": "Launch & Support",
+      "description": "When everything is ready, we launch together. I offer support and maintenance so your solution keeps performing."
+    }
+  },
+  "portfolio": {
+    "title": "Selected projects",
+    "subtitle": "Here are some examples of what I've built.",
+    "project1": {
+      "title": "E-commerce Platform",
+      "category": "E-commerce",
+      "description": "A custom headless e-commerce solution with high conversion rates and lightning-fast load times."
+    },
+    "project2": {
+      "title": "AI Automation for Logistics",
+      "category": "Automation",
+      "description": "Automated order flow and inventory management with AI-driven forecasting that saved 20+ hours per week."
+    },
+    "project3": {
+      "title": "Business Website & SEO",
+      "category": "Web Design",
+      "description": "Modern website with SEO strategy that increased organic traffic by over 300% in 6 months."
+    },
+    "viewProject": "View project"
+  },
+  "whyWebizo": {
+    "title": "Why Qvicko?",
+    "subtitle": "What sets me apart from a large agency.",
+    "personal": {
+      "title": "Personal service",
+      "description": "You always talk directly with the developer. No salespeople, no project managers — just me and your solution."
+    },
+    "modern": {
+      "title": "Modern technology",
+      "description": "I use the latest tools and frameworks. Your solution is built with the future in mind."
+    },
+    "results": {
+      "title": "Results-focused",
+      "description": "I measure success in business value — not lines of code. Every solution is designed to give you concrete results."
+    },
+    "transparent": {
+      "title": "Full transparency",
+      "description": "Clear communication, fixed prices and no surprises. You always know where we stand."
+    }
+  },
+  "testimonials": {
+    "title": "What my clients say",
+    "subtitle": "Businesses that have chosen to work with me.",
+    "testimonial1": {
+      "quote": "William delivered an e-commerce solution that exceeded our expectations. Professional, fast and always available.",
+      "name": "Anna Lindqvist",
+      "title": "CEO, Nordisk Handel AB"
+    },
+    "testimonial2": {
+      "quote": "The automations Qvicko built save us over 20 hours a week. Best investment we've made.",
+      "name": "Erik Johansson",
+      "title": "Founder, TechStart"
+    },
+    "testimonial3": {
+      "quote": "Working with William is a breath of fresh air. Direct communication, high quality and solutions that actually work.",
+      "name": "Sara Bergstrom",
+      "title": "Marketing Manager, CreativeFlow"
+    }
+  },
+  "cta": {
+    "title": "Ready to take the next step?",
+    "description": "Create an account and get access to my digital services. Automations, e-commerce and web solutions — all in one place.",
+    "button": "Create account now",
+    "note": "Free to register — get started in minutes"
+  },
+  "footer": {
+    "tagline": "Digital solutions that drive growth.",
+    "services": "Services",
+    "automation": "AI Automations",
+    "ecommerce": "E-commerce Solutions",
+    "webdev": "Web Design",
+    "ai": "AI Consulting",
+    "company": "Company",
+    "aboutLink": "About me",
+    "processLink": "How I work",
+    "portfolioLink": "Portfolio",
+    "contactLink": "Contact",
+    "legal": "Legal",
+    "privacy": "Privacy policy",
+    "terms": "Terms",
+    "cookies": "Cookies",
+    "contact": "Contact",
+    "email": "hello@qvicko.se",
+    "phone": "+46 70 123 45 67",
+    "copyright": "© 2026 Qvicko. All rights reserved."
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "loginTitle": "Log in to your account",
+    "loginSubtitle": "Enter your credentials to access your dashboard.",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "loginButton": "Log in",
+    "loggingIn": "Logging in...",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Create an account",
+    "getStarted": "Get started",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Sign up to access our digital services.",
+    "stepAccount": "Account",
+    "stepDetails": "Company info",
+    "fullName": "Full name",
+    "companyName": "Company name",
+    "companyNamePlaceholder": "Your Company Ltd",
+    "orgNumber": "Organisation number",
+    "phone": "Phone",
+    "optionalNote": "These fields are optional. You can fill them in later in your profile.",
+    "continue": "Continue",
+    "back": "Back",
+    "registerButton": "Create account",
+    "registering": "Creating account...",
+    "hasAccount": "Already have an account?",
+    "loginLink": "Log in instead",
+    "passwordMismatch": "Passwords do not match",
+    "passwordMatch": "Passwords match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordWeak": "Weak password",
+    "passwordOk": "Fair password",
+    "passwordStrong": "Strong password",
+    "loginFailed": "Login failed",
+    "registerFailed": "Registration failed"
+  },
+  "dashboard": {
+    "welcome": "Welcome, {name}",
+    "myListings": "My projects",
+    "noListings": "You have no active projects yet.",
+    "createListing": "Create project",
+    "myBids": "My inquiries",
+    "noBids": "You have no active inquiries. Explore our services!",
+    "browseAuctions": "Browse services",
+    "loading": "Loading..."
+  },
+  "dashboardHeader": {
+    "logout": "Log out",
+    "account": "My account"
+  },
+  "dashboardNav": {
+    "overview": "Overview",
+    "domain": "Domain",
+    "pages": "My pages",
+    "account": "Account",
+    "billing": "Billing",
+    "leads": "Leads",
+    "inbox": "Inbox",
+    "revenue": "Revenue",
+    "settings": "Settings"
+  },
+  "dashboardOverview": {
+    "user": {
+      "greeting": "Hi, {name}",
+      "subtitle": "Here's an overview of your website.",
+      "visitors": "Visitors",
+      "visitorsTooltip": "Number of unique visitors to your website in the selected period.",
+      "pagesPerSession": "Pages per session",
+      "pagesPerSessionTooltip": "Average number of pages a visitor views per session.",
+      "performanceScore": "Performance score",
+      "performanceTooltip": "A combined score based on load time (LCP, FCP) and layout stability (CLS).",
+      "visitorsChart": "Visitors this week",
+      "noData": "No analytics data yet. Visitors will appear once your site gets traffic.",
+      "loading": "Loading analytics...",
+      "changePct": "{value}% this week",
+      "changeAbs": "{value} from prev.",
+      "tipsTitle": "Tips to improve",
+      "tip1Title": "Optimize load times",
+      "tip1Desc": "Compress images and enable caching to improve your website's performance and user experience.",
+      "tip2Title": "Increase engagement",
+      "tip2Desc": "Add clear call-to-actions and improve navigation to keep visitors on your site longer."
+    },
+    "admin": {
+      "title": "Admin overview",
+      "subtitle": "Overview of all clients and revenue.",
+      "totalLeads": "Total leads",
+      "monthlyRevenue": "Monthly revenue",
+      "activeClients": "Active clients",
+      "revenueChart": "Revenue per month (tSEK)"
+    }
+  },
+  "cookies": {
+    "title": "We use cookies",
+    "description": "We use cookies to improve your experience on our website. By continuing you accept our use of cookies.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "collections": {
+    "title": "Our services",
+    "description": "Explore our full range of digital solutions and media services.",
+    "noResults": "No results found.",
+    "auction": "Service",
+    "fixedPrice": "Fixed price",
+    "viewDetails": "View details"
+  },
+  "product": {
+    "title": "Service details",
+    "seller": "Contact",
+    "condition": "Status",
+    "location": "Location",
+    "category": "Category",
+    "price": "Price",
+    "buyNow": "Get started",
+    "contactSeller": "Contact us",
+    "description": "Description",
+    "details": "Details",
+    "notFound": "Service not found."
+  },
+  "auction": {
+    "title": "Project details",
+    "currentBid": "Current estimate",
+    "startingBid": "Starting price",
+    "endsAt": "Deadline",
+    "placeBid": "Request quote",
+    "bidHistory": "Quote history",
+    "noBids": "No quotes yet.",
+    "bidAmount": "Amount",
+    "bidder": "Client",
+    "time": "Time",
+    "notFound": "Project not found."
+  },
+  "leads": {
+    "title": "Leads",
+    "subtitle": "Manage leads and generated websites.",
+    "addLead": "Add lead",
+    "newLead": "New lead",
+    "urlPlaceholder": "https://example.se",
+    "namePlaceholder": "Business name",
+    "industryPlaceholder": "Industry",
+    "create": "Create",
+    "processing": "Processing...",
+    "searchPlaceholder": "Search business, URL or email...",
+    "allStatuses": "All statuses",
+    "business": "Business",
+    "contact": "Contact",
+    "status": "Status",
+    "site": "Website",
+    "actions": "",
+    "noLeads": "No leads yet. Add a URL to get started.",
+    "showing": "Showing {from}-{to} of {total}",
+    "leadDetail": "Lead details",
+    "email": "Email",
+    "phone": "Phone",
+    "industry": "Industry",
+    "address": "Address",
+    "generatedSite": "Generated website",
+    "viewSite": "View website",
+    "emailHistory": "Email history",
+    "rescrape": "Re-scan",
+    "publish": "Publish",
+    "sendEmail": "Send email",
+    "notFound": "Lead not found.",
+    "statsTotal": "Total leads",
+    "statsGenerated": "Generated",
+    "statsEmailed": "Emailed",
+    "statsCost": "AI cost",
+    "messages": "Messages",
+    "scrapedData": "Scraped data",
+    "colors": "Colors",
+    "texts": "Texts",
+    "images": "Images",
+    "contactInfo": "Contact info",
+    "metaInfo": "Meta info",
+    "logo": "Logo",
+    "conversation": "Conversation",
+    "noMessages": "No messages yet.",
+    "all": "All",
+    "inbound": "Inbound",
+    "outbound": "Outbound",
+    "from": "From",
+    "to": "To",
+    "sentAt": "Sent",
+    "subject": "Subject",
+    "backToLeads": "Back to leads",
+    "qualityScore": "Quality score",
+    "createdAt": "Created",
+    "updatedAt": "Updated"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "subtitle": "Inbound emails and replies from leads.",
+    "searchPlaceholder": "Search emails...",
+    "allCategories": "All categories",
+    "unread": "Unread",
+    "all": "All",
+    "archived": "Archived",
+    "noEmails": "No emails found.",
+    "markRead": "Mark as read",
+    "markUnread": "Mark as unread",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "from": "From",
+    "to": "To",
+    "subject": "Subject",
+    "category": "Category",
+    "summary": "AI summary",
+    "spamScore": "Spam score",
+    "matchedLead": "Matched lead",
+    "viewLead": "View lead",
+    "showing": "Showing {from}-{to} of {total}",
+    "spam": "Spam",
+    "lead_reply": "Lead reply",
+    "support": "Support",
+    "inquiry": "Inquiry",
+    "other": "Other"
+  },
+  "userPages": {
+    "title": "My pages",
+    "subtitle": "Manage your websites.",
+    "noPages": "You have no pages yet",
+    "noPagesDesc": "When your website is ready it will appear here.",
+    "statusPublished": "Published",
+    "statusDraft": "Draft",
+    "views": "views",
+    "editSite": "Edit site"
+  },
+  "siteEditor": {
+    "editingLabel": "Editing website",
+    "saving": "Saving...",
+    "saved": "Saved!",
+    "saveError": "Failed to save",
+    "autoSave": "Auto-save active",
+    "openPreview": "Open preview",
+    "notFound": "Page not found",
+    "notFoundDesc": "The page you are looking for does not exist or does not belong to your account.",
+    "backToPages": "Back to My pages"
+  },
+  "userDomain": {
+    "title": "Domain",
+    "subtitle": "Manage your domain settings.",
+    "currentDomain": "Current domain",
+    "noDomain": "No domain connected",
+    "noDomainDesc": "You have not connected any domain yet.",
+    "connectDomain": "Connect domain",
+    "connectDesc": "Enter your domain below. You can type it with or without www and https.",
+    "connect": "Connect",
+    "connecting": "Connecting...",
+    "domainPlaceholder": "domain.com, www.domain.com or https://domain.com",
+    "invalidDomain": "Enter a valid domain, e.g. mybusiness.com",
+    "formatHint": "All formats work: domain.com, www.domain.com, https://www.domain.com",
+    "dnsSetup": "DNS Settings",
+    "step1Title": "Log in to your domain registrar",
+    "step1Desc": "Go to the panel where you manage your domain (e.g. GoDaddy, Namecheap, Cloudflare).",
+    "step2Title": "Add a CNAME record",
+    "step2Desc": "Create a CNAME record with the following values:",
+    "step3Title": "Wait for propagation",
+    "step3Desc": "It can take up to 24 hours before the changes are active. We will notify you when the domain is ready.",
+    "dnsWait": "DNS changes can take up to 24 hours. We check automatically and notify you by email when everything is ready.",
+    "myDomains": "My domains",
+    "noDomains": "You have no domains yet",
+    "addDomain": "Add domain",
+    "removeDomain": "Remove",
+    "removing": "Removing...",
+    "assignToSite": "Assign to site",
+    "selectSite": "Select site",
+    "unassigned": "Unassigned",
+    "verified": "Verified",
+    "pending": "Pending verification",
+    "failed": "Verification failed",
+    "verify": "Verify DNS",
+    "verifying": "Verifying...",
+    "domainAdded": "Domain added!",
+    "domainRemoved": "Domain removed",
+    "domainAssigned": "Domain assigned to site",
+    "subdomain": "Subdomain",
+    "subdomainSection": "Default domain (subdomain)",
+    "subdomainDesc": "Each website automatically gets a subdomain on qvicko.se",
+    "subdomainPlaceholder": "my-business",
+    "setSubdomain": "Save subdomain",
+    "settingSubdomain": "Saving...",
+    "subdomainSet": "Subdomain saved!",
+    "subdomainPreview": "Your website is displayed at:",
+    "customDomainSection": "Custom domains",
+    "customDomainDesc": "Connect your own domain to one of your websites.",
+    "selectSiteFirst": "Select a website first",
+    "status": "Status",
+    "actions": "Actions",
+    "site": "Website"
+  },
+  "userAccount": {
+    "title": "Account",
+    "subtitle": "Manage your profile and settings.",
+    "personalInfo": "Personal information",
+    "name": "Name",
+    "email": "Email",
+    "company": "Company",
+    "orgNumber": "Org number",
+    "phone": "Phone",
+    "country": "Country",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Your information has been saved.",
+    "saveFailed": "Could not save. Please try again.",
+    "autoSaveHint": "Changes are saved automatically."
+  },
+  "subscriptionAlert": {
+    "paymentFailed": "Your last payment failed. Update your card to avoid interruption.",
+    "expiringPlan": "Your plan expires in {days} days. Renew to keep your website active.",
+    "siteDeletion": "Your website is scheduled for deletion in {days} days due to unpaid invoice.",
+    "action": "Go to Billing",
+    "dismiss": "Dismiss"
+  },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Manage your plan, payment method and billing details.",
+    "currentPlan": "Current plan",
+    "free": "Free",
+    "starter": "Starter",
+    "pro": "Pro",
+    "freePriceLabel": "$0/mo",
+    "starterPriceLabel": "$29/mo",
+    "proPriceLabel": "$79/mo",
+    "freeDesc": "For those who want to try",
+    "starterDesc": "For small businesses",
+    "proDesc": "For growing businesses",
+    "freeFeatures": "1 website, Basic analytics, Qvicko subdomain",
+    "starterFeatures": "3 websites, Full analytics, Custom domain, Email support",
+    "proFeatures": "Unlimited websites, Priority support, Custom domain, SEO tools",
+    "selected": "Current plan",
+    "selectPlan": "Select plan",
+    "paymentMethod": "Payment method",
+    "cardNumber": "Card number",
+    "cardExpiry": "Expires",
+    "cardCvc": "CVC",
+    "noCard": "No card added yet.",
+    "addCard": "Add card",
+    "removeCard": "Remove card",
+    "billingDetails": "Billing details",
+    "companyDetails": "Company details",
+    "billingName": "Contact person",
+    "billingCompany": "Company",
+    "billingOrgNumber": "Org number",
+    "billingVatNumber": "VAT number",
+    "contactDetails": "Contact details",
+    "billingEmail": "Billing email",
+    "billingPhone": "Phone",
+    "billingAddress": "Billing address",
+    "billingAddressLine1": "Address line 1",
+    "billingAddressLine2": "Address line 2",
+    "billingZip": "Zip code",
+    "billingCity": "City",
+    "billingCountry": "Country",
+    "saveBilling": "Save details",
+    "savingBilling": "Saving...",
+    "billingSaved": "Billing details saved.",
+    "billingSaveFailed": "Could not save. Please try again."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "goHome": "Go to homepage"
+  }
+}
