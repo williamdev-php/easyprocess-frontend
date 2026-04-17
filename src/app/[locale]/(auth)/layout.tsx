@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 
 export default function AuthLayout({
@@ -15,8 +16,15 @@ export default function AuthLayout({
         <div className="absolute top-1/3 right-1/4 h-48 w-48 rounded-full bg-primary-dark/30 blur-2xl" />
 
         <div className="relative z-10 max-w-md px-12 text-white">
-          <Link href="/" className="text-3xl font-bold tracking-tight">
-            Qvicko
+          <Link href="/">
+            <Image
+              src="/logo-sand-mist.png"
+              alt="Qvicko"
+              width={160}
+              height={53}
+              className="h-12 w-auto"
+              priority
+            />
           </Link>
           <p className="mt-6 text-xl font-semibold leading-relaxed">
             Digitala losningar som driver tillvaxt
@@ -48,8 +56,15 @@ export default function AuthLayout({
       <div className="flex flex-1 flex-col bg-background">
         {/* Mobile logo */}
         <div className="flex items-center justify-center pt-8 lg:hidden">
-          <Link href="/" className="text-2xl font-bold tracking-tight text-primary-deep">
-            Qvicko
+          <Link href="/">
+            <Image
+              src="/logo-petrol-blue.png"
+              alt="Qvicko"
+              width={120}
+              height={40}
+              className="h-9 w-auto"
+              priority
+            />
           </Link>
         </div>
 

@@ -31,8 +31,10 @@ function SiteCard({ site }: { site: SiteItem }) {
   const siteData = site.siteData as {
     business?: { name?: string; tagline?: string };
     branding?: { colors?: { primary?: string } };
-    meta?: { title?: string };
+    meta?: { title?: string; favicon_url?: string };
   };
+
+  const faviconUrl = siteData?.meta?.favicon_url;
 
   const name =
     site.businessName ||
@@ -67,11 +69,26 @@ function SiteCard({ site }: { site: SiteItem }) {
 
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 flex items-start gap-3">
+            {faviconUrl ? (
+              <img
+                src={faviconUrl}
+                alt=""
+                className="h-6 w-6 shrink-0 rounded mt-0.5 object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+            ) : (
+              <div
+                className="h-6 w-6 shrink-0 rounded mt-0.5"
+                style={{ backgroundColor: primaryColor + "20" }}
+              />
+            )}
+            <div className="min-w-0 flex-1">
             <h3 className="truncate text-lg font-semibold text-primary-deep group-hover:text-primary transition-colors">
               {name}
             </h3>
             <p className="mt-0.5 truncate text-sm text-text-muted">{tagline}</p>
+            </div>
           </div>
           <span
             className={`shrink-0 rounded-lg border px-2.5 py-1 text-xs font-medium ${statusColor}`}
