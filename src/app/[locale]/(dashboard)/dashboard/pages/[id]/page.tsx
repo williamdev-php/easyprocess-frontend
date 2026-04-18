@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -8,6 +8,23 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { MY_SITE } from "@/graphql/queries";
 import { UPDATE_SITE_DATA } from "@/graphql/mutations";
 import { Link } from "@/i18n/routing";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -15,6 +32,7 @@ import { Link } from "@/i18n/routing";
 
 interface SiteData {
   meta?: { title?: string; description?: string; keywords?: string[]; language?: string };
+  section_order?: string[];
   theme?: string;
   branding?: {
     logo_url?: string | null;
@@ -603,22 +621,100 @@ function TeamEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData
 // Section config
 // ---------------------------------------------------------------------------
 
-const SECTIONS = [
-  { key: "business", label: "Företagsinformation", Editor: BusinessEditor, toggleable: false },
-  { key: "branding", label: "Varumärke & Färger", Editor: BrandingEditor, toggleable: false },
-  { key: "hero", label: "Hero-sektion", Editor: HeroEditor, toggleable: true },
-  { key: "about", label: "Om oss", Editor: AboutEditor, toggleable: true },
-  { key: "features", label: "Egenskaper", Editor: FeaturesEditor, toggleable: true },
-  { key: "stats", label: "Statistik", Editor: StatsEditor, toggleable: true },
-  { key: "services", label: "Tjänster", Editor: ServicesEditor, toggleable: true },
-  { key: "process", label: "Process / Steg", Editor: ProcessEditor, toggleable: true },
-  { key: "gallery", label: "Galleri", Editor: GalleryEditor, toggleable: true },
-  { key: "team", label: "Team", Editor: TeamEditor, toggleable: true },
-  { key: "testimonials", label: "Omdömen", Editor: TestimonialsEditor, toggleable: true },
-  { key: "faq", label: "Vanliga frågor", Editor: FAQEditor, toggleable: true },
-  { key: "cta", label: "Call-to-action", Editor: CTAEditor, toggleable: true },
-  { key: "contact", label: "Kontakt", Editor: ContactEditor, toggleable: true },
-] as const;
+const DEFAULT_SECTION_ORDER = [
+  "hero", "about", "features", "stats", "services", "process",
+  "gallery", "team", "testimonials", "faq", "cta", "contact",
+];
+
+const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{ data: SiteData; onChange: (d: SiteData) => void }>; toggleable: boolean }> = {
+  business: { label: "Företagsinformation", Editor: BusinessEditor, toggleable: false },
+  branding: { label: "Varumärke & Färger", Editor: BrandingEditor, toggleable: false },
+  hero: { label: "Hero-sektion", Editor: HeroEditor, toggleable: true },
+  about: { label: "Om oss", Editor: AboutEditor, toggleable: true },
+  features: { label: "Egenskaper", Editor: FeaturesEditor, toggleable: true },
+  stats: { label: "Statistik", Editor: StatsEditor, toggleable: true },
+  services: { label: "Tjänster", Editor: ServicesEditor, toggleable: true },
+  process: { label: "Process / Steg", Editor: ProcessEditor, toggleable: true },
+  gallery: { label: "Galleri", Editor: GalleryEditor, toggleable: true },
+  team: { label: "Team", Editor: TeamEditor, toggleable: true },
+  testimonials: { label: "Omdömen", Editor: TestimonialsEditor, toggleable: true },
+  faq: { label: "Vanliga frågor", Editor: FAQEditor, toggleable: true },
+  cta: { label: "Call-to-action", Editor: CTAEditor, toggleable: true },
+  contact: { label: "Kontakt", Editor: ContactEditor, toggleable: true },
+};
+
+// Non-content sections always appear first (not draggable)
+const FIXED_SECTIONS = ["business", "branding"];
+
+function SortableSectionItem({
+  sectionKey,
+  label,
+  Editor,
+  toggleable,
+  isOpen,
+  isEnabled,
+  onToggle,
+  onToggleEnabled,
+  siteData,
+  handleChange,
+}: {
+  sectionKey: string;
+  label: string;
+  Editor: React.ComponentType<{ data: SiteData; onChange: (d: SiteData) => void }>;
+  toggleable: boolean;
+  isOpen: boolean;
+  isEnabled: boolean;
+  onToggle: () => void;
+  onToggleEnabled?: () => void;
+  siteData: SiteData;
+  handleChange: (d: SiteData) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: sectionKey });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.8 : undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} id={`editor-section-${sectionKey}`} className="border-b border-border-light">
+      <div className="flex items-center gap-1">
+        {/* Drag handle */}
+        <button
+          type="button"
+          className="flex items-center justify-center shrink-0 w-6 h-full cursor-grab active:cursor-grabbing text-text-muted hover:text-primary-deep touch-none"
+          {...attributes}
+          {...listeners}
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
+          </svg>
+        </button>
+        <div className="flex-1 min-w-0">
+          <SectionHeader
+            title={label}
+            open={isOpen}
+            onToggle={onToggle}
+            enabled={toggleable ? isEnabled : undefined}
+            onToggleEnabled={onToggleEnabled}
+          />
+        </div>
+      </div>
+      {isOpen && isEnabled && (
+        <Editor data={siteData} onChange={handleChange} />
+      )}
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Main page
@@ -745,14 +841,47 @@ export default function SiteEditorPage() {
     handleChange(next);
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  // Current section order from data, falling back to default
+  const sectionOrder = useMemo(() => {
+    const order = siteData?.section_order ?? DEFAULT_SECTION_ORDER;
+    // Ensure all known sections are included (in case new ones were added)
+    const allSections = new Set(DEFAULT_SECTION_ORDER);
+    const result = order.filter((k: string) => allSections.has(k));
+    for (const k of DEFAULT_SECTION_ORDER) {
+      if (!result.includes(k)) result.push(k);
+    }
+    return result;
+  }, [siteData?.section_order]);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id || !siteData) return;
+
+      const oldIndex = sectionOrder.indexOf(active.id as string);
+      const newIndex = sectionOrder.indexOf(over.id as string);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+      handleChange({ ...siteData, section_order: newOrder });
+    },
+    [siteData, sectionOrder, handleChange],
+  );
+
   const viewerUrl = process.env.NEXT_PUBLIC_VIEWER_URL ?? "";
   const subdomain = data?.mySite?.subdomain;
-  // Build subdomain-based preview URL: https://{subdomain}.qvickosite.com
+  const isDev = process.env.NODE_ENV === "development";
+  // In development use path-based URLs (subdomain.localhost doesn't resolve).
+  // In production use subdomain-based URLs.
   const previewUrl = (() => {
-    if (subdomain && viewerUrl) {
+    if (subdomain && viewerUrl && !isDev) {
       try {
         const u = new URL(viewerUrl);
-        // Strip "www." if present and prepend subdomain
         const host = u.hostname.replace(/^www\./, "");
         return `${u.protocol}//${subdomain}.${host}`;
       } catch {
@@ -869,10 +998,13 @@ export default function SiteEditorPage() {
       <div className="flex flex-1 min-h-0">
         {/* Editor panel */}
         <div className="w-full md:w-[380px] lg:w-[420px] shrink-0 overflow-y-auto border-r border-border-light bg-gray-50/50">
-          {SECTIONS.map(({ key, label, Editor, toggleable }) => {
+          {/* Fixed sections (business, branding) — not draggable */}
+          {FIXED_SECTIONS.map((key) => {
+            const section = SECTION_MAP[key];
+            if (!section) return null;
+            const { label, Editor, toggleable } = section;
             const isOpen = openSections.has(key);
             const isEnabled = toggleable ? (siteData as Record<string, unknown>)[key] !== null && (siteData as Record<string, unknown>)[key] !== undefined : true;
-
             return (
               <div key={key} id={`editor-section-${key}`} className="border-b border-border-light">
                 <SectionHeader
@@ -888,6 +1020,38 @@ export default function SiteEditorPage() {
               </div>
             );
           })}
+
+          {/* Draggable content sections */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+              {sectionOrder.map((key: string) => {
+                const section = SECTION_MAP[key];
+                if (!section) return null;
+                const { label, Editor, toggleable } = section;
+                const isOpen = openSections.has(key);
+                const isEnabled = toggleable ? (siteData as Record<string, unknown>)[key] !== null && (siteData as Record<string, unknown>)[key] !== undefined : true;
+                return (
+                  <SortableSectionItem
+                    key={key}
+                    sectionKey={key}
+                    label={label}
+                    Editor={Editor}
+                    toggleable={toggleable}
+                    isOpen={isOpen}
+                    isEnabled={isEnabled}
+                    onToggle={() => toggleSection(key)}
+                    onToggleEnabled={toggleable ? () => toggleSectionEnabled(key) : undefined}
+                    siteData={siteData}
+                    handleChange={handleChange}
+                  />
+                );
+              })}
+            </SortableContext>
+          </DndContext>
         </div>
 
         {/* Preview panel — full remaining width */}
