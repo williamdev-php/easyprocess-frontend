@@ -113,13 +113,13 @@ export default function BillingPage() {
   const t = useTranslations("billing");
 
   // GraphQL queries
-  const { data: subData, refetch: refetchSub } = useQuery(MY_SUBSCRIPTION);
-  const { data: paymentsData, refetch: refetchPayments } = useQuery(MY_PAYMENTS, {
+  const { data: subData, refetch: refetchSub } = useQuery<any>(MY_SUBSCRIPTION);
+  const { data: paymentsData, refetch: refetchPayments } = useQuery<any>(MY_PAYMENTS, {
     variables: { limit: 10, offset: 0 },
   });
-  const { data: billingData, refetch: refetchBilling } = useQuery(MY_BILLING_DETAILS);
-  const { data: methodsData, refetch: refetchMethods } = useQuery(MY_PAYMENT_METHODS);
-  const { data: plansData } = useQuery(AVAILABLE_PLANS);
+  const { data: billingData, refetch: refetchBilling } = useQuery<any>(MY_BILLING_DETAILS);
+  const { data: methodsData, refetch: refetchMethods } = useQuery<any>(MY_PAYMENT_METHODS);
+  const { data: plansData } = useQuery<any>(AVAILABLE_PLANS);
 
   // GraphQL mutations
   const [updateBillingMut] = useMutation(UPDATE_BILLING_DETAILS);
