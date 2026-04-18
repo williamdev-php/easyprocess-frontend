@@ -900,7 +900,7 @@ export default function SiteEditorPage() {
 
   const { data, loading, error } = useQuery<any>(MY_SITE, { variables: { id: siteId } });
   const [saveDraftMutation] = useMutation(SAVE_DRAFT);
-  const [loadDraftMutation] = useMutation(LOAD_DRAFT);
+  const [loadDraftMutation] = useMutation<{ loadDraft: { siteId: string; draftData: any; updatedAt: string } }>(LOAD_DRAFT);
   const [publishSiteDataMutation] = useMutation(PUBLISH_SITE_DATA);
   const [discardDraftMutation] = useMutation(DISCARD_DRAFT);
 
