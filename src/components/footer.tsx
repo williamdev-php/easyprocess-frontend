@@ -101,15 +101,15 @@ export default function Footer() {
         <div className="mt-12 border-t border-white/10 pt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="text-sm text-white/40">{t("copyright")}</p>
           <div className="flex gap-6">
-            <a href="#" className="text-sm text-white/40 transition hover:text-white/60">
+            <Link href="/terms" className="text-sm text-white/40 transition hover:text-white/60">
               {t("privacy")}
-            </a>
-            <a href="#" className="text-sm text-white/40 transition hover:text-white/60">
+            </Link>
+            <Link href="/terms" className="text-sm text-white/40 transition hover:text-white/60">
               {t("terms")}
-            </a>
-            <a href="#" className="text-sm text-white/40 transition hover:text-white/60">
+            </Link>
+            <Link href="/terms" className="text-sm text-white/40 transition hover:text-white/60">
               {t("cookies")}
-            </a>
+            </Link>
           </div>
         </div>
       </div>

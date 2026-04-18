@@ -139,6 +139,7 @@ export const ADD_DOMAIN = gql`
       siteId
       status
       createdAt
+      vercelVerification
     }
   }
 `;
@@ -167,6 +168,7 @@ export const VERIFY_DOMAIN = gql`
       domain
       status
       verifiedAt
+      vercelVerification
     }
   }
 `;
@@ -176,6 +178,89 @@ export const SET_SITE_SUBDOMAIN = gql`
     setSiteSubdomain(siteId: $siteId, subdomain: $subdomain) {
       id
       subdomain
+    }
+  }
+`;
+
+export const PREPARE_DOMAIN_TRANSFER = gql`
+  mutation PrepareDomainTransfer($domainId: String!) {
+    prepareDomainTransfer(domainId: $domainId) {
+      domain
+      isLocked
+      authCode
+      instructions
+    }
+  }
+`;
+
+export const LOCK_DOMAIN = gql`
+  mutation LockDomain($domainId: String!) {
+    lockDomain(domainId: $domainId) {
+      id
+      isLocked
+    }
+  }
+`;
+
+export const TOGGLE_DOMAIN_AUTO_RENEW = gql`
+  mutation ToggleDomainAutoRenew($domainId: String!, $autoRenew: Boolean!) {
+    toggleDomainAutoRenew(domainId: $domainId, autoRenew: $autoRenew) {
+      id
+      autoRenew
+    }
+  }
+`;
+
+export const RENEW_PURCHASED_DOMAIN = gql`
+  mutation RenewPurchasedDomain($domainId: String!) {
+    renewPurchasedDomain(domainId: $domainId) {
+      id
+      domain
+      status
+      expiresAt
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Billing
+// ---------------------------------------------------------------------------
+
+export const UPDATE_BILLING_DETAILS = gql`
+  mutation UpdateBillingDetails($input: UpdateBillingDetailsInput!) {
+    updateBillingDetails(input: $input) {
+      id
+      billingName
+      billingCompany
+      billingOrgNumber
+      billingVatNumber
+      billingEmail
+      billingPhone
+      addressLine1
+      addressLine2
+      zip
+      city
+      country
+    }
+  }
+`;
+
+export const CANCEL_SUBSCRIPTION = gql`
+  mutation CancelSubscription {
+    cancelSubscription {
+      id
+      status
+      cancelAtPeriodEnd
+    }
+  }
+`;
+
+export const REACTIVATE_SUBSCRIPTION = gql`
+  mutation ReactivateSubscription {
+    reactivateSubscription {
+      id
+      status
+      cancelAtPeriodEnd
     }
   }
 `;

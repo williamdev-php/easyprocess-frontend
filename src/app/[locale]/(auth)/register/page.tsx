@@ -21,6 +21,7 @@ export default function RegisterPage() {
     orgNumber: "",
     phone: "",
   });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -39,6 +40,10 @@ export default function RegisterPage() {
     }
     if (form.password.length < 8) {
       setError(t("passwordTooShort"));
+      return;
+    }
+    if (!agreedToTerms) {
+      setError(t("mustAgreeToTerms"));
       return;
     }
 
@@ -222,6 +227,22 @@ export default function RegisterPage() {
                 {t("passwordMatch")}
               </p>
             )}
+          </div>
+
+          <div className="flex items-start gap-3">
+            <input
+              id="terms"
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0 rounded border-border-theme text-primary focus:ring-primary"
+            />
+            <label htmlFor="terms" className="text-sm text-text-muted leading-snug">
+              {t("agreeToTermsPrefix")}{" "}
+              <Link href="/terms" target="_blank" className="text-primary underline hover:text-primary-deep">
+                {t("termsLinkText")}
+              </Link>
+            </label>
           </div>
 
           <Button type="submit" fullWidth size="lg">

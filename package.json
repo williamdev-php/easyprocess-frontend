@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@apollo/client": "^4.1.7",
+    "@stripe/react-stripe-js": "^6.2.0",
+    "@stripe/stripe-js": "^9.2.0",
     "graphql": "^16.13.2",
     "js-cookie": "^3.0.5",
     "next": "16.2.4",

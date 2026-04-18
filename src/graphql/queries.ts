@@ -380,6 +380,7 @@ export const MY_DOMAINS = gql`
       verifiedAt
       createdAt
       updatedAt
+      vercelVerification
     }
   }
 `;
@@ -390,6 +391,114 @@ export const SUBDOMAIN_INFO = gql`
       subdomain
       fullUrl
       baseDomain
+    }
+  }
+`;
+
+export const SEARCH_DOMAIN = gql`
+  query SearchDomain($domain: String!) {
+    searchDomain(domain: $domain) {
+      available
+      domain
+      priceSek
+      priceSekDisplay
+      priceUsd
+      period
+    }
+  }
+`;
+
+export const MY_PURCHASED_DOMAINS = gql`
+  query MyPurchasedDomains {
+    myPurchasedDomains {
+      id
+      domain
+      priceSek
+      status
+      periodYears
+      autoRenew
+      isLocked
+      expiresAt
+      purchasedAt
+      createdAt
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Billing & Subscription
+// ---------------------------------------------------------------------------
+
+export const MY_SUBSCRIPTION = gql`
+  query MySubscription {
+    mySubscription {
+      id
+      status
+      currentPeriodStart
+      currentPeriodEnd
+      cancelAtPeriodEnd
+      trialStart
+      trialEnd
+      createdAt
+    }
+  }
+`;
+
+export const MY_PAYMENTS = gql`
+  query MyPayments($limit: Int, $offset: Int) {
+    myPayments(limit: $limit, offset: $offset) {
+      items {
+        id
+        amountSek
+        currency
+        status
+        invoiceUrl
+        createdAt
+      }
+      total
+    }
+  }
+`;
+
+export const MY_BILLING_DETAILS = gql`
+  query MyBillingDetails {
+    myBillingDetails {
+      id
+      billingName
+      billingCompany
+      billingOrgNumber
+      billingVatNumber
+      billingEmail
+      billingPhone
+      addressLine1
+      addressLine2
+      zip
+      city
+      country
+    }
+  }
+`;
+
+export const MY_PAYMENT_METHODS = gql`
+  query MyPaymentMethods {
+    myPaymentMethods {
+      id
+      brand
+      last4
+      expMonth
+      expYear
+    }
+  }
+`;
+
+export const AVAILABLE_PLANS = gql`
+  query AvailablePlans {
+    availablePlans {
+      key
+      name
+      priceSek
+      trialDays
+      features
     }
   }
 `;

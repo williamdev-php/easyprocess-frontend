@@ -22,7 +22,8 @@ export default function AuthLayout({
               alt="Qvicko"
               width={160}
               height={53}
-              className="h-12 w-auto"
+              className="h-12"
+              style={{ width: "auto" }}
               priority
             />
           </Link>
@@ -62,7 +63,8 @@ export default function AuthLayout({
               alt="Qvicko"
               width={120}
               height={40}
-              className="h-9 w-auto"
+              className="h-9"
+              style={{ width: "auto" }}
               priority
             />
           </Link>
