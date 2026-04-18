@@ -746,6 +746,21 @@ export default function SiteEditorPage() {
   };
 
   const viewerUrl = process.env.NEXT_PUBLIC_VIEWER_URL ?? "";
+  const subdomain = data?.mySite?.subdomain;
+  // Build subdomain-based preview URL: https://{subdomain}.qvickosite.com
+  const previewUrl = (() => {
+    if (subdomain && viewerUrl) {
+      try {
+        const u = new URL(viewerUrl);
+        // Strip "www." if present and prepend subdomain
+        const host = u.hostname.replace(/^www\./, "");
+        return `${u.protocol}//${subdomain}.${host}`;
+      } catch {
+        return `${viewerUrl}/${siteId}`;
+      }
+    }
+    return `${viewerUrl}/${siteId}`;
+  })();
 
   if (loading) {
     return (
@@ -837,7 +852,7 @@ export default function SiteEditorPage() {
 
           {/* Open preview in new tab */}
           <a
-            href={`${viewerUrl}/${siteId}`}
+            href={previewUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-deep"
@@ -886,7 +901,7 @@ export default function SiteEditorPage() {
           >
             <iframe
               ref={iframeRef}
-              src={`${viewerUrl}/${siteId}`}
+              src={previewUrl}
               className="h-full w-full"
               title="Site preview"
             />

@@ -18,7 +18,16 @@ const nextConfig: NextConfig = {
               "img-src 'self' https: data:",
               "font-src 'self' https: data:",
               "connect-src 'self' https://api.stripe.com " + (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"),
-              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com " + (process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001"),
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com " + (process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001") + " " + (() => {
+                // Allow all subdomains of the viewer URL for iframe embedding
+                try {
+                  const u = new URL(process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001");
+                  const host = u.hostname.replace(/^www\./, "");
+                  return `${u.protocol}//*.${host}`;
+                } catch {
+                  return "";
+                }
+              })(),
               "frame-ancestors 'none'",
             ].join("; "),
           },
