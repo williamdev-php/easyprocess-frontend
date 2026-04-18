@@ -193,6 +193,7 @@
     "processLink": "How I work",
     "portfolioLink": "Portfolio",
     "contactLink": "Contact",
+    "helpCenter": "Help Center",
     "legal": "Legal",
     "privacy": "Privacy policy",
     "terms": "Terms",
@@ -634,5 +635,21 @@
     "claimFailed": "Could not activate the site. Please try again.",
     "createAccount": "Create account & activate",
     "loginExisting": "Already have an account? Log in"
+  },
+  "helpCenter": {
+    "title": "Help Center",
+    "metaTitle": "Help Center — Qvicko",
+    "metaDescription": "Find answers to common questions about Qvicko. Guides for domains, websites, payments, and more.",
+    "heading": "How can we help you?",
+    "subheading": "Search our guides or browse the categories below.",
+    "searchPlaceholder": "Search the help center...",
+    "categories": "Categories",
+    "overview": "Overview",
+    "article": "article",
+    "articles": "articles",
+    "noResults": "No results found. Try different search terms.",
+    "backToSite": "Back to Qvicko",
+    "menu": "Menu",
+    "navigation": "Navigation"
   }
 }

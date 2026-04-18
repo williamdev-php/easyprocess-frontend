@@ -193,6 +193,7 @@
     "processLink": "Sa jobbar jag",
     "portfolioLink": "Portfolio",
     "contactLink": "Kontakt",
+    "helpCenter": "Hjälpcenter",
     "legal": "Juridiskt",
     "privacy": "Integritetspolicy",
     "terms": "Villkor",
@@ -634,5 +635,21 @@
     "claimFailed": "Kunde inte aktivera sidan. Forsok igen.",
     "createAccount": "Skapa konto & aktivera",
     "loginExisting": "Har du redan ett konto? Logga in"
+  },
+  "helpCenter": {
+    "title": "Hjälpcenter",
+    "metaTitle": "Hjälpcenter — Qvicko",
+    "metaDescription": "Hitta svar på vanliga frågor om Qvicko. Guider för domäner, webbplatser, betalning och mer.",
+    "heading": "Hur kan vi hjälpa dig?",
+    "subheading": "Sök bland våra guider eller bläddra bland kategorierna nedan.",
+    "searchPlaceholder": "Sök i hjälpcentret...",
+    "categories": "Kategorier",
+    "overview": "Översikt",
+    "article": "artikel",
+    "articles": "artiklar",
+    "noResults": "Inga resultat hittades. Försök med andra sökord.",
+    "backToSite": "Tillbaka till Qvicko",
+    "menu": "Meny",
+    "navigation": "Navigation"
   }
 }

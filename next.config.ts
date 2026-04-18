@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' https: data:",
               "font-src 'self' https: data:",
+              "media-src 'self' https://d8j0ntlcm91z4.cloudfront.net",
               "connect-src 'self' https://api.stripe.com " + (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"),
               "frame-src 'self' https://js.stripe.com https://hooks.stripe.com " + (process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001") + " " + (() => {
                 // Allow all subdomains of the viewer URL for iframe embedding

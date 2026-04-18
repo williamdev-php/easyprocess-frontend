@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/routing";
+import VideoHero from "@/components/video-hero";
 
 export default async function HomePage({
   params,
@@ -21,7 +22,11 @@ export default async function HomePage({
 
   return (
     <main>
-      {/* ─── HERO ─── */}
+      {/* ─── VIDEO HERO (new) ─── */}
+      <VideoHero />
+
+      {/* ─── ORIGINAL HERO (hidden — kept for easy rollback) ─── */}
+      {false && (
       <section className="relative min-h-screen bg-primary-deep text-white overflow-hidden">
         {/* Decorative graphic placeholders */}
         <div className="absolute top-20 right-0 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
@@ -79,6 +84,7 @@ export default async function HomePage({
           </svg>
         </div>
       </section>
+      )}
 
       {/* ─── STATS ─── */}
       <section className="bg-background py-16">

@@ -75,6 +75,11 @@ export default function Footer() {
                   {t("contactLink")}
                 </a>
               </li>
+              <li>
+                <Link href="/help" className="text-sm text-white/60 transition hover:text-white">
+                  {t("helpCenter")}
+                </Link>
+              </li>
             </ul>
           </div>
 
