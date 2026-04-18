@@ -36,7 +36,7 @@ function normalizeDomain(input: string): string {
 
 function isValidDomain(domain: string): boolean {
   if (!domain) return false;
-  return /^[a-zA-Z0-9åäöÅÄÖ-]+(\.[a-zA-Z0-9åäöÅÄÖ-]+)+$/.test(domain);
+  return /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(domain);
 }
 
 interface VercelVerification {
@@ -371,7 +371,8 @@ export default function DomainPage() {
     if (!searchResult?.available) return;
 
     try {
-      const token = localStorage.getItem("access_token");
+      const { getAccessToken } = await import("@/lib/auth-context");
+      const token = getAccessToken();
       const res = await fetch(`${API_URL}/api/billing/domain/purchase`, {
         method: "POST",
         headers: {

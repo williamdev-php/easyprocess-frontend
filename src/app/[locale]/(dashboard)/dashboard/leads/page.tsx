@@ -108,7 +108,15 @@ export default function LeadsPage() {
   const totalPages = Math.ceil(total / 20);
 
   async function handleCreate() {
-    if (!newUrl.trim()) return;
+    const trimmed = newUrl.trim();
+    if (!trimmed) return;
+    // Basic URL validation
+    try {
+      const u = new URL(trimmed.startsWith("http") ? trimmed : `https://${trimmed}`);
+      if (!["http:", "https:"].includes(u.protocol)) return;
+    } catch {
+      return;
+    }
     try {
       await createLead({
         variables: {

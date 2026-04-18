@@ -12,10 +12,16 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/dashboard";
-  // Only allow relative redirects (prevent open redirect)
-  const redirect = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
-    ? rawRedirect
-    : "/dashboard";
+  // Only allow same-origin relative path redirects (prevent open redirect).
+  let redirect = "/dashboard";
+  try {
+    const parsed = new URL(rawRedirect, window.location.origin);
+    if (parsed.origin === window.location.origin) {
+      redirect = parsed.pathname + parsed.search + parsed.hash;
+    }
+  } catch {
+    // Invalid URL — use default
+  }
   const t = useTranslations("auth");
 
   const [email, setEmail] = useState("");

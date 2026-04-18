@@ -22,6 +22,13 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Clean up dropdown timeout on unmount to prevent memory leak
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
+    };
+  }, []);
+
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = "hidden";

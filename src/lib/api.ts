@@ -1,4 +1,9 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? (() => {
+  if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
+    console.error("NEXT_PUBLIC_API_URL is not set — API requests will fail");
+  }
+  return "http://localhost:8000";
+})();
 
 // ---------------------------------------------------------------------------
 // Case conversion helpers
@@ -74,29 +79,39 @@ export interface User {
 // HTTP client
 // ---------------------------------------------------------------------------
 
+const REQUEST_TIMEOUT_MS = 15_000;
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_URL}${path}`;
-  const res = await fetch(url, {
-    ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail || body.message || `Request failed: ${res.status}`);
+  try {
+    const res = await fetch(url, {
+      ...options,
+      credentials: "include",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.detail || body.message || `Request failed: ${res.status}`);
+    }
+
+    if (res.status === 204) return {} as T;
+
+    const data = await res.json();
+    return convertKeys<T>(data, toCamelCase);
+  } finally {
+    clearTimeout(timer);
   }
-
-  if (res.status === 204) return {} as T;
-
-  const data = await res.json();
-  return convertKeys<T>(data, toCamelCase);
 }
 
 // ---------------------------------------------------------------------------

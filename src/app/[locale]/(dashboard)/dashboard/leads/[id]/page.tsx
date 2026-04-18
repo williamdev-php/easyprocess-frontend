@@ -383,7 +383,7 @@ export default function LeadDetailPage() {
                 </span>
               </div>
               <a
-                href={`${process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001"}/${lead.generatedSite.id}`}
+                href={`${process.env.NEXT_PUBLIC_VIEWER_URL ?? ""}/${lead.generatedSite.id}`}
                 target="_blank"
                 rel="noopener"
                 className="mt-2 inline-block text-sm font-medium text-primary hover:underline"

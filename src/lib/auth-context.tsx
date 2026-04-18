@@ -59,11 +59,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(userData);
   }, []);
 
-  // Try to refresh token on mount
+  // Try to refresh token on mount (with timeout to prevent indefinite hang)
   useEffect(() => {
     async function init() {
       try {
-        const data = await refreshToken();
+        const timeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Auth refresh timeout")), 10_000),
+        );
+        const data = await Promise.race([refreshToken(), timeout]);
         setAccessToken(data.accessToken);
         await fetchUser(data.accessToken);
       } catch {

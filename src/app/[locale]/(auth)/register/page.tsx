@@ -42,6 +42,10 @@ export default function RegisterPage() {
       setError(t("passwordTooShort"));
       return;
     }
+    if (!/[A-Z]/.test(form.password) || !/[a-z]/.test(form.password) || !/\d/.test(form.password)) {
+      setError(t("passwordTooShort"));
+      return;
+    }
     if (!agreedToTerms) {
       setError(t("mustAgreeToTerms"));
       return;
@@ -71,10 +75,13 @@ export default function RegisterPage() {
     }
   }
 
+  const hasUpper = /[A-Z]/.test(form.password);
+  const hasLower = /[a-z]/.test(form.password);
+  const hasDigit = /\d/.test(form.password);
   const passwordStrength =
     form.password.length === 0
       ? 0
-      : form.password.length < 8
+      : form.password.length < 8 || !hasUpper || !hasLower || !hasDigit
         ? 1
         : form.password.length < 12
           ? 2

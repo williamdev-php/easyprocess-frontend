@@ -341,7 +341,7 @@ function HeroEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={hero.headline || ""} onChange={(v) => set("headline", v)} /></FieldGroup>
       <FieldGroup label="Underrubrik"><TextArea value={hero.subtitle || ""} onChange={(v) => set("subtitle", v)} rows={2} /></FieldGroup>
-      <FieldGroup label="CTA-knapp text"><TextInput value={hero.cta?.label || ""} onChange={(v) => set("cta", { ...hero.cta, label: v, href: hero.cta?.href || "#kontakt" })} /></FieldGroup>
+      <FieldGroup label="CTA-knapp text"><TextInput value={hero.cta?.label || ""} onChange={(v) => set("cta", { ...hero.cta, label: v, href: hero.cta?.href || "#contact" })} /></FieldGroup>
       <FieldGroup label="CTA-knapp länk"><TextInput value={hero.cta?.href || ""} onChange={(v) => set("cta", { ...hero.cta, label: hero.cta?.label || "", href: v })} /></FieldGroup>
     </div>
   );
@@ -531,7 +531,7 @@ function CTAEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData)
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={cta.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Text"><TextArea value={cta.text || ""} onChange={(v) => set("text", v)} rows={2} /></FieldGroup>
-      <FieldGroup label="Knapptext"><TextInput value={cta.button?.label || ""} onChange={(v) => set("button", { ...cta.button, label: v, href: cta.button?.href || "#kontakt" })} /></FieldGroup>
+      <FieldGroup label="Knapptext"><TextInput value={cta.button?.label || ""} onChange={(v) => set("button", { ...cta.button, label: v, href: cta.button?.href || "#contact" })} /></FieldGroup>
       <FieldGroup label="Knapplänk"><TextInput value={cta.button?.href || ""} onChange={(v) => set("button", { ...cta.button, label: cta.button?.label || "", href: v })} /></FieldGroup>
     </div>
   );
@@ -745,7 +745,7 @@ export default function SiteEditorPage() {
     handleChange(next);
   };
 
-  const viewerUrl = process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001";
+  const viewerUrl = process.env.NEXT_PUBLIC_VIEWER_URL ?? "";
 
   if (loading) {
     return (
