@@ -6,25 +6,8 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { MY_SITE } from "@/graphql/queries";
-import { UPDATE_SITE_DATA } from "@/graphql/mutations";
+import { SAVE_DRAFT, LOAD_DRAFT, PUBLISH_SITE_DATA, DISCARD_DRAFT } from "@/graphql/mutations";
 import { Link } from "@/i18n/routing";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -43,18 +26,18 @@ interface SiteData {
     name?: string; tagline?: string; email?: string | null; phone?: string | null;
     address?: string | null; org_number?: string | null; social_links?: Record<string, string>;
   };
-  hero?: { headline: string; subtitle?: string; cta?: { label: string; href: string } | null; background_image?: string | null } | null;
-  about?: { title?: string; text?: string; image?: string | null; highlights?: { label: string; value: string }[] | null } | null;
+  hero?: { headline: string; subtitle?: string; cta?: { label: string; href: string } | null; background_image?: string | null; show_cta?: boolean } | null;
+  about?: { title?: string; text?: string; image?: string | null; highlights?: { label: string; value: string }[] | null; show_highlights?: boolean } | null;
   features?: { title?: string; subtitle?: string; items?: { title: string; description: string; icon?: string }[] } | null;
   stats?: { title?: string; items?: { value: string; label: string }[] } | null;
   services?: { title?: string; subtitle?: string; items?: { title: string; description: string }[] } | null;
   process?: { title?: string; subtitle?: string; steps?: { title: string; description: string; step_number?: number }[] } | null;
   gallery?: { title?: string; subtitle?: string; images?: { url: string; alt?: string; caption?: string }[] } | null;
   team?: { title?: string; subtitle?: string; members?: { name: string; role?: string; image?: string | null; bio?: string }[] } | null;
-  testimonials?: { title?: string; subtitle?: string; items?: { text: string; author: string; role?: string }[] } | null;
+  testimonials?: { title?: string; subtitle?: string; items?: { text: string; author: string; role?: string }[]; show_ratings?: boolean } | null;
   faq?: { title?: string; subtitle?: string; items?: { question: string; answer: string }[] } | null;
-  cta?: { title?: string; text?: string; button?: { label: string; href: string } | null } | null;
-  contact?: { title?: string; text?: string } | null;
+  cta?: { title?: string; text?: string; button?: { label: string; href: string } | null; show_button?: boolean } | null;
+  contact?: { title?: string; text?: string; show_form?: boolean; show_info?: boolean } | null;
   seo?: { structured_data?: Record<string, unknown>; robots?: string };
 }
 
@@ -168,6 +151,40 @@ function TextArea({
   );
 }
 
+function ToggleSwitch({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div
+      role="switch"
+      aria-checked={checked}
+      tabIndex={0}
+      onClick={() => onChange(!checked)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onChange(!checked); } }}
+      className="flex items-center justify-between gap-2 py-1 cursor-pointer select-none"
+    >
+      <span className="text-xs font-medium text-text-muted">{label}</span>
+      <span
+        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+          checked ? "bg-primary" : "bg-gray-300"
+        }`}
+      >
+        <span
+          className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform ${
+            checked ? "translate-x-[18px]" : "translate-x-[3px]"
+          }`}
+        />
+      </span>
+    </div>
+  );
+}
+
 function ColorInput({
   value,
   onChange,
@@ -202,85 +219,102 @@ function ColorInput({
 // List editor for items (services, features, FAQ, etc.)
 // ---------------------------------------------------------------------------
 
-function ListEditor<T extends Record<string, unknown>>({
+function CollapsibleListEditor<T extends Record<string, unknown>>({
   items,
   onChange,
   fields,
   addLabel,
   createDefault,
+  titleKey,
+  titleFallback,
 }: {
   items: T[];
   onChange: (items: T[]) => void;
   fields: { key: keyof T; label: string; type: "text" | "textarea" }[];
   addLabel: string;
   createDefault: () => T;
+  titleKey: keyof T;
+  titleFallback?: string;
 }) {
-  const add = () => onChange([...items, createDefault()]);
-  const remove = (idx: number) => onChange(items.filter((_, i) => i !== idx));
+  const [openItems, setOpenItems] = useState<Set<number>>(new Set());
+
   const update = (idx: number, key: keyof T, val: unknown) => {
     const next = deepClone(items);
     (next[idx] as Record<string, unknown>)[key as string] = val;
     onChange(next);
   };
-  const moveUp = (idx: number) => {
-    if (idx === 0) return;
-    const next = deepClone(items);
-    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-    onChange(next);
+  const remove = (idx: number) => {
+    onChange(items.filter((_, i) => i !== idx));
+    setOpenItems((prev) => { const n = new Set<number>(); prev.forEach((v) => { if (v < idx) n.add(v); else if (v > idx) n.add(v - 1); }); return n; });
   };
-  const moveDown = (idx: number) => {
-    if (idx >= items.length - 1) return;
+  const move = (idx: number, dir: -1 | 1) => {
+    const target = idx + dir;
+    if (target < 0 || target >= items.length) return;
     const next = deepClone(items);
-    [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+    [next[idx], next[target]] = [next[target], next[idx]];
     onChange(next);
+    setOpenItems((prev) => {
+      const n = new Set(prev);
+      if (n.has(idx)) { n.delete(idx); n.add(target); }
+      else if (n.has(target)) { n.delete(target); n.add(idx); }
+      return n;
+    });
+  };
+  const add = () => {
+    const newIdx = items.length;
+    onChange([...items, createDefault()]);
+    setOpenItems((prev) => new Set(prev).add(newIdx));
+  };
+  const toggle = (idx: number) => {
+    setOpenItems((prev) => { const n = new Set(prev); if (n.has(idx)) n.delete(idx); else n.add(idx); return n; });
   };
 
   return (
-    <div className="space-y-3">
-      {items.map((item, idx) => (
-        <div key={idx} className="rounded-lg border border-border-light bg-gray-50/50 p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-text-muted">#{idx + 1}</span>
-            <div className="flex gap-1">
-              <button type="button" onClick={() => moveUp(idx)} disabled={idx === 0}
-                className="rounded p-1 text-text-muted hover:bg-white disabled:opacity-30">
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+    <div className="space-y-1.5">
+      {items.map((item, idx) => {
+        const isOpen = openItems.has(idx);
+        const title = (item[titleKey] as string) || `${titleFallback || "Objekt"} #${idx + 1}`;
+        return (
+          <div key={idx} className="rounded-lg border border-border-light bg-gray-50/50 overflow-hidden">
+            <div className="flex items-center gap-1 px-2 py-1.5">
+              <button type="button" onClick={() => toggle(idx)} className="flex flex-1 items-center gap-2 min-w-0 text-left">
+                <svg className={`h-3 w-3 shrink-0 text-text-muted transition-transform ${isOpen ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
+                <span className="text-xs font-medium text-primary-deep truncate">{title}</span>
               </button>
-              <button type="button" onClick={() => moveDown(idx)} disabled={idx >= items.length - 1}
-                className="rounded p-1 text-text-muted hover:bg-white disabled:opacity-30">
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <button type="button" onClick={() => remove(idx)}
-                className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600">
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex gap-0.5 shrink-0">
+                <button type="button" onClick={() => move(idx, -1)} disabled={idx === 0}
+                  className="rounded p-0.5 text-text-muted hover:bg-white disabled:opacity-20">
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                </button>
+                <button type="button" onClick={() => move(idx, 1)} disabled={idx >= items.length - 1}
+                  className="rounded p-0.5 text-text-muted hover:bg-white disabled:opacity-20">
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                <button type="button" onClick={() => remove(idx)}
+                  className="rounded p-0.5 text-red-400 hover:bg-red-50 hover:text-red-600">
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
             </div>
+            {isOpen && (
+              <div className="border-t border-border-light px-3 py-2.5 space-y-2">
+                {fields.map((f) => (
+                  <div key={f.key as string}>
+                    <label className="mb-0.5 block text-xs text-text-muted">{f.label}</label>
+                    {f.type === "textarea" ? (
+                      <TextArea value={(item[f.key] as string) || ""} onChange={(v) => update(idx, f.key, v)} rows={2} />
+                    ) : (
+                      <TextInput value={(item[f.key] as string) || ""} onChange={(v) => update(idx, f.key, v)} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {fields.map((f) => (
-            <div key={f.key as string}>
-              <label className="mb-0.5 block text-xs text-text-muted">{f.label}</label>
-              {f.type === "textarea" ? (
-                <TextArea
-                  value={(item[f.key] as string) || ""}
-                  onChange={(v) => update(idx, f.key, v)}
-                  rows={2}
-                />
-              ) : (
-                <TextInput
-                  value={(item[f.key] as string) || ""}
-                  onChange={(v) => update(idx, f.key, v)}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      ))}
+        );
+      })}
       <button
         type="button"
         onClick={add}
@@ -355,12 +389,20 @@ function HeroEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData
   const set = (key: string, val: unknown) => {
     onChange({ ...data, hero: { ...hero, [key]: val } });
   };
+  const showCta = hero.show_cta !== false;
   return (
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={hero.headline || ""} onChange={(v) => set("headline", v)} /></FieldGroup>
       <FieldGroup label="Underrubrik"><TextArea value={hero.subtitle || ""} onChange={(v) => set("subtitle", v)} rows={2} /></FieldGroup>
-      <FieldGroup label="CTA-knapp text"><TextInput value={hero.cta?.label || ""} onChange={(v) => set("cta", { ...hero.cta, label: v, href: hero.cta?.href || "#contact" })} /></FieldGroup>
-      <FieldGroup label="CTA-knapp länk"><TextInput value={hero.cta?.href || ""} onChange={(v) => set("cta", { ...hero.cta, label: hero.cta?.label || "", href: v })} /></FieldGroup>
+      <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-2">
+        <ToggleSwitch label="Visa CTA-knapp" checked={showCta} onChange={(v) => set("show_cta", v)} />
+        {showCta && (
+          <>
+            <FieldGroup label="CTA-knapp text"><TextInput value={hero.cta?.label || ""} onChange={(v) => set("cta", { ...hero.cta, label: v, href: hero.cta?.href || "#contact" })} /></FieldGroup>
+            <FieldGroup label="CTA-knapp länk"><TextInput value={hero.cta?.href || ""} onChange={(v) => set("cta", { ...hero.cta, label: hero.cta?.label || "", href: v })} /></FieldGroup>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -370,22 +412,28 @@ function AboutEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteDat
   const set = (key: string, val: unknown) => {
     onChange({ ...data, about: { ...about, [key]: val } });
   };
+  const showHighlights = about.show_highlights !== false;
   return (
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={about.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Text"><TextArea value={about.text || ""} onChange={(v) => set("text", v)} rows={5} /></FieldGroup>
-      <FieldGroup label="Höjdpunkter">
-        <ListEditor
-          items={about.highlights || []}
-          onChange={(items) => set("highlights", items)}
-          fields={[
-            { key: "label", label: "Etikett", type: "text" },
-            { key: "value", label: "Värde", type: "text" },
-          ]}
-          addLabel="Lägg till höjdpunkt"
-          createDefault={() => ({ label: "", value: "" })}
-        />
-      </FieldGroup>
+      <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-2">
+        <ToggleSwitch label="Visa höjdpunkter" checked={showHighlights} onChange={(v) => set("show_highlights", v)} />
+        {showHighlights && (
+          <CollapsibleListEditor
+            items={about.highlights || []}
+            onChange={(items) => set("highlights", items)}
+            fields={[
+              { key: "label", label: "Etikett", type: "text" },
+              { key: "value", label: "Värde", type: "text" },
+            ]}
+            addLabel="Lägg till höjdpunkt"
+            createDefault={() => ({ label: "", value: "" })}
+            titleKey="label"
+            titleFallback="Höjdpunkt"
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -400,7 +448,7 @@ function ServicesEditor({ data, onChange }: { data: SiteData; onChange: (d: Site
       <FieldGroup label="Rubrik"><TextInput value={services.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Underrubrik"><TextInput value={services.subtitle || ""} onChange={(v) => set("subtitle", v)} /></FieldGroup>
       <FieldGroup label="Tjänster">
-        <ListEditor
+        <CollapsibleListEditor
           items={services.items || []}
           onChange={(items) => set("items", items)}
           fields={[
@@ -409,6 +457,8 @@ function ServicesEditor({ data, onChange }: { data: SiteData; onChange: (d: Site
           ]}
           addLabel="Lägg till tjänst"
           createDefault={() => ({ title: "", description: "" })}
+          titleKey="title"
+          titleFallback="Tjänst"
         />
       </FieldGroup>
     </div>
@@ -425,7 +475,7 @@ function FeaturesEditor({ data, onChange }: { data: SiteData; onChange: (d: Site
       <FieldGroup label="Rubrik"><TextInput value={features.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Underrubrik"><TextInput value={features.subtitle || ""} onChange={(v) => set("subtitle", v)} /></FieldGroup>
       <FieldGroup label="Egenskaper">
-        <ListEditor
+        <CollapsibleListEditor
           items={features.items || []}
           onChange={(items) => set("items", items)}
           fields={[
@@ -435,6 +485,8 @@ function FeaturesEditor({ data, onChange }: { data: SiteData; onChange: (d: Site
           ]}
           addLabel="Lägg till egenskap"
           createDefault={() => ({ title: "", description: "", icon: "" })}
+          titleKey="title"
+          titleFallback="Egenskap"
         />
       </FieldGroup>
     </div>
@@ -449,8 +501,9 @@ function TestimonialsEditor({ data, onChange }: { data: SiteData; onChange: (d: 
   return (
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={testimonials.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
+      <ToggleSwitch label="Visa stjärnbetyg" checked={testimonials.show_ratings !== false} onChange={(v) => set("show_ratings", v)} />
       <FieldGroup label="Omdömen">
-        <ListEditor
+        <CollapsibleListEditor
           items={testimonials.items || []}
           onChange={(items) => set("items", items)}
           fields={[
@@ -460,6 +513,8 @@ function TestimonialsEditor({ data, onChange }: { data: SiteData; onChange: (d: 
           ]}
           addLabel="Lägg till omdöme"
           createDefault={() => ({ text: "", author: "", role: "" })}
+          titleKey="author"
+          titleFallback="Omdöme"
         />
       </FieldGroup>
     </div>
@@ -468,24 +523,95 @@ function TestimonialsEditor({ data, onChange }: { data: SiteData; onChange: (d: 
 
 function FAQEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
   const faq = data.faq || { title: "Vanliga frågor", subtitle: "", items: [] };
+  const items = faq.items || [];
+  const [openItems, setOpenItems] = useState<Set<number>>(new Set());
   const set = (key: string, val: unknown) => {
     onChange({ ...data, faq: { ...faq, [key]: val } });
   };
+  const updateItem = (idx: number, key: string, val: string) => {
+    const next = deepClone(items);
+    (next[idx] as Record<string, unknown>)[key] = val;
+    set("items", next);
+  };
+  const removeItem = (idx: number) => {
+    set("items", items.filter((_, i) => i !== idx));
+    setOpenItems((prev) => { const n = new Set<number>(); prev.forEach((v) => { if (v < idx) n.add(v); else if (v > idx) n.add(v - 1); }); return n; });
+  };
+  const moveItem = (idx: number, dir: -1 | 1) => {
+    const next = deepClone(items);
+    const target = idx + dir;
+    [next[idx], next[target]] = [next[target], next[idx]];
+    set("items", next);
+    setOpenItems((prev) => {
+      const n = new Set(prev);
+      if (n.has(idx)) { n.delete(idx); n.add(target); }
+      else if (n.has(target)) { n.delete(target); n.add(idx); }
+      return n;
+    });
+  };
+  const addItem = () => {
+    const newIdx = items.length;
+    set("items", [...items, { question: "", answer: "" }]);
+    setOpenItems((prev) => new Set(prev).add(newIdx));
+  };
+
   return (
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={faq.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
-      <FieldGroup label="Frågor & Svar">
-        <ListEditor
-          items={faq.items || []}
-          onChange={(items) => set("items", items)}
-          fields={[
-            { key: "question", label: "Fråga", type: "text" },
-            { key: "answer", label: "Svar", type: "textarea" },
-          ]}
-          addLabel="Lägg till fråga"
-          createDefault={() => ({ question: "", answer: "" })}
-        />
-      </FieldGroup>
+      <div className="space-y-1.5">
+        <label className="mb-0.5 block text-xs font-medium text-text-muted">Frågor & Svar</label>
+        {items.map((item, idx) => {
+          const isOpen = openItems.has(idx);
+          return (
+            <div key={idx} className="rounded-lg border border-border-light bg-gray-50/50 overflow-hidden">
+              <div className="flex items-center gap-1 px-2 py-1.5">
+                <button
+                  type="button"
+                  onClick={() => setOpenItems((prev) => { const n = new Set(prev); if (n.has(idx)) n.delete(idx); else n.add(idx); return n; })}
+                  className="flex flex-1 items-center gap-2 min-w-0 text-left"
+                >
+                  <svg className={`h-3 w-3 shrink-0 text-text-muted transition-transform ${isOpen ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                  <span className="text-xs font-medium text-primary-deep truncate">
+                    {item.question || `Fråga #${idx + 1}`}
+                  </span>
+                </button>
+                <div className="flex gap-0.5 shrink-0">
+                  <button type="button" onClick={() => moveItem(idx, -1)} disabled={idx === 0}
+                    className="rounded p-0.5 text-text-muted hover:bg-white disabled:opacity-20">
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                  </button>
+                  <button type="button" onClick={() => moveItem(idx, 1)} disabled={idx >= items.length - 1}
+                    className="rounded p-0.5 text-text-muted hover:bg-white disabled:opacity-20">
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+                  <button type="button" onClick={() => removeItem(idx)}
+                    className="rounded p-0.5 text-red-400 hover:bg-red-50 hover:text-red-600">
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+              {isOpen && (
+                <div className="border-t border-border-light px-3 py-2.5 space-y-2">
+                  <FieldGroup label="Fråga"><TextInput value={item.question || ""} onChange={(v) => updateItem(idx, "question", v)} /></FieldGroup>
+                  <FieldGroup label="Svar"><TextArea value={item.answer || ""} onChange={(v) => updateItem(idx, "answer", v)} rows={3} /></FieldGroup>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <button
+          type="button"
+          onClick={addItem}
+          className="flex items-center gap-1.5 rounded-lg border border-dashed border-border-light px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:border-primary hover:text-primary"
+        >
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Lägg till fråga
+        </button>
+      </div>
     </div>
   );
 }
@@ -499,7 +625,7 @@ function GalleryEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteD
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={gallery.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Bilder">
-        <ListEditor
+        <CollapsibleListEditor
           items={gallery.images || []}
           onChange={(items) => set("images", items)}
           fields={[
@@ -509,6 +635,8 @@ function GalleryEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteD
           ]}
           addLabel="Lägg till bild"
           createDefault={() => ({ url: "", alt: "", caption: "" })}
+          titleKey="alt"
+          titleFallback="Bild"
         />
       </FieldGroup>
     </div>
@@ -525,7 +653,7 @@ function ProcessEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteD
       <FieldGroup label="Rubrik"><TextInput value={process.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Underrubrik"><TextInput value={process.subtitle || ""} onChange={(v) => set("subtitle", v)} /></FieldGroup>
       <FieldGroup label="Steg">
-        <ListEditor
+        <CollapsibleListEditor
           items={process.steps || []}
           onChange={(items) => set("steps", items.map((s, i) => ({ ...s, step_number: i + 1 })))}
           fields={[
@@ -534,6 +662,8 @@ function ProcessEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteD
           ]}
           addLabel="Lägg till steg"
           createDefault={() => ({ title: "", description: "", step_number: 0 })}
+          titleKey="title"
+          titleFallback="Steg"
         />
       </FieldGroup>
     </div>
@@ -545,12 +675,20 @@ function CTAEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData)
   const set = (key: string, val: unknown) => {
     onChange({ ...data, cta: { ...cta, [key]: val } });
   };
+  const showButton = cta.show_button !== false;
   return (
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={cta.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Text"><TextArea value={cta.text || ""} onChange={(v) => set("text", v)} rows={2} /></FieldGroup>
-      <FieldGroup label="Knapptext"><TextInput value={cta.button?.label || ""} onChange={(v) => set("button", { ...cta.button, label: v, href: cta.button?.href || "#contact" })} /></FieldGroup>
-      <FieldGroup label="Knapplänk"><TextInput value={cta.button?.href || ""} onChange={(v) => set("button", { ...cta.button, label: cta.button?.label || "", href: v })} /></FieldGroup>
+      <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-2">
+        <ToggleSwitch label="Visa knapp" checked={showButton} onChange={(v) => set("show_button", v)} />
+        {showButton && (
+          <>
+            <FieldGroup label="Knapptext"><TextInput value={cta.button?.label || ""} onChange={(v) => set("button", { ...cta.button, label: v, href: cta.button?.href || "#contact" })} /></FieldGroup>
+            <FieldGroup label="Knapplänk"><TextInput value={cta.button?.href || ""} onChange={(v) => set("button", { ...cta.button, label: cta.button?.label || "", href: v })} /></FieldGroup>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -564,6 +702,10 @@ function ContactEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteD
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={contact.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Text"><TextArea value={contact.text || ""} onChange={(v) => set("text", v)} rows={2} /></FieldGroup>
+      <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-1">
+        <ToggleSwitch label="Visa kontaktformulär" checked={contact.show_form !== false} onChange={(v) => set("show_form", v)} />
+        <ToggleSwitch label="Visa kontaktuppgifter" checked={contact.show_info !== false} onChange={(v) => set("show_info", v)} />
+      </div>
     </div>
   );
 }
@@ -577,7 +719,7 @@ function StatsEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteDat
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={stats.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Statistik">
-        <ListEditor
+        <CollapsibleListEditor
           items={stats.items || []}
           onChange={(items) => set("items", items)}
           fields={[
@@ -586,6 +728,8 @@ function StatsEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteDat
           ]}
           addLabel="Lägg till statistik"
           createDefault={() => ({ value: "", label: "" })}
+          titleKey="label"
+          titleFallback="Statistik"
         />
       </FieldGroup>
     </div>
@@ -601,7 +745,7 @@ function TeamEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={team.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Medlemmar">
-        <ListEditor
+        <CollapsibleListEditor
           items={team.members || []}
           onChange={(items) => set("members", items)}
           fields={[
@@ -611,6 +755,8 @@ function TeamEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData
           ]}
           addLabel="Lägg till medlem"
           createDefault={() => ({ name: "", role: "", bio: "", image: null })}
+          titleKey="name"
+          titleFallback="Medlem"
         />
       </FieldGroup>
     </div>
@@ -646,15 +792,24 @@ const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{
 // Non-content sections always appear first (not draggable)
 const FIXED_SECTIONS = ["business", "branding"];
 
-function SortableSectionItem({
+function DraggableSectionItem({
   sectionKey,
   label,
   Editor,
   toggleable,
   isOpen,
   isEnabled,
+  isFirst,
+  isLast,
   onToggle,
   onToggleEnabled,
+  onMoveUp,
+  onMoveDown,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+  onDrop,
+  isDragOver,
   siteData,
   handleChange,
 }: {
@@ -664,41 +819,59 @@ function SortableSectionItem({
   toggleable: boolean;
   isOpen: boolean;
   isEnabled: boolean;
+  isFirst: boolean;
+  isLast: boolean;
   onToggle: () => void;
   onToggleEnabled?: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onDragStart: (e: React.DragEvent) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragEnd: () => void;
+  onDrop: (e: React.DragEvent) => void;
+  isDragOver: boolean;
   siteData: SiteData;
   handleChange: (d: SiteData) => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: sectionKey });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 50 : undefined,
-    opacity: isDragging ? 0.8 : undefined,
-  };
-
   return (
-    <div ref={setNodeRef} style={style} id={`editor-section-${sectionKey}`} className="border-b border-border-light">
-      <div className="flex items-center gap-1">
-        {/* Drag handle */}
-        <button
-          type="button"
-          className="flex items-center justify-center shrink-0 w-6 h-full cursor-grab active:cursor-grabbing text-text-muted hover:text-primary-deep touch-none"
-          {...attributes}
-          {...listeners}
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
+    <div
+      id={`editor-section-${sectionKey}`}
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDragEnd={onDragEnd}
+      onDrop={onDrop}
+      className={`border-b border-border-light bg-white transition-colors ${isDragOver ? "border-t-2 border-t-primary" : ""}`}
+    >
+      <div className="flex items-center gap-0">
+        {/* Drag handle + reorder buttons */}
+        <div className="flex flex-col items-center shrink-0 w-8 self-stretch justify-center gap-0.5 cursor-grab active:cursor-grabbing text-text-muted/50 hover:text-primary-deep hover:bg-primary/5 transition-colors">
+          <svg className="h-4 w-4 pointer-events-none" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.5" />
+            <circle cx="11" cy="4" r="1.5" />
+            <circle cx="5" cy="8" r="1.5" />
+            <circle cx="11" cy="8" r="1.5" />
+            <circle cx="5" cy="12" r="1.5" />
+            <circle cx="11" cy="12" r="1.5" />
           </svg>
-        </button>
+        </div>
+
+        {/* Up/down buttons */}
+        <div className="flex flex-col shrink-0">
+          <button type="button" onClick={(e) => { e.stopPropagation(); onMoveUp(); }} disabled={isFirst}
+            className="p-0.5 text-text-muted hover:text-primary-deep disabled:opacity-20 disabled:cursor-default transition-colors">
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+          <button type="button" onClick={(e) => { e.stopPropagation(); onMoveDown(); }} disabled={isLast}
+            className="p-0.5 text-text-muted hover:text-primary-deep disabled:opacity-20 disabled:cursor-default transition-colors">
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
         <div className="flex-1 min-w-0">
           <SectionHeader
             title={label}
@@ -726,35 +899,78 @@ export default function SiteEditorPage() {
   const t = useTranslations("siteEditor");
 
   const { data, loading, error } = useQuery<any>(MY_SITE, { variables: { id: siteId } });
-  const [updateSiteData, { loading: saving }] = useMutation(UPDATE_SITE_DATA);
+  const [saveDraftMutation] = useMutation(SAVE_DRAFT);
+  const [loadDraftMutation] = useMutation(LOAD_DRAFT);
+  const [publishSiteDataMutation] = useMutation(PUBLISH_SITE_DATA);
+  const [discardDraftMutation] = useMutation(DISCARD_DRAFT);
 
   const [siteData, setSiteData] = useState<SiteData | null>(null);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(["business", "hero"]));
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "draft_saving" | "draft_saved" | "publishing" | "published" | "error">("idle");
+  const [hasDraft, setHasDraft] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [previewMode, setPreviewMode] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+  const [isDraggingSection, setIsDraggingSection] = useState(false);
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const disabledSectionsCache = useRef<Record<string, unknown>>({});
+  const siteDataRef = useRef<SiteData | null>(null);
+  const publishedDataRef = useRef<SiteData | null>(null);
+  const dragSourceRef = useRef<string | null>(null);
+  siteDataRef.current = siteData;
 
-  // Init site data from query
+  // Init: load published data, then check for draft
   useEffect(() => {
     if (data?.mySite?.siteData && !siteData) {
-      setSiteData(deepClone(data.mySite.siteData));
-    }
-  }, [data, siteData]);
+      const published = deepClone(data.mySite.siteData);
+      publishedDataRef.current = published;
+      setSiteData(published);
 
-  // Listen for section-click messages from the viewer iframe
+      // Try loading draft
+      loadDraftMutation({ variables: { siteId } })
+        .then((res) => {
+          const draft = res.data?.loadDraft;
+          if (draft?.draftData) {
+            setSiteData(deepClone(draft.draftData));
+            setHasDraft(true);
+            setHasUnsavedChanges(true);
+          }
+        })
+        .catch(() => { /* no draft */ });
+    }
+  }, [data, siteData, siteId, loadDraftMutation]);
+
+  // Send current data to iframe
+  const pushToIframe = useCallback((d: SiteData) => {
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(
+        { type: "SITE_DATA_UPDATE", siteData: d },
+        "*"
+      );
+    }
+  }, []);
+
+  // Listen for messages from the viewer iframe
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
-      if (event.data?.type === "SECTION_CLICKED" && event.data.section) {
-        const section = event.data.section as string;
+      const msg = event.data;
+      if (!msg?.type) return;
+
+      if (msg.type === "PREVIEW_READY") {
+        const current = siteDataRef.current;
+        if (current) pushToIframe(current);
+        return;
+      }
+
+      if (msg.type === "SECTION_CLICKED" && msg.section) {
+        const section = msg.section as string;
         setOpenSections((prev) => {
           const next = new Set(prev);
           next.add(section);
           return next;
         });
-        // Scroll the section header into view in the editor panel
         setTimeout(() => {
           const el = document.getElementById(`editor-section-${section}`);
           el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -763,39 +979,72 @@ export default function SiteEditorPage() {
     }
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [pushToIframe]);
 
-  // Auto-save with debounce + send to iframe for live preview
+  // Handle changes: update preview + auto-save draft
   const handleChange = useCallback(
     (newData: SiteData) => {
       setSiteData(newData);
+      setHasUnsavedChanges(true);
+      setHasDraft(true);
 
-      // Send to iframe for live preview
-      if (iframeRef.current?.contentWindow) {
-        iframeRef.current.contentWindow.postMessage(
-          { type: "SITE_DATA_UPDATE", siteData: newData },
-          "*"
-        );
-      }
+      // Immediate preview update
+      pushToIframe(newData);
 
-      // Debounced save
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-      setSaveStatus("idle");
-      saveTimer.current = setTimeout(async () => {
-        setSaveStatus("saving");
+      // Debounced draft auto-save (every 3 seconds)
+      if (draftTimer.current) clearTimeout(draftTimer.current);
+      draftTimer.current = setTimeout(async () => {
+        setSaveStatus("draft_saving");
         try {
-          await updateSiteData({
-            variables: { input: { siteId, siteData: newData } },
+          await saveDraftMutation({
+            variables: { input: { siteId, draftData: newData } },
           });
-          setSaveStatus("saved");
-          setTimeout(() => setSaveStatus("idle"), 2000);
+          setSaveStatus("draft_saved");
+          setTimeout(() => setSaveStatus("idle"), 1500);
         } catch {
           setSaveStatus("error");
         }
-      }, 1500);
+      }, 3000);
     },
-    [siteId, updateSiteData]
+    [siteId, saveDraftMutation, pushToIframe]
   );
+
+  // Publish: save to site_data, delete draft, invalidate caches
+  const handlePublish = useCallback(async () => {
+    const current = siteDataRef.current;
+    if (!current) return;
+
+    // Cancel pending draft save
+    if (draftTimer.current) clearTimeout(draftTimer.current);
+
+    setSaveStatus("publishing");
+    try {
+      await publishSiteDataMutation({
+        variables: { input: { siteId, siteData: current } },
+      });
+      publishedDataRef.current = deepClone(current);
+      setHasUnsavedChanges(false);
+      setHasDraft(false);
+      setSaveStatus("published");
+      setTimeout(() => setSaveStatus("idle"), 2500);
+    } catch {
+      setSaveStatus("error");
+    }
+  }, [siteId, publishSiteDataMutation]);
+
+  // Discard draft: revert to published data
+  const handleDiscardDraft = useCallback(async () => {
+    if (!publishedDataRef.current) return;
+    try {
+      await discardDraftMutation({ variables: { siteId } });
+    } catch { /* ignore */ }
+    const published = deepClone(publishedDataRef.current);
+    setSiteData(published);
+    pushToIframe(published);
+    setHasUnsavedChanges(false);
+    setHasDraft(false);
+    setSaveStatus("idle");
+  }, [siteId, discardDraftMutation, pushToIframe]);
 
   const toggleSection = (key: string) => {
     setOpenSections((prev) => {
@@ -822,18 +1071,18 @@ export default function SiteEditorPage() {
         (next as Record<string, unknown>)[key] = deepClone(cached);
       } else {
         const defaults: Record<string, unknown> = {
-          hero: { headline: "", subtitle: "" },
-          about: { title: "Om oss", text: "" },
+          hero: { headline: "", subtitle: "", show_cta: true },
+          about: { title: "Om oss", text: "", show_highlights: true },
           features: { title: "Varför välja oss", subtitle: "", items: [] },
           stats: { title: "", items: [] },
           services: { title: "Våra tjänster", subtitle: "", items: [] },
           process: { title: "Så fungerar det", subtitle: "", steps: [] },
           gallery: { title: "Galleri", subtitle: "", images: [] },
           team: { title: "Vårt team", subtitle: "", members: [] },
-          testimonials: { title: "Omdömen", subtitle: "", items: [] },
+          testimonials: { title: "Omdömen", subtitle: "", items: [], show_ratings: true },
           faq: { title: "Vanliga frågor", subtitle: "", items: [] },
-          cta: { title: "", text: "" },
-          contact: { title: "Kontakta oss", text: "" },
+          cta: { title: "", text: "", show_button: true },
+          contact: { title: "Kontakta oss", text: "", show_form: true, show_info: true },
         };
         (next as Record<string, unknown>)[key] = defaults[key] || {};
       }
@@ -841,44 +1090,39 @@ export default function SiteEditorPage() {
     handleChange(next);
   };
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
-
   // Current section order from data, falling back to default
   const sectionOrder = useMemo(() => {
-    const order = siteData?.section_order ?? DEFAULT_SECTION_ORDER;
-    // Ensure all known sections are included (in case new ones were added)
-    const allSections = new Set(DEFAULT_SECTION_ORDER);
-    const result = order.filter((k: string) => allSections.has(k));
+    const order = siteData?.section_order;
+    if (!order || !Array.isArray(order) || order.length === 0) return DEFAULT_SECTION_ORDER;
+    const known = new Set(DEFAULT_SECTION_ORDER);
+    const result = order.filter((k: string) => known.has(k));
     for (const k of DEFAULT_SECTION_ORDER) {
       if (!result.includes(k)) result.push(k);
     }
     return result;
   }, [siteData?.section_order]);
 
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over || active.id === over.id || !siteData) return;
-
-      const oldIndex = sectionOrder.indexOf(active.id as string);
-      const newIndex = sectionOrder.indexOf(over.id as string);
-      if (oldIndex === -1 || newIndex === -1) return;
-
-      const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
-      handleChange({ ...siteData, section_order: newOrder });
-    },
-    [siteData, sectionOrder, handleChange],
-  );
+  const moveSection = useCallback((fromIndex: number, toIndex: number) => {
+    const current = siteDataRef.current;
+    if (!current) return;
+    const order = [...(current.section_order && Array.isArray(current.section_order) && current.section_order.length > 0
+      ? current.section_order
+      : DEFAULT_SECTION_ORDER)];
+    if (fromIndex < 0 || toIndex < 0 || fromIndex >= order.length || toIndex >= order.length) return;
+    const [moved] = order.splice(fromIndex, 1);
+    order.splice(toIndex, 0, moved);
+    handleChange({ ...current, section_order: order });
+  }, [handleChange]);
 
   const viewerUrl = process.env.NEXT_PUBLIC_VIEWER_URL ?? "";
   const subdomain = data?.mySite?.subdomain;
   const isDev = process.env.NODE_ENV === "development";
-  // In development use path-based URLs (subdomain.localhost doesn't resolve).
-  // In production use subdomain-based URLs.
-  const previewUrl = (() => {
+
+  // Editor iframe always uses /preview/{siteId} — no caching, no layout
+  const previewIframeUrl = `${viewerUrl}/preview/${siteId}`;
+
+  // "Open preview" link uses the public site URL
+  const publicSiteUrl = (() => {
     if (subdomain && viewerUrl && !isDev) {
       try {
         const u = new URL(viewerUrl);
@@ -932,18 +1176,50 @@ export default function SiteEditorPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          {/* Save status */}
+          {/* Draft / save status */}
           <span className={`text-xs font-medium ${
-            saveStatus === "saving" ? "text-yellow-600" :
-            saveStatus === "saved" ? "text-green-600" :
+            saveStatus === "draft_saving" ? "text-yellow-600" :
+            saveStatus === "draft_saved" ? "text-text-muted" :
+            saveStatus === "publishing" ? "text-yellow-600" :
+            saveStatus === "published" ? "text-green-600" :
             saveStatus === "error" ? "text-red-600" :
+            hasUnsavedChanges ? "text-yellow-600" :
             "text-text-muted"
           }`}>
-            {saveStatus === "saving" && t("saving")}
-            {saveStatus === "saved" && t("saved")}
-            {saveStatus === "error" && t("saveError")}
-            {saveStatus === "idle" && t("autoSave")}
+            {saveStatus === "draft_saving" && "Sparar utkast..."}
+            {saveStatus === "draft_saved" && "Utkast sparat"}
+            {saveStatus === "publishing" && "Publicerar..."}
+            {saveStatus === "published" && "Publicerad!"}
+            {saveStatus === "error" && "Fel vid sparning"}
+            {saveStatus === "idle" && hasUnsavedChanges && "Opublicerade ändringar"}
+            {saveStatus === "idle" && !hasUnsavedChanges && "Inga ändringar"}
           </span>
+
+          {/* Discard draft */}
+          {hasDraft && (
+            <button
+              onClick={handleDiscardDraft}
+              className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:border-red-300 hover:text-red-600 hover:bg-red-50"
+            >
+              Ångra
+            </button>
+          )}
+
+          {/* Publish button */}
+          <button
+            onClick={handlePublish}
+            disabled={!hasUnsavedChanges || saveStatus === "publishing"}
+            className="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {saveStatus === "publishing" ? (
+              <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            )}
+            Publicera
+          </button>
 
           {/* Preview mode toggle */}
           <div className="hidden md:flex items-center gap-0.5 rounded-lg border border-border-light bg-gray-50 p-0.5">
@@ -981,7 +1257,7 @@ export default function SiteEditorPage() {
 
           {/* Open preview in new tab */}
           <a
-            href={previewUrl}
+            href={publicSiteUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-deep"
@@ -1022,52 +1298,84 @@ export default function SiteEditorPage() {
           })}
 
           {/* Draggable content sections */}
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
-              {sectionOrder.map((key: string) => {
-                const section = SECTION_MAP[key];
-                if (!section) return null;
-                const { label, Editor, toggleable } = section;
-                const isOpen = openSections.has(key);
-                const isEnabled = toggleable ? (siteData as Record<string, unknown>)[key] !== null && (siteData as Record<string, unknown>)[key] !== undefined : true;
-                return (
-                  <SortableSectionItem
-                    key={key}
-                    sectionKey={key}
-                    label={label}
-                    Editor={Editor}
-                    toggleable={toggleable}
-                    isOpen={isOpen}
-                    isEnabled={isEnabled}
-                    onToggle={() => toggleSection(key)}
-                    onToggleEnabled={toggleable ? () => toggleSectionEnabled(key) : undefined}
-                    siteData={siteData}
-                    handleChange={handleChange}
-                  />
-                );
-              })}
-            </SortableContext>
-          </DndContext>
+          {sectionOrder.map((key: string, idx: number) => {
+            const section = SECTION_MAP[key];
+            if (!section) return null;
+            const { label, Editor, toggleable } = section;
+            const isOpen = openSections.has(key);
+            const isEnabled = toggleable ? (siteData as Record<string, unknown>)[key] !== null && (siteData as Record<string, unknown>)[key] !== undefined : true;
+            return (
+              <DraggableSectionItem
+                key={key}
+                sectionKey={key}
+                label={label}
+                Editor={Editor}
+                toggleable={toggleable}
+                isOpen={isOpen}
+                isEnabled={isEnabled}
+                isFirst={idx === 0}
+                isLast={idx === sectionOrder.length - 1}
+                onToggle={() => toggleSection(key)}
+                onToggleEnabled={toggleable ? () => toggleSectionEnabled(key) : undefined}
+                onMoveUp={() => moveSection(idx, idx - 1)}
+                onMoveDown={() => moveSection(idx, idx + 1)}
+                onDragStart={(e) => {
+                  dragSourceRef.current = key;
+                  e.dataTransfer.effectAllowed = "move";
+                  e.dataTransfer.setData("text/plain", key);
+                  setIsDraggingSection(true);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  setDragOverKey(key);
+                }}
+                onDragEnd={() => {
+                  dragSourceRef.current = null;
+                  setDragOverKey(null);
+                  setIsDraggingSection(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOverKey(null);
+                  const source = dragSourceRef.current;
+                  dragSourceRef.current = null;
+                  if (!source || source === key) return;
+                  const current = siteDataRef.current;
+                  if (!current) return;
+                  const order = [...(current.section_order && Array.isArray(current.section_order) && current.section_order.length > 0
+                    ? current.section_order
+                    : DEFAULT_SECTION_ORDER)];
+                  const fromIdx = order.indexOf(source);
+                  const toIdx = order.indexOf(key);
+                  if (fromIdx === -1 || toIdx === -1) return;
+                  const [moved] = order.splice(fromIdx, 1);
+                  order.splice(toIdx, 0, moved);
+                  handleChange({ ...current, section_order: order });
+                }}
+                isDragOver={dragOverKey === key}
+                siteData={siteData}
+                handleChange={handleChange}
+              />
+            );
+          })}
         </div>
 
         {/* Preview panel — full remaining width */}
         <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-gray-100/80 p-3 overflow-hidden">
           <div
-            className={`h-full rounded-xl border border-border-light bg-white shadow-lg overflow-hidden transition-all duration-300 ${
+            className={`rounded-xl border border-border-light bg-white shadow-lg overflow-hidden transition-all duration-300 origin-center ${
               previewMode === "mobile" ? "w-[375px]" :
               previewMode === "tablet" ? "w-[768px]" :
               "w-full"
-            }`}
+            } ${isDraggingSection ? "scale-[0.65] h-[140%]" : "h-full"}`}
           >
             <iframe
               ref={iframeRef}
-              src={previewUrl}
+              src={previewIframeUrl}
               className="h-full w-full"
               title="Site preview"
+              style={{ pointerEvents: isDraggingSection ? "none" : "auto" }}
             />
           </div>
         </div>

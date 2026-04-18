@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 
@@ -12,8 +13,14 @@ export default function Footer() {
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="text-2xl font-bold tracking-tight">
-              Qvicko
+            <Link href="/" className="inline-block">
+              <Image
+                src="/logo-sand-mist.png"
+                alt="Qvicko"
+                width={120}
+                height={40}
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="mt-4 text-sm text-white/60">{t("tagline")}</p>
             <div className="mt-6 flex gap-3">

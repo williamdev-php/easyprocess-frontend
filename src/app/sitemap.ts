@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.se";
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.com";
 const locales = ["sv", "en"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

@@ -17,7 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const messages = (await import(`../../../messages/${locale}.json`)).default;
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.se";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.com";
 
   return {
     title: {

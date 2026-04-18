@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
-import LocaleSwitcher from "@/components/locale-switcher";
+
 
 export default function Navbar() {
   const { isAuthenticated, isLoading, logout } = useAuth();
@@ -150,8 +150,6 @@ export default function Navbar() {
                 {t("process")}
               </a>
 
-              <LocaleSwitcher />
-
               {/* Auth buttons */}
               {isLoading ? null : isAuthenticated ? (
                 <>
@@ -185,7 +183,6 @@ export default function Navbar() {
 
             {/* Mobile menu button */}
             <div className="flex items-center gap-2 lg:hidden">
-              <LocaleSwitcher />
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="rounded-xl p-2 text-white transition hover:bg-white/10"

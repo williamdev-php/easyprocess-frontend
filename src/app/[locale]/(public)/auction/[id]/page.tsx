@@ -12,7 +12,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: "auction" });
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.se";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.com";
 
   const title = `${t("title")} #${id}`;
 

@@ -127,6 +127,45 @@ export const UPDATE_SITE_DATA = gql`
   }
 `;
 
+export const SAVE_DRAFT = gql`
+  mutation SaveDraft($input: SaveDraftInput!) {
+    saveDraft(input: $input) {
+      siteId
+      draftData
+      updatedAt
+    }
+  }
+`;
+
+export const LOAD_DRAFT = gql`
+  mutation LoadDraft($siteId: String!) {
+    loadDraft(siteId: $siteId) {
+      siteId
+      draftData
+      updatedAt
+    }
+  }
+`;
+
+export const PUBLISH_SITE_DATA = gql`
+  mutation PublishSiteData($input: UpdateSiteDataInput!) {
+    publishSiteData(input: $input) {
+      success
+      site {
+        id
+        siteData
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const DISCARD_DRAFT = gql`
+  mutation DiscardDraft($siteId: String!) {
+    discardDraft(siteId: $siteId)
+  }
+`;
+
 // ---------------------------------------------------------------------------
 // Domains
 // ---------------------------------------------------------------------------

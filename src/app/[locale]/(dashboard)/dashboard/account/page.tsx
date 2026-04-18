@@ -8,6 +8,14 @@ import { Alert } from "@/components/ui/alert";
 import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 
+function Skeleton({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`animate-shimmer rounded-xl bg-gradient-to-r from-border-light via-white to-border-light bg-[length:200%_100%] ${className}`}
+    />
+  );
+}
+
 const UPDATE_PROFILE = gql`
   mutation UpdateProfile($input: UpdateProfileInput!) {
     updateProfile(input: $input) {
@@ -48,7 +56,7 @@ function SavedCheck() {
 }
 
 export default function AccountPage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const t = useTranslations("userAccount");
   const [updateProfile] = useMutation(UPDATE_PROFILE);
 
@@ -57,6 +65,24 @@ export default function AccountPage() {
   const [orgNumber, setOrgNumber] = useState(user?.orgNumber || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [country, setCountry] = useState(user?.country || "");
+
+  // Sync form state when user data arrives (e.g. after auth refresh on page reload)
+  useEffect(() => {
+    if (user) {
+      setFullName(user.fullName || "");
+      setCompanyName(user.companyName || "");
+      setOrgNumber(user.orgNumber || "");
+      setPhone(user.phone || "");
+      setCountry(user.country || "");
+      prevValues.current = {
+        fullName: user.fullName || "",
+        companyName: user.companyName || "",
+        orgNumber: user.orgNumber || "",
+        phone: user.phone || "",
+        country: user.country || "",
+      };
+    }
+  }, [user]);
 
   // Track which field is currently saving / just saved
   const [savingField, setSavingField] = useState<string | null>(null);
@@ -150,6 +176,29 @@ export default function AccountPage() {
     { key: "phone", label: t("phone"), value: phone, onChange: setPhone },
     { key: "country", label: t("country"), value: country, onChange: setCountry },
   ];
+
+  if (isLoading || !user) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-primary-deep">{t("title")}</h2>
+          <p className="mt-1 text-text-muted">{t("subtitle")}</p>
+        </div>
+
+        <div className="rounded-2xl border border-border-light bg-white p-6">
+          <Skeleton className="mb-5 h-4 w-32" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i}>
+                <Skeleton className="mb-1.5 h-3 w-20" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

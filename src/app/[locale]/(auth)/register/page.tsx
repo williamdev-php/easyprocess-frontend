@@ -1,14 +1,18 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
+import { getAccessToken } from "@/lib/auth-context";
 import { Button, Input, Label, Alert } from "@/components/ui";
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const claimToken = searchParams.get("claim");
   const t = useTranslations("auth");
 
   const [step, setStep] = useState(1);
@@ -67,6 +71,26 @@ export default function RegisterPage() {
         orgNumber: form.orgNumber || undefined,
         phone: form.phone || undefined,
       });
+
+      // If registering with a claim token, claim the site after registration
+      if (claimToken) {
+        try {
+          const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+          const token = getAccessToken();
+          await fetch(`${API_URL}/api/sites/claim/${claimToken}`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+        } catch {
+          // Claim failed but account was created — redirect to dashboard anyway
+        }
+        router.push("/dashboard/pages");
+        return;
+      }
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : t("registerFailed"));

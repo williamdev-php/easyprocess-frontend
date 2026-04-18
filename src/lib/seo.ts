@@ -1,4 +1,4 @@
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.se";
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.com";
 
 export function generateWebsiteJsonLd(locale: string) {
   return {

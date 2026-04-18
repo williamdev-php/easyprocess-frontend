@@ -12,7 +12,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: "product" });
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.se";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.com";
 
   // TODO: Fetch real product data for dynamic metadata
   const title = `${t("title")} #${id}`;

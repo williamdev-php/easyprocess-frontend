@@ -20,6 +20,14 @@ import {
   RENEW_PURCHASED_DOMAIN,
 } from "@/graphql/mutations";
 
+function Skeleton({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`animate-shimmer rounded-xl bg-gradient-to-r from-border-light via-white to-border-light bg-[length:200%_100%] ${className}`}
+    />
+  );
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const stripePromise =
   typeof window !== "undefined" && process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -93,6 +101,19 @@ interface TransferInfo {
   domain: string;
   authCode: string | null;
   instructions: string;
+}
+
+// Unified domain row for the combined list
+interface UnifiedDomain {
+  key: string;
+  domainName: string;
+  siteName: string | null;
+  status: string;
+  type: "subdomain" | "custom" | "purchased";
+  // original data references
+  customDomain?: DomainItem;
+  purchasedDomain?: DomainPurchaseItem;
+  siteId?: string;
 }
 
 // Stripe payment form for domain purchase
@@ -174,13 +195,14 @@ export default function DomainPage() {
   const { user } = useAuth();
   const t = useTranslations("userDomain");
 
-  const [visible, setVisible] = useState(false);
   const [domainInput, setDomainInput] = useState("");
   const [normalizedDomain, setNormalizedDomain] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [selectedSiteForDomain, setSelectedSiteForDomain] = useState("");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [latestVercelInfo, setLatestVercelInfo] = useState<VercelVerification | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [expandedDomainKey, setExpandedDomainKey] = useState<string | null>(null);
 
   // Domain purchase state
   const [buyDomainInput, setBuyDomainInput] = useState("");
@@ -192,9 +214,9 @@ export default function DomainPage() {
   const [selectedSiteForPurchase, setSelectedSiteForPurchase] = useState("");
 
   // Queries
-  const { data: domainsData, refetch: refetchDomains } = useQuery<{ myDomains: DomainItem[] }>(MY_DOMAINS);
-  const { data: sitesData } = useQuery<{ mySites: SiteItem[] }>(MY_SITES);
-  const { data: purchasedData, refetch: refetchPurchased } = useQuery<{ myPurchasedDomains: DomainPurchaseItem[] }>(MY_PURCHASED_DOMAINS);
+  const { data: domainsData, loading: domainsLoading, refetch: refetchDomains } = useQuery<{ myDomains: DomainItem[] }>(MY_DOMAINS);
+  const { data: sitesData, loading: sitesLoading } = useQuery<{ mySites: SiteItem[] }>(MY_SITES);
+  const { data: purchasedData, loading: purchasedLoading, refetch: refetchPurchased } = useQuery<{ myPurchasedDomains: DomainPurchaseItem[] }>(MY_PURCHASED_DOMAINS);
   const [searchDomainQuery] = useLazyQuery<{ searchDomain: DomainSearchResultData }>(SEARCH_DOMAIN);
 
   // Mutations
@@ -209,11 +231,10 @@ export default function DomainPage() {
 
   const domains: DomainItem[] = domainsData?.myDomains || [];
   const sites: SiteItem[] = sitesData?.mySites || [];
+  const purchasedDomains: DomainPurchaseItem[] = purchasedData?.myPurchasedDomains || [];
+  const [transferInfo, setTransferInfo] = useState<TransferInfo | null>(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
+  const loading = domainsLoading || sitesLoading || purchasedLoading;
 
   useEffect(() => {
     const normalized = normalizeDomain(domainInput);
@@ -221,7 +242,6 @@ export default function DomainPage() {
     setIsValid(isValidDomain(normalized));
   }, [domainInput]);
 
-  // Auto-clear message after 4 seconds
   useEffect(() => {
     if (!message) return;
     const timer = setTimeout(() => setMessage(null), 4000);
@@ -232,6 +252,52 @@ export default function DomainPage() {
     setMessage({ type, text });
   };
 
+  // Build unified domain list
+  const unifiedDomains: UnifiedDomain[] = [];
+
+  // 1. Subdomains from sites
+  sites.forEach((site) => {
+    if (site.subdomain) {
+      unifiedDomains.push({
+        key: `sub-${site.id}`,
+        domainName: `${site.subdomain}.qvickosite.com`,
+        siteName: site.businessName || site.subdomain,
+        status: "ACTIVE",
+        type: "subdomain",
+        siteId: site.id,
+      });
+    }
+  });
+
+  // 2. Custom domains
+  domains.forEach((d) => {
+    unifiedDomains.push({
+      key: `custom-${d.id}`,
+      domainName: d.domain,
+      siteName: d.siteBusinessName || null,
+      status: d.status,
+      type: "custom",
+      customDomain: d,
+      siteId: d.siteId || undefined,
+    });
+  });
+
+  // 3. Purchased domains (that are not already in custom domains)
+  const customDomainNames = new Set(domains.map((d) => d.domain));
+  purchasedDomains.forEach((dp) => {
+    if (!customDomainNames.has(dp.domain)) {
+      unifiedDomains.push({
+        key: `purchased-${dp.id}`,
+        domainName: dp.domain,
+        siteName: null,
+        status: dp.status === "PURCHASED" ? "ACTIVE" : dp.status,
+        type: "purchased",
+        purchasedDomain: dp,
+      });
+    }
+  });
+
+  // Handlers
   const handleAddDomain = async () => {
     if (!isValid) return;
     try {
@@ -244,11 +310,10 @@ export default function DomainPage() {
         },
       });
       const vercelInfo = result.data?.addDomain?.vercelVerification;
-      if (vercelInfo) {
-        setLatestVercelInfo(vercelInfo);
-      }
+      if (vercelInfo) setLatestVercelInfo(vercelInfo);
       setDomainInput("");
       setSelectedSiteForDomain("");
+      setShowAddForm(false);
       showMessage("success", t("domainAdded"));
       refetchDomains();
     } catch (err: unknown) {
@@ -270,9 +335,7 @@ export default function DomainPage() {
 
   const handleAssignDomain = async (domainId: string, siteId: string) => {
     try {
-      await assignDomainToSite({
-        variables: { input: { domainId, siteId } },
-      });
+      await assignDomainToSite({ variables: { input: { domainId, siteId } } });
       showMessage("success", t("domainAssigned"));
       refetchDomains();
     } catch (err: unknown) {
@@ -285,9 +348,7 @@ export default function DomainPage() {
     try {
       const result = await verifyDomain({ variables: { domainId } });
       const vercelInfo = result.data?.verifyDomain?.vercelVerification;
-      if (vercelInfo) {
-        setLatestVercelInfo(vercelInfo);
-      }
+      if (vercelInfo) setLatestVercelInfo(vercelInfo);
       if (result.data?.verifyDomain?.status === "ACTIVE") {
         showMessage("success", t("domainVerified"));
       }
@@ -298,16 +359,10 @@ export default function DomainPage() {
     }
   };
 
-  const purchasedDomains: DomainPurchaseItem[] = purchasedData?.myPurchasedDomains || [];
-  const [transferInfo, setTransferInfo] = useState<TransferInfo | null>(null);
-  const [expandedDomainId, setExpandedDomainId] = useState<string | null>(null);
-
   const handlePrepareTransfer = async (domainId: string) => {
     try {
       const result = await prepareDomainTransfer({ variables: { domainId } });
-      if (result.data?.prepareDomainTransfer) {
-        setTransferInfo(result.data.prepareDomainTransfer);
-      }
+      if (result.data?.prepareDomainTransfer) setTransferInfo(result.data.prepareDomainTransfer);
       refetchPurchased();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error";
@@ -351,14 +406,11 @@ export default function DomainPage() {
   const handleSearchDomain = useCallback(async () => {
     const domain = normalizeDomain(buyDomainInput);
     if (!isValidDomain(domain)) return;
-
     setSearching(true);
     setSearchResult(null);
     try {
       const result = await searchDomainQuery({ variables: { domain } });
-      if (result.data?.searchDomain) {
-        setSearchResult(result.data.searchDomain);
-      }
+      if (result.data?.searchDomain) setSearchResult(result.data.searchDomain);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error";
       showMessage("error", msg);
@@ -369,27 +421,18 @@ export default function DomainPage() {
 
   const handleStartPurchase = async () => {
     if (!searchResult?.available) return;
-
     try {
       const { getAccessToken } = await import("@/lib/auth-context");
       const token = getAccessToken();
       const res = await fetch(`${API_URL}/api/billing/domain/purchase`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          domain: searchResult.domain,
-          site_id: selectedSiteForPurchase || null,
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ domain: searchResult.domain, site_id: selectedSiteForPurchase || null }),
       });
-
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.detail || "Purchase failed");
       }
-
       const data = await res.json();
       setPurchaseClientSecret(data.client_secret);
       setPurchaseDomain(data.domain);
@@ -423,27 +466,56 @@ export default function DomainPage() {
       ACTIVE: "bg-emerald-50 text-emerald-700 border-emerald-200",
       PENDING: "bg-amber-50 text-amber-700 border-amber-200",
       FAILED: "bg-red-50 text-red-700 border-red-200",
+      PENDING_PAYMENT: "bg-amber-50 text-amber-700 border-amber-200",
     };
     const labels: Record<string, string> = {
       ACTIVE: t("verified"),
       PENDING: t("pending"),
       FAILED: t("failed"),
+      PENDING_PAYMENT: t("pendingPayment"),
     };
     return (
-      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${styles[status] || styles.PENDING}`}>
+      <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${styles[status] || styles.PENDING}`}>
         {labels[status] || status}
       </span>
     );
   };
 
-  // Find sites with subdomains for preview
-  const sitesWithSubdomain = sites.filter((s) => s.subdomain);
+  const typeBadge = (type: "subdomain" | "custom" | "purchased") => {
+    const styles: Record<string, string> = {
+      subdomain: "bg-primary-deep/5 text-primary-deep border-primary-deep/10",
+      custom: "bg-blue-50 text-blue-700 border-blue-200",
+      purchased: "bg-purple-50 text-purple-700 border-purple-200",
+    };
+    const labels: Record<string, string> = {
+      subdomain: t("typeSubdomain"),
+      custom: t("typeCustom"),
+      purchased: t("typePurchased"),
+    };
+    return (
+      <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${styles[type]}`}>
+        {labels[type]}
+      </span>
+    );
+  };
+
+  // Find pending custom domains with verification info
+  const pendingDomains = domains.filter((d) => d.status !== "ACTIVE");
+  const domainWithVerification = pendingDomains.find((d) => d.vercelVerification?.verification?.length);
+  const verificationSource = domainWithVerification?.vercelVerification || latestVercelInfo;
+  const txtRecords = verificationSource?.verification || [];
 
   return (
-    <div className={`space-y-6 transition-all duration-500 ${visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}>
-      <div>
-        <h2 className="text-2xl font-bold text-primary-deep">{t("title")}</h2>
-        <p className="mt-1 text-text-muted">{t("subtitle")}</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-primary-deep">{t("title")}</h2>
+          <p className="mt-1 text-text-muted">{t("subtitle")}</p>
+        </div>
+        <Button variant="primary" onClick={() => setShowAddForm(!showAddForm)}>
+          {t("addDomain")}
+        </Button>
       </div>
 
       {/* Message toast */}
@@ -457,38 +529,316 @@ export default function DomainPage() {
         </div>
       )}
 
-      {/* Active subdomains (read-only, auto-assigned) */}
-      {sitesWithSubdomain.length > 0 && (
-        <div className="rounded-2xl border border-border-light bg-white p-6 transition-shadow hover:shadow-sm">
-          <h3 className="mb-2 text-sm font-semibold text-primary-deep">{t("subdomainSection")}</h3>
-          <p className="mb-4 text-sm text-text-muted">{t("subdomainDesc")}</p>
-          <div className="space-y-2">
-            {sitesWithSubdomain.map((site) => (
-              <div key={site.id} className="flex items-center gap-3 rounded-xl border border-border-light bg-primary-deep/[0.02] p-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
-                  <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      {/* Add domain form (collapsible) */}
+      {showAddForm && (
+        <div className="rounded-2xl border border-border-light bg-white p-6 animate-slide-down space-y-5">
+          <h3 className="text-sm font-semibold text-primary-deep">{t("addDomain")}</h3>
+          <p className="text-sm text-text-muted">{t("addDomainDesc")}</p>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex-1">
+              <Input
+                value={domainInput}
+                onChange={(e) => setDomainInput(e.target.value)}
+                placeholder={t("domainPlaceholder")}
+                className={domainInput && !isValid ? "border-error" : ""}
+              />
+              {domainInput && !isValid && (
+                <p className="mt-1.5 text-xs text-error">{t("invalidDomain")}</p>
+              )}
+              {domainInput && isValid && (
+                <p className="mt-1.5 text-xs text-emerald-600">{normalizedDomain}</p>
+              )}
+            </div>
+            <select
+              value={selectedSiteForDomain}
+              onChange={(e) => setSelectedSiteForDomain(e.target.value)}
+              className="rounded-xl border border-border-light bg-white px-3 py-2.5 text-sm text-primary-deep focus:border-primary focus:outline-none"
+            >
+              <option value="">{t("selectSite")}</option>
+              {sites.map((site) => (
+                <option key={site.id} value={site.id}>
+                  {site.businessName || site.id.slice(0, 8)}
+                </option>
+              ))}
+            </select>
+            <Button variant="primary" disabled={!isValid || adding} onClick={handleAddDomain}>
+              {adding ? (
+                <span className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  {t("connecting")}
+                </span>
+              ) : (
+                t("addDomain")
+              )}
+            </Button>
+          </div>
+          <p className="text-xs text-text-muted">{t("formatHint")}</p>
+        </div>
+      )}
+
+      {/* Unified domain list */}
+      {loading ? (
+        <div className="rounded-2xl border border-border-light bg-white overflow-hidden">
+          <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 border-b border-border-light bg-primary-deep/[0.02] text-xs font-medium text-text-muted uppercase tracking-wide">
+            <div className="col-span-4">{t("domainName")}</div>
+            <div className="col-span-3">{t("connectedSite")}</div>
+            <div className="col-span-2">{t("type")}</div>
+            <div className="col-span-2">{t("status")}</div>
+            <div className="col-span-1"></div>
+          </div>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 px-6 py-4 border-b border-border-light/50 items-center">
+              <div className="sm:col-span-4 flex items-center gap-2">
+                <Skeleton className="h-4 w-4 shrink-0 rounded-full" />
+                <Skeleton className="h-5 w-40" />
+              </div>
+              <div className="sm:col-span-3"><Skeleton className="h-4 w-28" /></div>
+              <div className="sm:col-span-2"><Skeleton className="h-5 w-16 rounded-full" /></div>
+              <div className="sm:col-span-2"><Skeleton className="h-5 w-16 rounded-full" /></div>
+              <div className="sm:col-span-1" />
+            </div>
+          ))}
+        </div>
+      ) : unifiedDomains.length > 0 ? (
+        <div className="rounded-2xl border border-border-light bg-white overflow-hidden">
+          {/* Table header (desktop) */}
+          <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 border-b border-border-light bg-primary-deep/[0.02] text-xs font-medium text-text-muted uppercase tracking-wide">
+            <div className="col-span-4">{t("domainName")}</div>
+            <div className="col-span-3">{t("connectedSite")}</div>
+            <div className="col-span-2">{t("type")}</div>
+            <div className="col-span-2">{t("status")}</div>
+            <div className="col-span-1"></div>
+          </div>
+
+          {/* Domain rows */}
+          {unifiedDomains.map((ud) => (
+            <div key={ud.key}>
+              <div
+                className={`grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 px-6 py-4 border-b border-border-light/50 items-center transition-colors ${
+                  ud.type !== "subdomain" ? "cursor-pointer hover:bg-primary-deep/[0.01]" : ""
+                }`}
+                onClick={() => {
+                  if (ud.type !== "subdomain") {
+                    setExpandedDomainKey(expandedDomainKey === ud.key ? null : ud.key);
+                  }
+                }}
+              >
+                {/* Domain name */}
+                <div className="sm:col-span-4 flex items-center gap-2">
+                  <svg className="h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                   </svg>
+                  <span className="font-medium text-primary-deep text-sm truncate">{ud.domainName}</span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-primary-deep">
-                    {site.businessName || "Hemsida"}
-                  </p>
-                  <p className="text-xs text-text-muted">
-                    {t("subdomainPreview")}{" "}
-                    <span className="font-mono font-medium text-primary">
-                      {site.subdomain}.qvicko.se
-                    </span>
-                  </p>
+
+                {/* Connected site */}
+                <div className="sm:col-span-3 text-sm text-text-secondary">
+                  {ud.siteName ? (
+                    <span>{ud.siteName}</span>
+                  ) : (
+                    <span className="text-text-muted text-xs">{t("unassigned")}</span>
+                  )}
+                </div>
+
+                {/* Type */}
+                <div className="sm:col-span-2">
+                  {typeBadge(ud.type)}
+                </div>
+
+                {/* Status */}
+                <div className="sm:col-span-2">
+                  {statusBadge(ud.status)}
+                </div>
+
+                {/* Expand arrow */}
+                <div className="sm:col-span-1 flex justify-end">
+                  {ud.type !== "subdomain" && (
+                    <svg className={`h-4 w-4 text-text-muted transition-transform ${expandedDomainKey === ud.key ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
                 </div>
               </div>
-            ))}
+
+              {/* Expanded panel for custom domains */}
+              {expandedDomainKey === ud.key && ud.type === "custom" && ud.customDomain && (
+                <div className="px-6 py-4 bg-primary-deep/[0.01] border-b border-border-light animate-slide-down">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Assign to site */}
+                    {!ud.customDomain.siteId && (
+                      <select
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            handleAssignDomain(ud.customDomain!.id, e.target.value);
+                            e.target.value = "";
+                          }
+                        }}
+                        className="rounded-lg border border-border-light bg-white px-2 py-1.5 text-xs text-primary-deep focus:border-primary focus:outline-none"
+                      >
+                        <option value="">{t("assignToSite")}</option>
+                        {sites.map((site) => (
+                          <option key={site.id} value={site.id}>
+                            {site.businessName || site.id.slice(0, 8)}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {/* Verify */}
+                    {ud.customDomain.status !== "ACTIVE" && (
+                      <Button variant="secondary" size="sm" onClick={() => handleVerifyDomain(ud.customDomain!.id)}>
+                        {t("verify")}
+                      </Button>
+                    )}
+                    {/* Remove */}
+                    <button
+                      onClick={() => handleRemoveDomain(ud.customDomain!.id)}
+                      className="rounded-lg px-2 py-1.5 text-xs text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      {t("removeDomain")}
+                    </button>
+                  </div>
+
+                  {/* Verification records for this domain */}
+                  {ud.customDomain.status !== "ACTIVE" && ud.customDomain.vercelVerification?.verification?.length ? (
+                    <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                      <p className="mb-2 text-xs font-medium text-amber-800">{t("verificationRequired")}</p>
+                      {ud.customDomain.vercelVerification.verification.map((rec, i) => (
+                        <div key={i} className="mt-2 rounded-lg bg-white p-3 font-mono text-xs text-primary-deep">
+                          <div className="flex justify-between"><span className="text-text-muted">Type:</span> <span>{rec.type}</span></div>
+                          <div className="flex justify-between"><span className="text-text-muted">Name:</span> <span>{rec.domain || "_vercel"}</span></div>
+                          <div className="flex justify-between break-all"><span className="text-text-muted">Value:</span> <span className="ml-2 text-right">{rec.value}</span></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+              {/* Expanded panel for purchased domains */}
+              {expandedDomainKey === ud.key && ud.type === "purchased" && ud.purchasedDomain && ud.purchasedDomain.status === "PURCHASED" && (
+                <div className="px-6 py-4 bg-primary-deep/[0.01] border-b border-border-light animate-slide-down space-y-3">
+                  {/* Expiry */}
+                  {ud.purchasedDomain.expiresAt && (
+                    <p className="text-xs text-text-muted">
+                      {t("expiresAt")}: {new Date(ud.purchasedDomain.expiresAt).toLocaleDateString("sv-SE")}
+                    </p>
+                  )}
+                  {/* Auto-renewal */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-primary-deep">{t("autoRenewal")}</p>
+                      <p className="text-xs text-text-muted">{t("autoRenewalDesc")}</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleAutoRenew(ud.purchasedDomain!.id, !ud.purchasedDomain!.autoRenew)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        ud.purchasedDomain.autoRenew ? "bg-primary" : "bg-gray-200"
+                      }`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        ud.purchasedDomain.autoRenew ? "translate-x-6" : "translate-x-1"
+                      }`} />
+                    </button>
+                  </div>
+                  {/* Renew + Transfer */}
+                  <div className="flex items-center gap-2">
+                    <Button variant="secondary" size="sm" onClick={() => handleRenewDomain(ud.purchasedDomain!.id)}>
+                      {t("renewNow")}
+                    </Button>
+                    {ud.purchasedDomain.isLocked ? (
+                      <Button variant="secondary" size="sm" onClick={() => handlePrepareTransfer(ud.purchasedDomain!.id)}>
+                        {t("unlockAndTransfer")}
+                      </Button>
+                    ) : (
+                      <Button variant="secondary" size="sm" onClick={() => handleLockDomain(ud.purchasedDomain!.id)}>
+                        {t("lockDomain")}
+                      </Button>
+                    )}
+                  </div>
+                  {/* Transfer info */}
+                  {transferInfo && transferInfo.domain === ud.purchasedDomain.domain && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 space-y-2 animate-slide-down">
+                      <p className="text-xs text-amber-800">{transferInfo.instructions}</p>
+                      {transferInfo.authCode && (
+                        <div className="rounded-lg bg-white p-2">
+                          <p className="text-xs text-text-muted mb-1">{t("authCode")}:</p>
+                          <code className="block text-sm font-mono font-bold text-primary-deep select-all break-all">
+                            {transferInfo.authCode}
+                          </code>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-border-light bg-white p-12 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-deep/5">
+            <svg className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-primary-deep">{t("noDomains")}</h3>
+          <p className="mt-2 text-sm text-text-muted">{t("noDomainsDesc")}</p>
+        </div>
+      )}
+
+      {/* DNS setup guide (when there are pending domains) */}
+      {!loading && pendingDomains.length > 0 && (
+        <div className="rounded-2xl border border-border-light bg-white p-6 animate-slide-down">
+          <h3 className="mb-4 text-sm font-semibold text-primary-deep">{t("dnsSetupTitle")}</h3>
+
+          {/* Verification records */}
+          {txtRecords.length > 0 && (
+            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <p className="mb-2 text-xs font-medium text-amber-800">{t("verificationRequired")}</p>
+              {txtRecords.map((rec, i) => (
+                <div key={i} className="mt-2 rounded-lg bg-white p-3 font-mono text-xs text-primary-deep">
+                  <div className="flex justify-between"><span className="text-text-muted">Type:</span> <span>{rec.type}</span></div>
+                  <div className="flex justify-between"><span className="text-text-muted">Name:</span> <span>{rec.domain || "_vercel"}</span></div>
+                  <div className="flex justify-between break-all"><span className="text-text-muted">Value:</span> <span className="ml-2 text-right">{rec.value}</span></div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-deep text-xs font-bold text-white">1</div>
+              <p className="text-sm text-text-secondary pt-0.5">{t("dnsStep1")}</p>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-deep text-xs font-bold text-white">2</div>
+              <div>
+                <p className="text-sm text-text-secondary">{t("dnsStep2")}</p>
+                <div className="mt-2 rounded-lg bg-primary-deep/[0.03] p-3 font-mono text-xs text-primary-deep">
+                  <div className="flex justify-between"><span className="text-text-muted">Type:</span> <span>CNAME</span></div>
+                  <div className="flex justify-between"><span className="text-text-muted">Name:</span> <span>@</span></div>
+                  <div className="flex justify-between"><span className="text-text-muted">Value:</span> <span>cname.vercel-dns.com</span></div>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-deep text-xs font-bold text-white">3</div>
+              <p className="text-sm text-text-secondary pt-0.5">{t("dnsStep3")}</p>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
+            <svg className="h-5 w-5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs text-amber-800">{t("dnsWait")}</p>
           </div>
         </div>
       )}
 
       {/* Buy domain section */}
-      <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-white to-primary/[0.03] p-6 transition-shadow hover:shadow-sm">
+      <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-white to-primary/[0.03] p-6">
         <div className="flex items-center gap-2 mb-2">
           <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
@@ -497,24 +847,16 @@ export default function DomainPage() {
         </div>
         <p className="mb-4 text-sm text-text-muted">{t("buyDomainDesc")}</p>
 
-        {/* Search form */}
         <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1">
+          <div className="flex-1">
             <Input
               value={buyDomainInput}
-              onChange={(e) => {
-                setBuyDomainInput(e.target.value);
-                setSearchResult(null);
-              }}
+              onChange={(e) => { setBuyDomainInput(e.target.value); setSearchResult(null); }}
               placeholder={t("buyDomainPlaceholder")}
               onKeyDown={(e) => e.key === "Enter" && handleSearchDomain()}
             />
           </div>
-          <Button
-            variant="primary"
-            disabled={!isValidDomain(normalizeDomain(buyDomainInput)) || searching}
-            onClick={handleSearchDomain}
-          >
+          <Button variant="primary" disabled={!isValidDomain(normalizeDomain(buyDomainInput)) || searching} onClick={handleSearchDomain}>
             {searching ? (
               <span className="flex items-center gap-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -540,9 +882,7 @@ export default function DomainPage() {
                       <span className="font-semibold text-emerald-800">{searchResult.domain}</span>
                       <span className="text-xs text-emerald-600">{t("available")}</span>
                     </div>
-                    <p className="mt-1 text-sm text-emerald-700">
-                      {searchResult.priceSekDisplay} kr/{t("year")}
-                    </p>
+                    <p className="mt-1 text-sm text-emerald-700">{searchResult.priceSekDisplay} kr/{t("year")}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <select
@@ -552,18 +892,13 @@ export default function DomainPage() {
                     >
                       <option value="">{t("selectSiteOptional")}</option>
                       {sites.map((site) => (
-                        <option key={site.id} value={site.id}>
-                          {site.businessName || site.id.slice(0, 8)}
-                        </option>
+                        <option key={site.id} value={site.id}>{site.businessName || site.id.slice(0, 8)}</option>
                       ))}
                     </select>
-                    <Button variant="primary" onClick={handleStartPurchase}>
-                      {t("buyDomain")}
-                    </Button>
+                    <Button variant="primary" onClick={handleStartPurchase}>{t("buyDomain")}</Button>
                   </div>
                 </div>
 
-                {/* Stripe payment form */}
                 {purchaseClientSecret && (
                   <div className="mt-4 border-t border-emerald-200 pt-4">
                     <Elements
@@ -600,326 +935,7 @@ export default function DomainPage() {
             )}
           </div>
         )}
-
-        {/* Purchased domains list */}
-        {purchasedDomains.length > 0 && (
-          <div className="mt-4 space-y-2">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wide">{t("purchasedDomains")}</p>
-            {purchasedDomains.map((dp) => (
-              <div key={dp.id} className="rounded-lg border border-border-light bg-white">
-                <div
-                  className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary-deep/[0.01] transition-colors"
-                  onClick={() => setExpandedDomainId(expandedDomainId === dp.id ? null : dp.id)}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-primary-deep text-sm">{dp.domain}</span>
-                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
-                      dp.status === "PURCHASED"
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        : dp.status === "PENDING_PAYMENT"
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : "bg-red-50 text-red-700 border-red-200"
-                    }`}>
-                      {dp.status === "PURCHASED" ? t("active") : dp.status === "PENDING_PAYMENT" ? t("pendingPayment") : dp.status}
-                    </span>
-                    {dp.isLocked && (
-                      <svg className="h-3.5 w-3.5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {dp.expiresAt && (
-                      <span className="text-xs text-text-muted">
-                        {t("expiresAt")}: {new Date(dp.expiresAt).toLocaleDateString("sv-SE")}
-                      </span>
-                    )}
-                    <svg className={`h-4 w-4 text-text-muted transition-transform ${expandedDomainId === dp.id ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Expanded management panel */}
-                {expandedDomainId === dp.id && dp.status === "PURCHASED" && (
-                  <div className="border-t border-border-light p-3 space-y-3 animate-slide-down">
-                    {/* Auto-renewal toggle */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-primary-deep">{t("autoRenewal")}</p>
-                        <p className="text-xs text-text-muted">{t("autoRenewalDesc")}</p>
-                      </div>
-                      <button
-                        onClick={() => handleToggleAutoRenew(dp.id, !dp.autoRenew)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          dp.autoRenew ? "bg-primary" : "bg-gray-200"
-                        }`}
-                      >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          dp.autoRenew ? "translate-x-6" : "translate-x-1"
-                        }`} />
-                      </button>
-                    </div>
-
-                    {/* Manual renewal */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-primary-deep">{t("manualRenewal")}</p>
-                        <p className="text-xs text-text-muted">{t("manualRenewalDesc")}</p>
-                      </div>
-                      <Button variant="secondary" size="sm" onClick={() => handleRenewDomain(dp.id)}>
-                        {t("renewNow")}
-                      </Button>
-                    </div>
-
-                    {/* Transfer section */}
-                    <div className="border-t border-border-light pt-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-medium text-primary-deep">{t("transferDomain")}</p>
-                          <p className="text-xs text-text-muted">{t("transferDomainDesc")}</p>
-                        </div>
-                        {dp.isLocked ? (
-                          <Button variant="secondary" size="sm" onClick={() => handlePrepareTransfer(dp.id)}>
-                            {t("unlockAndTransfer")}
-                          </Button>
-                        ) : (
-                          <Button variant="secondary" size="sm" onClick={() => handleLockDomain(dp.id)}>
-                            {t("lockDomain")}
-                          </Button>
-                        )}
-                      </div>
-
-                      {/* Transfer info panel */}
-                      {transferInfo && transferInfo.domain === dp.domain && (
-                        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 space-y-2 animate-slide-down">
-                          <p className="text-xs text-amber-800">{transferInfo.instructions}</p>
-                          {transferInfo.authCode && (
-                            <div className="rounded-lg bg-white p-2">
-                              <p className="text-xs text-text-muted mb-1">{t("authCode")}:</p>
-                              <code className="block text-sm font-mono font-bold text-primary-deep select-all break-all">
-                                {transferInfo.authCode}
-                              </code>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
-
-      {/* Custom domains section */}
-      <div className="rounded-2xl border border-border-light bg-white p-6 transition-shadow hover:shadow-sm">
-        <h3 className="mb-2 text-sm font-semibold text-primary-deep">{t("customDomainSection")}</h3>
-        <p className="mb-4 text-sm text-text-muted">{t("customDomainDesc")}</p>
-
-        {/* Add domain form */}
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1">
-            <Input
-              value={domainInput}
-              onChange={(e) => setDomainInput(e.target.value)}
-              placeholder={t("domainPlaceholder")}
-              className={domainInput && !isValid ? "border-error" : ""}
-            />
-            {domainInput && (
-              <div className="mt-2 flex items-center gap-2">
-                {isValid ? (
-                  <>
-                    <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-xs text-emerald-600">{normalizedDomain}</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="h-4 w-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    <span className="text-xs text-error">{t("invalidDomain")}</span>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-          <select
-            value={selectedSiteForDomain}
-            onChange={(e) => setSelectedSiteForDomain(e.target.value)}
-            className="rounded-xl border border-border-light bg-white px-3 py-2 text-sm text-primary-deep focus:border-primary focus:outline-none"
-          >
-            <option value="">{t("selectSite")}</option>
-            {sites.map((site) => (
-              <option key={site.id} value={site.id}>
-                {site.businessName || site.id.slice(0, 8)}
-              </option>
-            ))}
-          </select>
-          <Button
-            variant="primary"
-            disabled={!isValid || adding}
-            onClick={handleAddDomain}
-          >
-            {adding ? (
-              <span className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                {t("connecting")}
-              </span>
-            ) : (
-              t("addDomain")
-            )}
-          </Button>
-        </div>
-        <p className="mt-3 text-xs text-text-muted">{t("formatHint")}</p>
-      </div>
-
-      {/* Domain list */}
-      {domains.length > 0 && (
-        <div className="rounded-2xl border border-border-light bg-white p-6 transition-shadow hover:shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold text-primary-deep">{t("myDomains")}</h3>
-          <div className="space-y-3">
-            {domains.map((domain) => (
-              <div key={domain.id} className="flex flex-col gap-3 rounded-xl border border-border-light p-4 sm:flex-row sm:items-center">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <svg className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                    </svg>
-                    <span className="font-medium text-primary-deep">{domain.domain}</span>
-                    {statusBadge(domain.status)}
-                  </div>
-                  {domain.siteId && domain.siteSubdomain && (
-                    <p className="mt-1 text-xs text-text-muted">
-                      {t("site")}: {domain.siteBusinessName || domain.siteSubdomain}
-                    </p>
-                  )}
-                  {!domain.siteId && (
-                    <p className="mt-1 text-xs text-text-muted">{t("unassigned")}</p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {/* Assign to site dropdown */}
-                  {!domain.siteId && (
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          handleAssignDomain(domain.id, e.target.value);
-                          e.target.value = "";
-                        }
-                      }}
-                      className="rounded-lg border border-border-light bg-white px-2 py-1.5 text-xs text-primary-deep focus:border-primary focus:outline-none"
-                    >
-                      <option value="">{t("assignToSite")}</option>
-                      {sites.map((site) => (
-                        <option key={site.id} value={site.id}>
-                          {site.businessName || site.id.slice(0, 8)}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  {/* Verify button */}
-                  {domain.status !== "ACTIVE" && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleVerifyDomain(domain.id)}
-                    >
-                      {t("verify")}
-                    </Button>
-                  )}
-
-                  {/* Remove button */}
-                  <button
-                    onClick={() => handleRemoveDomain(domain.id)}
-                    className="rounded-lg px-2 py-1.5 text-xs text-red-500 hover:bg-red-50 transition-colors"
-                  >
-                    {t("removeDomain")}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* DNS setup instructions (visible when there are pending/failed domains) */}
-      {domains.some((d) => d.status !== "ACTIVE") && (
-        <div className="rounded-2xl border border-border-light bg-white p-6 animate-slide-down">
-          <h3 className="mb-4 text-sm font-semibold text-primary-deep">{t("dnsSetup")}</h3>
-
-          {/* Per-domain Vercel verification records (TXT) */}
-          {(() => {
-            const pendingDomains = domains.filter((d) => d.status !== "ACTIVE");
-            const domainWithVerification = pendingDomains.find(
-              (d) => d.vercelVerification?.verification?.length
-            );
-            const verificationSource = domainWithVerification?.vercelVerification || latestVercelInfo;
-            const txtRecords = verificationSource?.verification || [];
-
-            return txtRecords.length > 0 ? (
-              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                <p className="mb-2 text-sm font-medium text-amber-800">{t("verificationRequired")}</p>
-                {txtRecords.map((rec, i) => (
-                  <div key={i} className="mt-2 rounded-lg bg-white p-3 font-mono text-xs text-primary-deep">
-                    <div className="flex justify-between">
-                      <span className="text-text-muted">Type:</span> <span>{rec.type}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-text-muted">Name:</span> <span>{rec.domain || "_vercel"}</span>
-                    </div>
-                    <div className="flex justify-between break-all">
-                      <span className="text-text-muted">Value:</span> <span className="ml-2 text-right">{rec.value}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : null;
-          })()}
-
-          <div className="space-y-4">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-deep text-xs font-bold text-white">
-                  {step}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-primary-deep">
-                    {t(`step${step}Title`)}
-                  </p>
-                  <p className="mt-0.5 text-xs text-text-muted leading-relaxed">
-                    {t(`step${step}Desc`)}
-                  </p>
-                  {step === 2 && (
-                    <div className="mt-2 rounded-lg bg-primary-deep/[0.03] p-3 font-mono text-xs text-primary-deep">
-                      <div className="flex justify-between">
-                        <span className="text-text-muted">Type:</span> <span>CNAME</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-text-muted">Name:</span> <span>@</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-text-muted">Value:</span> <span>cname.vercel-dns.com</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-5 flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
-            <svg className="h-5 w-5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-xs text-amber-800">{t("dnsWait")}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

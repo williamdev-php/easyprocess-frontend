@@ -21,17 +21,7 @@ export default function DashboardLayout({
     }
   }, [isLoading, isAuthenticated, router]);
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-deep border-t-transparent" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
+  if (!isLoading && !isAuthenticated) {
     return null;
   }
 
@@ -42,7 +32,7 @@ export default function DashboardLayout({
         <div className="flex gap-8">
           <DashboardSidebar />
           <main className="min-w-0 flex-1 pb-20 lg:pb-0">
-            <SubscriptionAlert />
+            {!isLoading && <SubscriptionAlert />}
             {children}
           </main>
         </div>

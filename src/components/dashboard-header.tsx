@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
-import LocaleSwitcher from "@/components/locale-switcher";
 
 export default function DashboardHeader() {
   const { user, logout } = useAuth();
@@ -36,20 +36,21 @@ export default function DashboardHeader() {
         {/* Logo */}
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary-deep"
+          className="flex items-center"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-deep">
-            <span className="text-sm font-bold text-white">Q</span>
-          </div>
-          <span className="hidden sm:inline">
-            Qvicko
-          </span>
+          <Image
+            src="/logo-petrol-blue.png"
+            alt="Qvicko"
+            width={120}
+            height={40}
+            className="h-10 w-auto sm:h-12"
+            loading="eager"
+            priority
+          />
         </Link>
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-          <LocaleSwitcher />
-
           {/* User dropdown */}
           <div className="relative" ref={menuRef}>
             <button
