@@ -81,9 +81,11 @@ export const GET_LEAD = gql`
         toEmail
         subject
         status
+        sentVia
         sentAt
         openedAt
         clickedAt
+        repliedAt
         createdAt
       }
       inboundEmails {
@@ -120,6 +122,43 @@ export const GET_DASHBOARD_STATS = gql`
       totalEmailsSent
       totalViews
       totalAiCostUsd
+      outreachSent30d
+      outreachOpenRate
+      outreachReplyRate
+      outreachConversions30d
+    }
+  }
+`;
+
+export const GET_OUTREACH_STATS = gql`
+  query GetOutreachStats {
+    outreachStats {
+      emailsSent30d
+      openRate
+      replyRate
+      clickRate
+      bounceRate
+      conversions30d
+      dailySendCount
+      dailySendLimit
+      warmupStatus
+      warmupDay
+      warmupDaysTarget
+    }
+  }
+`;
+
+export const GET_SMARTLEAD_MESSAGES = gql`
+  query GetSmartleadMessages($leadId: String!) {
+    smartleadMessages(leadId: $leadId) {
+      id
+      type
+      subject
+      body
+      fromEmail
+      toEmail
+      timestamp
+      status
     }
   }
 `;

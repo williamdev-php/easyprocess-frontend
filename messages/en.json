@@ -37,149 +37,83 @@
     "clients": "Happy clients",
     "technologies": "Technologies"
   },
-  "services": {
-    "title": "My services",
-    "subtitle": "From idea to launch — I help you with the entire chain.",
-    "automation": {
-      "title": "AI Automations",
-      "description": "I build intelligent automations that streamline your workflows. From data collection and reporting to customer communication — let AI do the heavy lifting.",
-      "features": [
-        "Automated workflows",
-        "AI-powered data analysis",
-        "System integrations",
-        "Chatbots & customer service AI"
-      ]
+  "builder": {
+    "badge": "Website Builder",
+    "title": "Your website, live in minutes",
+    "subtitle": "No coding, no hassle. Describe your business and our AI builds a complete, professional website — ready to publish instantly.",
+    "speed": {
+      "title": "Lightning fast launch",
+      "description": "Go from idea to live website in under 5 minutes. AI handles the design, copywriting, and structure so you can focus on running your business."
     },
-    "ecommerce": {
-      "title": "E-commerce Solutions",
-      "description": "Custom e-commerce solutions built to convert. Headless architecture, fast load times and seamless payment flows.",
-      "features": [
-        "Headless e-commerce",
-        "Payment integrations",
-        "Inventory management",
-        "Conversion optimization"
-      ]
+    "design": {
+      "title": "Stunning design, every time",
+      "description": "Every site is custom-built with modern design principles. Mobile-first, visually polished, and tailored to your brand identity."
     },
-    "webdev": {
-      "title": "Web Design & Development",
-      "description": "Modern websites built with cutting-edge technology. Responsive, fast and SEO-optimized — designed to impress and perform.",
-      "features": [
-        "Responsive design",
-        "SEO optimization",
-        "Fast load times",
-        "CMS integration"
-      ]
+    "seo": {
+      "title": "Built-in SEO power",
+      "description": "Every page is optimized for search engines from day one. Meta tags, fast load times, and structured content that Google loves."
     },
-    "ai": {
-      "title": "AI Consulting & Digital Services",
-      "description": "Strategic consulting for businesses looking to leverage AI. I help you identify opportunities, choose the right tools and implement solutions.",
-      "features": [
-        "AI strategy",
-        "Tool selection & implementation",
-        "Training & workshops",
-        "Prototypes & proof-of-concept"
-      ]
+    "cta": "Build your website now"
+  },
+  "showcase": {
+    "badge": "See it in action",
+    "title": "From blank page to business asset",
+    "description": "Watch how our AI transforms a simple description into a fully designed, responsive website. Upload your brand, add a few details — and we handle the rest.",
+    "imagePlaceholder": "Before & after website mockup",
+    "videoPlaceholder": "AI website creation demo",
+    "videoHint": "Tip: A short explainer or screen recording showing the AI building a real site in real-time works great here."
+  },
+  "seoBoost": {
+    "badge": "SEO Proxy Pages",
+    "title": "Supercharge your traffic with SEO landing pages",
+    "description": "Create targeted landing pages that rank on Google and drive qualified visitors to your business. Each page is optimized for specific keywords and local search — giving your business an unfair advantage online.",
+    "point1": {
+      "title": "Keyword-targeted pages",
+      "desc": "AI generates landing pages focused on the search terms your customers actually use."
+    },
+    "point2": {
+      "title": "Local SEO domination",
+      "desc": "Rank in your city, your neighborhood, your niche — with pages built for local intent."
+    },
+    "point3": {
+      "title": "Automatic optimization",
+      "desc": "Pages are continuously improved based on performance data and search trends."
+    },
+    "point4": {
+      "title": "Measurable results",
+      "desc": "Track traffic, rankings, and conversions directly from your dashboard."
+    },
+    "metrics": {
+      "traffic": "Organic traffic",
+      "trafficValue": "+340%",
+      "ranking": "Keyword rankings",
+      "rankingValue": "Top 10",
+      "conversions": "Conversions",
+      "conversionsValue": "+91%"
     }
   },
-  "about": {
-    "title": "About me",
-    "subtitle": "The person behind Qvicko",
-    "description": "My name is William Soderstrom and I run Qvicko — a digital consultancy focused on helping businesses grow with modern technology and AI.",
-    "paragraph2": "With experience in web development, e-commerce, automations and AI, I help businesses — from startups to established companies — digitalize and streamline their operations.",
-    "paragraph3": "When you work with me, you get direct contact with the person actually building your solution. No bureaucracy, no middlemen — just results.",
-    "values": {
-      "personal": "Personal contact",
-      "personalDesc": "You always talk directly with me",
-      "quality": "Quality first",
-      "qualityDesc": "I deliver nothing I'm not proud of myself",
-      "results": "Results-oriented",
-      "resultsDesc": "Everything I build should add value to your business"
-    }
-  },
-  "process": {
-    "title": "How I work",
-    "subtitle": "From first contact to launch — a clear and transparent process.",
+  "simpleSteps": {
+    "title": "Three steps. That's it.",
+    "subtitle": "No meetings, no proposals, no waiting around. Just a website that works.",
     "step1": {
-      "title": "Consultation",
-      "description": "We start with a free call where I listen to your needs, goals and challenges. Together we identify opportunities."
+      "title": "Describe your business",
+      "description": "Tell us your company name, industry, and what makes you unique. Or paste the URL of your existing site to transform it."
     },
     "step2": {
-      "title": "Strategy & Planning",
-      "description": "I create a clear plan with timeline, tech choices and budget. You know exactly what you get and when."
+      "title": "AI builds your site",
+      "description": "Our AI creates a complete website with design, copy, images, and SEO — all tailored to your brand in seconds."
     },
     "step3": {
-      "title": "Development & Design",
-      "description": "I build the solution with continuous dialogue. You get regular updates and can give feedback throughout the process."
-    },
-    "step4": {
-      "title": "Launch & Support",
-      "description": "When everything is ready, we launch together. I offer support and maintenance so your solution keeps performing."
+      "title": "Publish and grow",
+      "description": "Go live instantly with a free subdomain, or connect your own domain. Start getting traffic and customers right away."
     }
   },
-  "portfolio": {
-    "title": "Selected projects",
-    "subtitle": "Here are some examples of what I've built.",
-    "project1": {
-      "title": "E-commerce Platform",
-      "category": "E-commerce",
-      "description": "A custom headless e-commerce solution with high conversion rates and lightning-fast load times."
-    },
-    "project2": {
-      "title": "AI Automation for Logistics",
-      "category": "Automation",
-      "description": "Automated order flow and inventory management with AI-driven forecasting that saved 20+ hours per week."
-    },
-    "project3": {
-      "title": "Business Website & SEO",
-      "category": "Web Design",
-      "description": "Modern website with SEO strategy that increased organic traffic by over 300% in 6 months."
-    },
-    "viewProject": "View project"
-  },
-  "whyWebizo": {
-    "title": "Why Qvicko?",
-    "subtitle": "What sets me apart from a large agency.",
-    "personal": {
-      "title": "Personal service",
-      "description": "You always talk directly with the developer. No salespeople, no project managers — just me and your solution."
-    },
-    "modern": {
-      "title": "Modern technology",
-      "description": "I use the latest tools and frameworks. Your solution is built with the future in mind."
-    },
-    "results": {
-      "title": "Results-focused",
-      "description": "I measure success in business value — not lines of code. Every solution is designed to give you concrete results."
-    },
-    "transparent": {
-      "title": "Full transparency",
-      "description": "Clear communication, fixed prices and no surprises. You always know where we stand."
-    }
-  },
-  "testimonials": {
-    "title": "What my clients say",
-    "subtitle": "Businesses that have chosen to work with me.",
-    "testimonial1": {
-      "quote": "William delivered an e-commerce solution that exceeded our expectations. Professional, fast and always available.",
-      "name": "Anna Lindqvist",
-      "title": "CEO, Nordisk Handel AB"
-    },
-    "testimonial2": {
-      "quote": "The automations Qvicko built save us over 20 hours a week. Best investment we've made.",
-      "name": "Erik Johansson",
-      "title": "Founder, TechStart"
-    },
-    "testimonial3": {
-      "quote": "Working with William is a breath of fresh air. Direct communication, high quality and solutions that actually work.",
-      "name": "Sara Bergstrom",
-      "title": "Marketing Manager, CreativeFlow"
-    }
-  },
-  "cta": {
-    "title": "Ready to take the next step?",
-    "description": "Create an account and get access to my digital services. Automations, e-commerce and web solutions — all in one place.",
-    "button": "Create account now",
-    "note": "Free to register — get started in minutes"
+  "ctaNew": {
+    "title": "Your competitors already have a website. Do you?",
+    "description": "Stop overthinking it. Get a professional, SEO-optimized website in minutes — not months. No technical skills needed.",
+    "button": "Create your website free",
+    "loginButton": "Log in to dashboard",
+    "note": "Free to start — no credit card required"
   },
   "footer": {
     "tagline": "Digital solutions that drive growth.",
@@ -558,7 +492,8 @@
     "saving": "Saving...",
     "saved": "Your information has been saved.",
     "saveFailed": "Could not save. Please try again.",
-    "autoSaveHint": "Changes are saved automatically."
+    "autoSaveHint": "Changes are saved automatically.",
+    "avatar": "Profile picture"
   },
   "subscriptionAlert": {
     "paymentFailed": "Your last payment failed. Update your card to avoid interruption.",
@@ -710,6 +645,82 @@
     "businessPhone": "Phone",
     "businessOrgNumber": "Organization number",
     "businessAddress": "Address"
+  },
+  "verifyEmail": {
+    "verifying": "Verifying your email...",
+    "successTitle": "Email verified!",
+    "successMessage": "Your email address has been verified. You can now use all features.",
+    "errorTitle": "Verification failed",
+    "failed": "The link is invalid or has expired.",
+    "noToken": "No verification link found.",
+    "goToDashboard": "Go to dashboard",
+    "alertTitle": "Verify your email",
+    "alertMessage": "We've sent a verification email to your email address. Click the link in the email to verify.",
+    "resendButton": "Resend",
+    "sending": "Sending...",
+    "resent": "Sent!",
+    "resendFailed": "Could not send verification email. Please try again."
+  },
+  "createSite": {
+    "pageTitle": "Create your website",
+    "pageSubtitle": "Get a professional website in minutes — completely free to start.",
+    "stepEmail": "Account",
+    "stepChoose": "Choose type",
+    "stepDetails": "Details",
+    "stepGenerate": "Create",
+    "emailLabel": "Your email address",
+    "emailPlaceholder": "your@email.com",
+    "emailContinue": "Continue",
+    "emailNote": "We use your email to link the website to your account.",
+    "loggedInAs": "Logged in as",
+    "changeAccount": "Switch account",
+    "chooseTitle": "How do you want to create your website?",
+    "optionNew": "Create new website",
+    "optionNewDesc": "Start from scratch. Describe your business and AI will create a complete website for you.",
+    "optionTransform": "Transform existing site",
+    "optionTransformDesc": "Enter the URL of your current website and we'll build a new, modern version based on your content.",
+    "newSiteTitle": "Describe your website",
+    "businessName": "Website name",
+    "businessNamePlaceholder": "E.g. Johnson's Construction LLC",
+    "industry": "Industry",
+    "industryPlaceholder": "E.g. Construction, Restaurant, Salon...",
+    "context": "Describe your business",
+    "contextPlaceholder": "Describe what your business does, what services you offer, what makes you unique. The more you write, the better the website will be.",
+    "contextHint": "AI will expand and improve your description.",
+    "colorsTitle": "Color palette",
+    "colorsSubtitle": "Choose colors for your website or let us pick for you.",
+    "colorPrimary": "Primary",
+    "colorSecondary": "Secondary",
+    "colorAccent": "Accent",
+    "colorBackground": "Background",
+    "colorText": "Text",
+    "randomizeColors": "Randomize colors",
+    "logoTitle": "Logo",
+    "logoSubtitle": "Upload your logo or continue without one.",
+    "uploadLogo": "Upload logo",
+    "skipLogo": "Continue without logo",
+    "removeLogo": "Remove",
+    "transformTitle": "Enter your current website",
+    "urlLabel": "Web address",
+    "urlPlaceholder": "https://www.mybusiness.com",
+    "startTransform": "Transform",
+    "scrapingTitle": "Analyzing your website...",
+    "scrapingSubtitle": "We're reading your content, colors, and images.",
+    "generatingTitle": "Creating your new website...",
+    "generatingSubtitle": "AI is designing a modern website based on your preferences.",
+    "generateButton": "Create website",
+    "generating": "Creating...",
+    "successTitle": "Your website is ready!",
+    "successSubtitle": "Log in or create an account to view and manage your new website.",
+    "viewSite": "View website",
+    "goToDashboard": "Go to dashboard",
+    "loginToView": "Log in to view your website",
+    "createAccountToView": "Create account to view your website",
+    "failedTitle": "Something went wrong",
+    "failedSubtitle": "We couldn't create your website. Please try again.",
+    "tryAgain": "Try again",
+    "back": "Back",
+    "next": "Next"
   },
   "media": {
     "library": "Media Library",

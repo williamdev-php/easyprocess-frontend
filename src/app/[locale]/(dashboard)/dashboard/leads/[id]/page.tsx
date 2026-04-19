@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { Link } from "@/i18n/routing";
-import { GET_LEAD } from "@/graphql/queries";
+import { GET_LEAD, GET_SMARTLEAD_MESSAGES } from "@/graphql/queries";
 import {
   SCRAPE_LEAD,
   SEND_OUTREACH_EMAIL,
@@ -24,6 +24,7 @@ const STATUS_COLORS: Record<string, string> = {
   GENERATED: "bg-emerald-100 text-emerald-700",
   EMAIL_SENT: "bg-cyan-100 text-cyan-700",
   OPENED: "bg-teal-100 text-teal-700",
+  REPLIED: "bg-amber-100 text-amber-700",
   CONVERTED: "bg-green-100 text-green-800",
   REJECTED: "bg-gray-100 text-gray-600",
   FAILED: "bg-red-100 text-red-700",
@@ -62,6 +63,12 @@ function ConversationPanel({ lead }: { lead: any }) {
   const t = useTranslations("leads");
   const [activeTab, setActiveTab] = useState<"all" | "inbound" | "outbound">("all");
 
+  // Fetch Smartlead message history
+  const { data: slData } = useQuery<any>(GET_SMARTLEAD_MESSAGES, {
+    variables: { leadId: lead.id },
+    skip: !lead.id,
+  });
+
   // Merge outreach and inbound emails into a timeline
   const outreachMessages = (lead.outreachEmails || []).map((e: any) => ({
     id: e.id,
@@ -72,6 +79,7 @@ function ConversationPanel({ lead }: { lead: any }) {
     status: e.status,
     date: e.sentAt || e.createdAt,
     body: null,
+    sentVia: e.sentVia || "resend",
   }));
 
   const inboundMessages = (lead.inboundEmails || []).map((e: any) => ({
@@ -87,8 +95,30 @@ function ConversationPanel({ lead }: { lead: any }) {
     category: e.category,
   }));
 
-  let messages = [...outreachMessages, ...inboundMessages];
-  if (activeTab === "inbound") messages = inboundMessages;
+  // Add Smartlead message history (replies detected by Smartlead)
+  const smartleadMessages = (slData?.smartleadMessages || [])
+    .filter((m: any) => m.type === "reply")
+    .map((m: any) => ({
+      id: `sl-${m.id}`,
+      type: "inbound" as const,
+      from: m.fromEmail,
+      to: m.toEmail,
+      subject: m.subject,
+      status: "lead_reply",
+      date: m.timestamp,
+      body: m.body,
+      category: "lead_reply",
+      viaSmartlead: true,
+    }));
+
+  // Deduplicate — avoid showing same reply from both inbound and Smartlead
+  const inboundEmails = new Set((lead.inboundEmails || []).map((e: any) => e.fromEmail?.toLowerCase()));
+  const uniqueSmartleadMessages = smartleadMessages.filter(
+    (m: any) => !inboundEmails.has(m.from?.toLowerCase())
+  );
+
+  let messages = [...outreachMessages, ...inboundMessages, ...uniqueSmartleadMessages];
+  if (activeTab === "inbound") messages = [...inboundMessages, ...uniqueSmartleadMessages];
   if (activeTab === "outbound") messages = outreachMessages;
   messages.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -131,6 +161,16 @@ function ConversationPanel({ lead }: { lead: any }) {
                   {msg.from}
                 </span>
                 <div className="flex items-center gap-1.5">
+                  {msg.type === "outbound" && msg.sentVia === "smartlead" && (
+                    <span className="rounded-full px-2 py-0.5 text-[10px] font-medium bg-violet-100 text-violet-700">
+                      Smartlead
+                    </span>
+                  )}
+                  {msg.viaSmartlead && (
+                    <span className="rounded-full px-2 py-0.5 text-[10px] font-medium bg-violet-100 text-violet-700">
+                      Smartlead
+                    </span>
+                  )}
                   {msg.type === "inbound" && msg.category && (
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${CATEGORY_COLORS[msg.category] || "bg-gray-100"}`}>
                       {msg.category}

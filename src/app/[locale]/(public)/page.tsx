@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import VideoHero from "@/components/video-hero";
 import StatsCounter from "@/components/stats-counter";
+import LazySection from "@/components/lazy-section";
 
 export default async function HomePage({
   params,
@@ -11,81 +12,17 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const hero = await getTranslations("hero");
   const stats = await getTranslations("stats");
-  const services = await getTranslations("services");
-  const about = await getTranslations("about");
-  const process = await getTranslations("process");
-  const portfolio = await getTranslations("portfolio");
-  const why = await getTranslations("whyWebizo");
-  const testimonials = await getTranslations("testimonials");
-  const cta = await getTranslations("cta");
+  const builder = await getTranslations("builder");
+  const seo = await getTranslations("seoBoost");
+  const showcase = await getTranslations("showcase");
+  const steps = await getTranslations("simpleSteps");
+  const cta = await getTranslations("ctaNew");
 
   return (
     <main>
-      {/* ─── VIDEO HERO (new) ─── */}
+      {/* ─── VIDEO HERO ─── */}
       <VideoHero />
-
-      {/* ─── ORIGINAL HERO (hidden — kept for easy rollback) ─── */}
-      {false && (
-      <section className="relative min-h-screen bg-primary-deep text-white overflow-hidden">
-        {/* Decorative graphic placeholders */}
-        <div className="absolute top-20 right-0 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute bottom-20 left-0 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
-        <div className="absolute top-1/2 right-1/4 h-64 w-64 rounded-full bg-primary-dark/30 blur-2xl" />
-
-        {/* Graphic element placeholder */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block">
-          {/* GRAPHIC: hero-illustration.png — 600×600px abstract illustration */}
-          <div className="h-[500px] w-[500px] rounded-full border border-white/5 bg-white/5 flex items-center justify-center text-white/20 text-sm">
-            hero-illustration.png
-          </div>
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-4 pt-32 pb-20 sm:px-6 lg:px-8 lg:pt-44 lg:pb-32">
-          <div className="max-w-3xl">
-            <div className="mb-6 inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-sm text-accent">
-              <span className="mr-2 h-2 w-2 rounded-full bg-accent" />
-              William Söderström — Qvicko
-            </div>
-
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
-              {hero("title")}
-              <span className="text-accent">{hero("highlight")}</span>
-            </h1>
-
-            <p className="mt-6 max-w-2xl text-lg text-white/70 sm:text-xl">
-              {hero("description")}
-            </p>
-
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center rounded-xl bg-accent px-8 py-4 text-lg font-semibold text-primary-deep shadow-lg transition hover:bg-accent/90 hover:shadow-xl"
-              >
-                {hero("cta")}
-                <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
-              <a
-                href="#services"
-                className="inline-flex items-center justify-center rounded-xl border-2 border-white/20 px-8 py-4 text-lg font-semibold text-white transition hover:border-white/40 hover:bg-white/5"
-              >
-                {hero("ctaSecondary")}
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 80" fill="none" className="w-full">
-            <path d="M0 80V20C240 60 480 0 720 20C960 40 1200 80 1440 40V80H0Z" fill="var(--background)" />
-          </svg>
-        </div>
-      </section>
-      )}
 
       {/* ─── STATS ─── */}
       <StatsCounter
@@ -97,291 +34,242 @@ export default async function HomePage({
         ]}
       />
 
-      {/* ─── SERVICES ─── */}
-      <section id="services" className="bg-background py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-primary-deep sm:text-4xl">
-              {services("title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
-              {services("subtitle")}
-            </p>
-          </div>
+      {/* ─── WEBSITE BUILDER ─── */}
+      <LazySection>
+        <section id="services" className="bg-background py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <span className="inline-flex items-center rounded-full bg-accent/20 px-4 py-1.5 text-sm font-semibold text-primary-deep">
+                {builder("badge")}
+              </span>
+              <h2 className="mt-4 text-3xl font-extrabold text-primary-deep sm:text-4xl lg:text-5xl">
+                {builder("title")}
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
+                {builder("subtitle")}
+              </p>
+            </div>
 
-          <div className="mt-16 grid gap-8 sm:grid-cols-2">
-            {(["automation", "ecommerce", "webdev", "ai"] as const).map(
-              (key, i) => {
-                const icons = ["⚡", "🛒", "🌐", "🤖"];
-                const features: string[] = [
-                  services(`${key}.features.0`),
-                  services(`${key}.features.1`),
-                  services(`${key}.features.2`),
-                  services(`${key}.features.3`),
+            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {(["speed", "design", "seo"] as const).map((key, i) => {
+                const icons = [
+                  <svg key="s" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>,
+                  <svg key="d" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>,
+                  <svg key="o" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>,
                 ];
                 return (
                   <div
                     key={key}
                     className="group rounded-2xl border border-border-theme bg-surface p-8 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                   >
-                    {/* GRAPHIC: service-{key}-icon.png — 64×64px icon */}
-                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-deep/10 text-2xl">
+                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-deep/10 text-primary-deep transition-colors group-hover:bg-primary-deep group-hover:text-white">
                       {icons[i]}
                     </div>
                     <h3 className="text-xl font-bold text-primary-deep">
-                      {services(`${key}.title`)}
+                      {builder(`${key}.title`)}
                     </h3>
                     <p className="mt-3 text-text-muted">
-                      {services(`${key}.description`)}
+                      {builder(`${key}.description`)}
                     </p>
-                    <ul className="mt-5 space-y-2">
-                      {features.map((f) => (
-                        <li key={f} className="flex items-center gap-2 text-sm text-text-secondary">
-                          <svg className="h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 );
-              }
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── ABOUT ─── */}
-      <section id="about" className="bg-primary-deep text-white py-20 lg:py-28 overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            {/* Photo placeholder */}
-            <div className="relative mx-auto max-w-md lg:max-w-none">
-              {/* GRAPHIC: william-portrait.png — 500×600px professional photo */}
-              <div className="aspect-[4/5] w-full rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center text-white/20 text-sm">
-                william-portrait.png
-              </div>
-              {/* Decorative accent corner */}
-              <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-2xl border-2 border-accent/30" />
-              <div className="absolute -top-4 -left-4 h-16 w-16 rounded-xl bg-accent/20" />
+              })}
             </div>
 
-            <div>
-              <span className="text-sm font-semibold uppercase tracking-wider text-accent">
-                {about("subtitle")}
-              </span>
-              <h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">
-                {about("title")}
+            <div className="mt-12 text-center">
+              <Link
+                href="/create-site"
+                className="inline-flex items-center rounded-xl bg-primary-deep px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-primary-dark hover:shadow-xl"
+              >
+                {builder("cta")}
+                <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </LazySection>
+
+      {/* ─── SPLIT-SCREEN: SHOWCASE + AI VIDEO ─── */}
+      <LazySection>
+        <section className="bg-primary-deep text-white py-20 lg:py-28 overflow-hidden">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+              {/* Left: visual mockup */}
+              <div className="relative">
+                <div className="aspect-[4/3] w-full rounded-2xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center">
+                  {/* Placeholder for screenshot/mockup image */}
+                  <div className="text-center p-8">
+                    <svg className="mx-auto h-16 w-16 text-white/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                    <p className="text-white/30 text-sm">{showcase("imagePlaceholder")}</p>
+                  </div>
+                </div>
+                <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-2xl border-2 border-accent/30" />
+              </div>
+
+              {/* Right: AI video + description */}
+              <div>
+                <span className="text-sm font-semibold uppercase tracking-wider text-accent">
+                  {showcase("badge")}
+                </span>
+                <h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">
+                  {showcase("title")}
+                </h2>
+                <p className="mt-6 text-lg text-white/70">
+                  {showcase("description")}
+                </p>
+
+                {/* AI Video placeholder */}
+                <div className="mt-8 aspect-video w-full rounded-2xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center relative group cursor-pointer">
+                  <div className="text-center">
+                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-accent/20 transition group-hover:bg-accent/40">
+                      <svg className="h-8 w-8 text-accent" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <p className="text-white/40 text-sm">{showcase("videoPlaceholder")}</p>
+                  </div>
+                </div>
+                <p className="mt-3 text-xs text-white/40">{showcase("videoHint")}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </LazySection>
+
+      {/* ─── SEO BOOST ─── */}
+      <LazySection>
+        <section className="bg-background py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+              <div>
+                <span className="inline-flex items-center rounded-full bg-primary-deep/10 px-4 py-1.5 text-sm font-semibold text-primary-deep">
+                  {seo("badge")}
+                </span>
+                <h2 className="mt-4 text-3xl font-extrabold text-primary-deep sm:text-4xl">
+                  {seo("title")}
+                </h2>
+                <p className="mt-6 text-lg text-text-muted">
+                  {seo("description")}
+                </p>
+
+                <ul className="mt-8 space-y-4">
+                  {(["point1", "point2", "point3", "point4"] as const).map((key) => (
+                    <li key={key} className="flex items-start gap-3">
+                      <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-deep/10">
+                        <svg className="h-3.5 w-3.5 text-primary-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div>
+                        <span className="font-semibold text-primary-deep">{seo(`${key}.title`)}</span>
+                        <p className="text-sm text-text-muted">{seo(`${key}.desc`)}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Visual: SEO metrics card */}
+              <div className="relative mx-auto max-w-md lg:max-w-none">
+                <div className="rounded-2xl border border-border-theme bg-surface p-8 shadow-lg">
+                  <div className="space-y-6">
+                    {(["traffic", "ranking", "conversions"] as const).map((metric) => (
+                      <div key={metric}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-primary-deep">{seo(`metrics.${metric}`)}</span>
+                          <span className="text-sm font-bold text-primary-deep">{seo(`metrics.${metric}Value`)}</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-border-theme">
+                          <div
+                            className="h-2 rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-1000"
+                            style={{ width: metric === "traffic" ? "85%" : metric === "ranking" ? "72%" : "91%" }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="absolute -top-4 -left-4 h-16 w-16 rounded-xl bg-accent/20" />
+                <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-2xl border-2 border-primary/20" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </LazySection>
+
+      {/* ─── SIMPLE STEPS ─── */}
+      <LazySection>
+        <section className="bg-surface py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-extrabold text-primary-deep sm:text-4xl">
+                {steps("title")}
               </h2>
-              <p className="mt-6 text-lg text-white/70">
-                {about("description")}
+              <p className="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
+                {steps("subtitle")}
               </p>
-              <p className="mt-4 text-white/70">
-                {about("paragraph2")}
-              </p>
-              <p className="mt-4 text-white/70">
-                {about("paragraph3")}
-              </p>
-
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                {(["personal", "quality", "results"] as const).map((v) => (
-                  <div key={v} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <div className="font-semibold text-accent">{about(`values.${v}`)}</div>
-                    <div className="mt-1 text-sm text-white/50">{about(`values.${v}Desc`)}</div>
-                  </div>
-                ))}
-              </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ─── PROCESS ─── */}
-      <section id="process" className="bg-background py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-primary-deep sm:text-4xl">
-              {process("title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
-              {process("subtitle")}
-            </p>
-          </div>
-
-          <div className="relative mt-16">
-            {/* Connection line */}
-            <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-border-theme lg:block" />
-
-            <div className="grid gap-8 lg:grid-cols-4">
-              {([1, 2, 3, 4] as const).map((step) => (
-                <div key={step} className="relative text-center">
-                  <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-deep text-xl font-bold text-white shadow-lg">
-                    {step}
+            <div className="mt-16 grid gap-8 lg:grid-cols-3">
+              {([1, 2, 3] as const).map((num) => (
+                <div key={num} className="relative text-center">
+                  <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary-deep text-2xl font-bold text-white shadow-lg">
+                    {num}
                   </div>
-                  <h3 className="text-lg font-bold text-primary-deep">
-                    {process(`step${step}.title`)}
+                  {num < 3 && (
+                    <div className="absolute top-10 left-[60%] hidden h-px w-[80%] bg-border-theme lg:block" />
+                  )}
+                  <h3 className="text-xl font-bold text-primary-deep">
+                    {steps(`step${num}.title`)}
                   </h3>
-                  <p className="mt-3 text-sm text-text-muted">
-                    {process(`step${step}.description`)}
+                  <p className="mt-3 text-text-muted">
+                    {steps(`step${num}.description`)}
                   </p>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ─── PORTFOLIO ─── */}
-      <section className="bg-surface py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-primary-deep sm:text-4xl">
-              {portfolio("title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
-              {portfolio("subtitle")}
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {([1, 2, 3] as const).map((num) => (
-              <div
-                key={num}
-                className="group overflow-hidden rounded-2xl border border-border-theme bg-background shadow-sm transition-all duration-300 hover:shadow-lg"
-              >
-                {/* GRAPHIC: portfolio-{num}.png — 600×400px project screenshot */}
-                <div className="aspect-[3/2] bg-primary-deep/5 flex items-center justify-center text-text-muted text-sm">
-                  portfolio-{num}.png
-                </div>
-                <div className="p-6">
-                  <span className="inline-flex rounded-full bg-accent/30 px-3 py-1 text-xs font-semibold text-primary-deep">
-                    {portfolio(`project${num}.category`)}
-                  </span>
-                  <h3 className="mt-3 text-lg font-bold text-primary-deep">
-                    {portfolio(`project${num}.title`)}
-                  </h3>
-                  <p className="mt-2 text-sm text-text-muted">
-                    {portfolio(`project${num}.description`)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── WHY EASYPROCESS ─── */}
-      <section className="bg-background py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-primary-deep sm:text-4xl">
-              {why("title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
-              {why("subtitle")}
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {(["personal", "modern", "results", "transparent"] as const).map(
-              (key, i) => {
-                const icons = [
-                  /* person */ <svg key="p" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" /></svg>,
-                  /* tech */   <svg key="t" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611l-.772.13a17.96 17.96 0 01-14.726 0l-.772-.13c-1.717-.293-2.3-2.379-1.067-3.61L5 14.5" /></svg>,
-                  /* chart */  <svg key="c" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>,
-                  /* eye */    <svg key="e" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
-                ];
-                return (
-                  <div key={key} className="text-center">
-                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-deep/10 text-primary-deep">
-                      {icons[i]}
-                    </div>
-                    <h3 className="text-lg font-bold text-primary-deep">
-                      {why(`${key}.title`)}
-                    </h3>
-                    <p className="mt-3 text-sm text-text-muted">
-                      {why(`${key}.description`)}
-                    </p>
-                  </div>
-                );
-              }
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── TESTIMONIALS ─── */}
-      <section className="bg-primary-deep text-white py-20 lg:py-28 overflow-hidden relative">
-        <div className="absolute top-10 left-10 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute bottom-10 right-10 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
-
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold sm:text-4xl">
-              {testimonials("title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
-              {testimonials("subtitle")}
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {([1, 2, 3] as const).map((num) => (
-              <div
-                key={num}
-                className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm"
-              >
-                {/* Quote mark */}
-                <svg className="mb-4 h-8 w-8 text-accent/50" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609L9.978 5.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z" />
-                </svg>
-                <p className="text-white/80 italic">
-                  &ldquo;{testimonials(`testimonial${num}.quote`)}&rdquo;
-                </p>
-                <div className="mt-6 flex items-center gap-3">
-                  {/* GRAPHIC: avatar-{num}.png — 48×48px client photo */}
-                  <div className="h-12 w-12 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-sm">
-                    {testimonials(`testimonial${num}.name`).charAt(0)}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-white">
-                      {testimonials(`testimonial${num}.name`)}
-                    </div>
-                    <div className="text-sm text-white/50">
-                      {testimonials(`testimonial${num}.title`)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      </LazySection>
 
       {/* ─── CTA ─── */}
-      <section id="contact" className="bg-background py-20 lg:py-28">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-extrabold text-primary-deep sm:text-4xl lg:text-5xl">
-            {cta("title")}
-          </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-text-muted">
-            {cta("description")}
-          </p>
-          <div className="mt-10">
-            <Link
-              href="/register"
-              className="inline-flex items-center rounded-xl bg-primary-deep px-10 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-primary-dark hover:shadow-xl"
-            >
-              {cta("button")}
-              <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
-            <p className="mt-4 text-sm text-text-muted">{cta("note")}</p>
+      <LazySection>
+        <section id="contact" className="bg-primary-deep text-white py-20 lg:py-28 relative overflow-hidden">
+          <div className="absolute top-10 left-10 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+          <div className="absolute bottom-10 right-10 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
+
+          <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-extrabold sm:text-4xl lg:text-5xl">
+              {cta("title")}
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/70">
+              {cta("description")}
+            </p>
+            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+              <Link
+                href="/create-site"
+                className="inline-flex items-center rounded-xl bg-accent px-10 py-4 text-lg font-semibold text-primary-deep shadow-lg transition hover:bg-accent/90 hover:shadow-xl"
+              >
+                {cta("button")}
+                <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex items-center rounded-xl border-2 border-white/20 px-8 py-4 text-lg font-semibold text-white transition hover:border-white/40 hover:bg-white/5"
+              >
+                {cta("loginButton")}
+              </Link>
+            </div>
+            <p className="mt-4 text-sm text-white/50">{cta("note")}</p>
           </div>
-        </div>
-      </section>
+        </section>
+      </LazySection>
     </main>
   );
 }

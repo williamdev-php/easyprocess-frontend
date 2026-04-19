@@ -57,9 +57,17 @@ export default function DashboardHeader() {
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition-colors hover:bg-primary-deep/5"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-deep text-xs font-bold text-white shadow-sm">
-                {initials}
-              </div>
+              {user?.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.fullName || ""}
+                  className="h-9 w-9 rounded-full object-cover border border-border-light shadow-sm"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-deep text-xs font-bold text-white shadow-sm">
+                  {initials}
+                </div>
+              )}
               <div className="hidden text-left sm:block">
                 <p className="text-sm font-semibold text-primary-deep leading-tight">
                   {user?.fullName?.split(" ")[0] || "User"}

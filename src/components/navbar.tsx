@@ -168,7 +168,7 @@ export default function Navbar() {
                     {t("login")}
                   </Link>
                   <Link
-                    href="/register"
+                    href="/create-site"
                     className="ml-1 inline-flex items-center rounded-xl bg-accent px-5 py-2 text-sm font-semibold text-primary-deep transition hover:bg-accent/90"
                   >
                     {t("register")}
@@ -293,7 +293,7 @@ export default function Navbar() {
                 </Link>
                 <div className="mt-4 px-4">
                   <Link
-                    href="/register"
+                    href="/create-site"
                     onClick={() => setMobileOpen(false)}
                     className="block w-full rounded-xl bg-accent py-3 text-center text-lg font-semibold text-primary-deep transition hover:bg-accent/90"
                   >

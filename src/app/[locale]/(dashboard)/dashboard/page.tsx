@@ -3,8 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@apollo/client/react";
-import { MY_SITES } from "@/graphql/queries";
-import { GET_SITE_ANALYTICS } from "@/graphql/queries";
+import { MY_SITES, GET_SITE_ANALYTICS, GET_DASHBOARD_STATS, GET_OUTREACH_STATS } from "@/graphql/queries";
 import { useState, useEffect, useRef, useMemo } from "react";
 
 /* ──────────────── Skeleton shimmer ──────────────── */
@@ -267,6 +266,19 @@ function formatChange(value: number, type: "pct" | "abs"): string {
 function AdminOverview() {
   const t = useTranslations("dashboardOverview.admin");
 
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const { data: statsData, loading: statsLoading } = useQuery<any>(GET_DASHBOARD_STATS, {
+    fetchPolicy: "cache-and-network",
+  });
+  const { data: outreachData } = useQuery<any>(GET_OUTREACH_STATS, {
+    fetchPolicy: "cache-and-network",
+  });
+
+  const stats = statsData?.dashboardStats;
+  const outreach = outreachData?.outreachStats;
+
+  if (statsLoading) return <OverviewSkeleton />;
+
   return (
     <div className="space-y-6">
       <div>
@@ -274,74 +286,124 @@ function AdminOverview() {
         <p className="mt-1 text-text-muted">{t("subtitle")}</p>
       </div>
 
+      {/* Lead pipeline stats */}
       <div className="grid gap-4 sm:grid-cols-3">
         <MetricCard
           label={t("totalLeads")}
-          value="127"
-          change="+12%"
+          value={String(stats?.totalLeads ?? 0)}
+          change={`${stats?.leadsGenerated ?? 0} genererade`}
           icon="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
         />
         <MetricCard
-          label={t("monthlyRevenue")}
-          value="84 500 kr"
-          change="+8%"
-          icon="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
+          label="Utskick (30d)"
+          value={String(outreach?.emailsSent30d ?? stats?.outreachSent30d ?? 0)}
+          change={outreach ? `${outreach.openRate}% oppnade` : "—"}
+          icon="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+          delay={100}
         />
         <MetricCard
-          label={t("activeClients")}
-          value="34"
-          change="+3"
-          icon="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.228A2 2 0 013 17.16V14.82"
+          label="Konverteringar (30d)"
+          value={String(outreach?.conversions30d ?? stats?.outreachConversions30d ?? 0)}
+          change={outreach ? `${outreach.replyRate}% svar` : "—"}
+          icon="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          delay={200}
         />
       </div>
 
-      <div className="rounded-2xl border border-border-light bg-white p-6">
-        <h3 className="mb-6 text-sm font-semibold text-primary-deep">
-          {t("revenueChart")}
-        </h3>
-        <div className="flex items-end gap-3 h-48">
-          {[65, 72, 58, 89, 95, 78, 102, 88, 110, 97, 115, 125].map(
-            (val, i) => (
-              <div key={i} className="flex flex-1 flex-col items-center gap-2">
-                <div className="relative w-full flex justify-center">
-                  <div
-                    className="w-full max-w-[28px] rounded-lg bg-gradient-to-t from-primary-deep to-primary transition-all duration-700"
-                    style={{ height: `${(val / 125) * 160}px` }}
-                  />
-                </div>
-                <span className="text-[10px] font-medium text-text-muted">
-                  {(i + 1).toString().padStart(2, "0")}
-                </span>
-              </div>
-            )
-          )}
+      {/* Outreach performance bar */}
+      {outreach && (
+        <div className="rounded-2xl border border-violet-200 bg-violet-50/50 p-4">
+          <h3 className="mb-3 text-sm font-semibold text-primary-deep">Outreach-prestanda</h3>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-5 text-sm">
+            <div>
+              <span className="text-text-muted">Svarsfrekvens</span>
+              <p className="text-xl font-bold text-primary-deep">{outreach.replyRate}%</p>
+            </div>
+            <div>
+              <span className="text-text-muted">Klickfrekvens</span>
+              <p className="text-xl font-bold text-primary-deep">{outreach.clickRate}%</p>
+            </div>
+            <div>
+              <span className="text-text-muted">Bounce-frekvens</span>
+              <p className="text-xl font-bold text-primary-deep">{outreach.bounceRate}%</p>
+            </div>
+            <div>
+              <span className="text-text-muted">Dagligt utskick</span>
+              <p className="text-xl font-bold text-primary-deep">{outreach.dailySendCount}/{outreach.dailySendLimit}</p>
+            </div>
+            <div>
+              <span className="text-text-muted">Uppvarmning</span>
+              <p className={`text-sm font-semibold ${outreach.warmupStatus === "warmed" ? "text-green-700" : "text-amber-700"}`}>
+                {outreach.warmupStatus === "warmed" ? "Klar" : `Dag ${outreach.warmupDay}/${outreach.warmupDaysTarget}`}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Pipeline overview */}
+      {stats && (
+        <div className="rounded-2xl border border-border-light bg-white p-6">
+          <h3 className="mb-4 text-sm font-semibold text-primary-deep">Pipeline</h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+            {[
+              { label: "Nya", value: stats.leadsNew, color: "bg-blue-100 text-blue-700" },
+              { label: "Skrapade", value: stats.leadsScraped, color: "bg-indigo-100 text-indigo-700" },
+              { label: "Genererade", value: stats.leadsGenerated, color: "bg-emerald-100 text-emerald-700" },
+              { label: "Skickade", value: stats.leadsEmailSent, color: "bg-cyan-100 text-cyan-700" },
+              { label: "Konverterade", value: stats.leadsConverted, color: "bg-green-100 text-green-800" },
+              { label: "Misslyckade", value: stats.leadsFailed, color: "bg-red-100 text-red-700" },
+              { label: "AI-kostnad", value: `$${(stats.totalAiCostUsd ?? 0).toFixed(2)}`, color: "bg-purple-100 text-purple-700" },
+            ].map((item) => (
+              <div key={item.label} className="text-center">
+                <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${item.color}`}>
+                  {item.value}
+                </span>
+                <p className="mt-1 text-xs text-text-muted">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 /* ──────────────── User Overview (real data) ──────────────── */
 
+interface SiteOption {
+  id: string;
+  businessName?: string;
+  subdomain?: string;
+}
+
 function UserOverview() {
   const { user } = useAuth();
   const t = useTranslations("dashboardOverview.user");
 
   // First, get user's sites to find the site ID
-  const { data: sitesData, loading: sitesLoading } = useQuery<{ mySites: Array<{ id: string }> }>(MY_SITES);
+  const { data: sitesData, loading: sitesLoading } = useQuery<{ mySites: Array<SiteOption> }>(MY_SITES);
 
-  // Pick the first site (most users have one)
-  const siteId = useMemo(() => {
-    if (!sitesData?.mySites?.length) return null;
-    return sitesData.mySites[0].id;
-  }, [sitesData]);
+  const sites: SiteOption[] = useMemo(() => sitesData?.mySites ?? [], [sitesData]);
 
-  // Fetch analytics for that site
+  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+
+  // Auto-select first site when sites load (or if selected site disappears)
+  useEffect(() => {
+    if (sites.length > 0 && (!selectedSiteId || !sites.find((s) => s.id === selectedSiteId))) {
+      setSelectedSiteId(sites[0].id);
+    }
+  }, [sites, selectedSiteId]);
+
+  const siteId = selectedSiteId;
+
+  // Fetch analytics for selected site
   const { data: analyticsData, loading: analyticsLoading } = useQuery<{ siteAnalytics: { totalPageViews: number; totalVisitors: number; pagesPerSession: number; performanceScore: number; visitorsChangePct: number; pagesPerSessionPrev: number; performanceScorePrev: number; daily: Array<{ date: string; visitors: number; pageViews: number }> } }>(
     GET_SITE_ANALYTICS,
     {
       variables: { siteId, days: 7 },
       skip: !siteId,
+      fetchPolicy: "cache-and-network",
     }
   );
 
@@ -387,11 +449,27 @@ function UserOverview() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-primary-deep">
-          {t("greeting", { name: user?.fullName?.split(" ")[0] || "" })}
-        </h2>
-        <p className="mt-1 text-text-muted">{t("subtitle")}</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-primary-deep">
+            {t("greeting", { name: user?.fullName?.split(" ")[0] || "" })}
+          </h2>
+          <p className="mt-1 text-text-muted">{t("subtitle")}</p>
+        </div>
+
+        {sites.length > 1 && (
+          <select
+            value={siteId ?? ""}
+            onChange={(e) => setSelectedSiteId(e.target.value)}
+            className="rounded-xl border border-border-light bg-white px-4 py-2 text-sm font-medium text-primary-deep shadow-sm transition-colors hover:border-primary/30 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            {sites.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.businessName || s.subdomain || s.id}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {!siteId ? (
@@ -466,6 +544,8 @@ function UserOverview() {
 
 /* ──────────────── Main page ──────────────── */
 
+import { EmailVerificationAlert } from "@/components/email-verification-alert";
+
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
   const [ready, setReady] = useState(false);
@@ -481,5 +561,10 @@ export default function DashboardPage() {
     return <OverviewSkeleton />;
   }
 
-  return user?.isSuperuser ? <AdminOverview /> : <UserOverview />;
+  return (
+    <>
+      <EmailVerificationAlert />
+      {user?.isSuperuser ? <AdminOverview /> : <UserOverview />}
+    </>
+  );
 }

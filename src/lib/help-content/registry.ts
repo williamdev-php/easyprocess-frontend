@@ -1,8 +1,10 @@
 import type { HelpCategory } from "./types";
 import { domainsCategory } from "./domains";
+import { siteMetricsCategory } from "./site-metrics";
 
 export const helpCategories: HelpCategory[] = [
   domainsCategory,
+  siteMetricsCategory,
 ];
 
 export function getCategory(slug: string): HelpCategory | undefined {

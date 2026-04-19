@@ -22,6 +22,11 @@ import {
 // In-memory token store (not localStorage for security)
 let accessToken: string | null = null;
 
+// True while the initial token refresh is in progress — prevents the Apollo
+// error link from force-logging out the user before auth has had a chance to
+// complete.
+let _authInitializing = true;
+
 // Callback set by AuthProvider so the error link can trigger logout without
 // importing React hooks (avoids circular dependency).
 let _forceLogoutCb: (() => void) | null = null;
@@ -30,7 +35,14 @@ export function getAccessToken(): string | null {
   return accessToken;
 }
 
+export function isAuthInitializing(): boolean {
+  return _authInitializing;
+}
+
 export function forceLogout(): void {
+  // Don't force logout while the initial token refresh is still running —
+  // queries that fire before the token is available are expected to fail.
+  if (_authInitializing) return;
   if (_forceLogoutCb) _forceLogoutCb();
 }
 
@@ -51,6 +63,7 @@ interface AuthContextValue {
   login: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -91,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAccessToken(null);
         setUser(null);
       } finally {
+        _authInitializing = false;
         setIsLoading(false);
       }
     }
@@ -109,6 +123,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await fetchUser(data.accessToken);
   }, [fetchUser]);
 
+  const updateUser = useCallback((updates: Partial<User>) => {
+    setUser((prev) => prev ? { ...prev, ...updates } : prev);
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await logoutUser();
@@ -123,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, isLoading, login, register, logout }}
+      value={{ user, isAuthenticated, isLoading, login, register, logout, updateUser }}
     >
       {children}
     </AuthContext.Provider>

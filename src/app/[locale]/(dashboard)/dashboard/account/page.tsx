@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
 import { CountrySelect } from "@/components/ui/country-select";
 import { MediaPickerField } from "@/components/media-picker";
+import { EmailVerificationAlert } from "@/components/email-verification-alert";
 import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 
@@ -60,7 +61,7 @@ function SavedCheck() {
 }
 
 export default function AccountPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, updateUser } = useAuth();
   const t = useTranslations("userAccount");
   const [updateProfile] = useMutation(UPDATE_PROFILE);
 
@@ -210,6 +211,8 @@ export default function AccountPage() {
         <p className="mt-1 text-text-muted">{t("subtitle")}</p>
       </div>
 
+      <EmailVerificationAlert />
+
       {error && <Alert variant="error">{t("saveFailed")}</Alert>}
 
       {/* Avatar */}
@@ -234,6 +237,7 @@ export default function AccountPage() {
                 await updateProfile({
                   variables: { input: { avatarUrl: url || null } },
                 });
+                updateUser({ avatarUrl: url || undefined });
               } catch { /* handled by error state */ }
             }}
             label=""

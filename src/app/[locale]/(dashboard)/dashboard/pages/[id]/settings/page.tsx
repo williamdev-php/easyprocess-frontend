@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
@@ -72,9 +72,14 @@ export default function SiteSettingsPage() {
 
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Initialize from site data
+  // Initialize form state from server data only once (on first load).
+  // Subsequent Apollo cache updates (e.g. after mutation) must NOT
+  // overwrite in-flight user edits — that caused media selections to
+  // vanish from the preview after saving.
+  const initialized = useRef(false);
   useEffect(() => {
-    if (!data?.mySite?.siteData) return;
+    if (initialized.current || !data?.mySite?.siteData) return;
+    initialized.current = true;
     const sd = data.mySite.siteData;
 
     setMetaTitle(sd.meta?.title || "");

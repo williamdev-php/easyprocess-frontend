@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useRouter } from "@/i18n/routing";
-import { GET_LEADS, GET_DASHBOARD_STATS } from "@/graphql/queries";
+import { GET_LEADS, GET_DASHBOARD_STATS, GET_OUTREACH_STATS } from "@/graphql/queries";
 import { CREATE_LEAD, DELETE_LEAD } from "@/graphql/mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ const STATUS_COLORS: Record<string, string> = {
   GENERATED: "bg-emerald-100 text-emerald-700",
   EMAIL_SENT: "bg-cyan-100 text-cyan-700",
   OPENED: "bg-teal-100 text-teal-700",
+  REPLIED: "bg-amber-100 text-amber-700",
   CONVERTED: "bg-green-100 text-green-800",
   REJECTED: "bg-gray-100 text-gray-600",
   FAILED: "bg-red-100 text-red-700",
@@ -69,6 +70,59 @@ function StatsCards() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/* ──────────────── Outreach Stats Bar ──────────────── */
+
+function OutreachStatsBar() {
+  const { data, loading } = useQuery<any>(GET_OUTREACH_STATS, {
+    fetchPolicy: "cache-and-network",
+  });
+  const stats = data?.outreachStats;
+  if (loading || !stats) return null;
+
+  const warmupLabel = stats.warmupStatus === "warming_up"
+    ? `Uppvarmning: Dag ${stats.warmupDay}/${stats.warmupDaysTarget}`
+    : stats.warmupStatus === "warmed"
+    ? "Uppvarmd"
+    : "Ej konfigurerad";
+
+  return (
+    <div className="rounded-2xl border border-violet-200 bg-violet-50/50 p-4">
+      <div className="flex flex-wrap items-center gap-6 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-text-muted">Skickade (30d):</span>
+          <span className="font-semibold text-primary-deep">{stats.emailsSent30d}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-text-muted">Oppningsfrekvens:</span>
+          <span className="font-semibold text-primary-deep">{stats.openRate}%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-text-muted">Svarsfrekvens:</span>
+          <span className="font-semibold text-primary-deep">{stats.replyRate}%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-text-muted">Konverteringar:</span>
+          <span className="font-semibold text-green-700">{stats.conversions30d}</span>
+        </div>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-xs text-text-muted">
+            {stats.dailySendCount}/{stats.dailySendLimit} idag
+          </span>
+          <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+            stats.warmupStatus === "warmed"
+              ? "bg-green-100 text-green-700"
+              : stats.warmupStatus === "warming_up"
+              ? "bg-amber-100 text-amber-700"
+              : "bg-gray-100 text-gray-600"
+          }`}>
+            {warmupLabel}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -154,6 +208,8 @@ export default function LeadsPage() {
       </div>
 
       <StatsCards />
+
+      <OutreachStatsBar />
 
       {/* Create form */}
       {showCreate && (

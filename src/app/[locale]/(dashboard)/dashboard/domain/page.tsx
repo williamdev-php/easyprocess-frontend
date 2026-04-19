@@ -203,6 +203,8 @@ export default function DomainPage() {
   const [latestVercelInfo, setLatestVercelInfo] = useState<VercelVerification | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [expandedDomainKey, setExpandedDomainKey] = useState<string | null>(null);
+  const [sortColumn, setSortColumn] = useState<"domainName" | "siteName" | "type" | "status" | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Domain purchase state
   const [buyDomainInput, setBuyDomainInput] = useState("");
@@ -269,8 +271,10 @@ export default function DomainPage() {
     }
   });
 
-  // 2. Custom domains
+  // 2. Custom domains (skip entries that duplicate a subdomain above)
+  const subdomainNames = new Set(unifiedDomains.map((d) => d.domainName));
   domains.forEach((d) => {
+    if (subdomainNames.has(d.domain)) return;
     unifiedDomains.push({
       key: `custom-${d.id}`,
       domainName: d.domain,
@@ -295,6 +299,25 @@ export default function DomainPage() {
         purchasedDomain: dp,
       });
     }
+  });
+
+  // Sorting
+  const handleSort = (column: "domainName" | "siteName" | "type" | "status") => {
+    if (sortColumn === column) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortedDomains = [...unifiedDomains].sort((a, b) => {
+    if (!sortColumn) return 0;
+    const valA = (a[sortColumn] || "").toLowerCase();
+    const valB = (b[sortColumn] || "").toLowerCase();
+    if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+    if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+    return 0;
   });
 
   // Handlers
@@ -604,15 +627,28 @@ export default function DomainPage() {
         <div className="rounded-2xl border border-border-light bg-white overflow-hidden">
           {/* Table header (desktop) */}
           <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 border-b border-border-light bg-primary-deep/[0.02] text-xs font-medium text-text-muted uppercase tracking-wide">
-            <div className="col-span-4">{t("domainName")}</div>
-            <div className="col-span-3">{t("connectedSite")}</div>
-            <div className="col-span-2">{t("type")}</div>
-            <div className="col-span-2">{t("status")}</div>
+            {([
+              { key: "domainName", spanClass: "col-span-4", label: t("domainName") },
+              { key: "siteName", spanClass: "col-span-3", label: t("connectedSite") },
+              { key: "type", spanClass: "col-span-2", label: t("type") },
+              { key: "status", spanClass: "col-span-2", label: t("status") },
+            ] as const).map((col) => (
+              <div
+                key={col.key}
+                className={`${col.spanClass} flex items-center gap-1 cursor-pointer select-none hover:text-primary-deep transition-colors`}
+                onClick={() => handleSort(col.key)}
+              >
+                {col.label}
+                <svg className={`h-3 w-3 transition-transform ${sortColumn === col.key ? "text-primary-deep" : "text-transparent"} ${sortColumn === col.key && sortDirection === "desc" ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                </svg>
+              </div>
+            ))}
             <div className="col-span-1"></div>
           </div>
 
           {/* Domain rows */}
-          {unifiedDomains.map((ud) => (
+          {sortedDomains.map((ud) => (
             <div key={ud.key}>
               <div
                 className={`grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 px-6 py-4 border-b border-border-light/50 items-center transition-colors ${
