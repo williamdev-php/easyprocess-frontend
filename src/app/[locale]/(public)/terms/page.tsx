@@ -17,7 +17,7 @@ export default async function TermsPage({
 
 function TermsSV() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-4xl px-4 pt-32 pb-16 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-extrabold tracking-tight text-primary-deep">
         Allmanna villkor
       </h1>
@@ -350,7 +350,7 @@ function TermsSV() {
 
 function TermsEN() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-4xl px-4 pt-32 pb-16 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-extrabold tracking-tight text-primary-deep">
         Terms and Conditions
       </h1>

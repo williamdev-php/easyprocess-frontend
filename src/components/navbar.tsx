@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 
 
 export default function Navbar() {
-  const { isAuthenticated, isLoading, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const t = useTranslations("nav");
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -53,10 +53,10 @@ export default function Navbar() {
     "rounded-xl px-3 py-2 text-sm font-medium transition hover:bg-white/10";
 
   const dropdownItems = [
-    { key: "automation", href: "#services" },
-    { key: "ecommerce", href: "#services" },
-    { key: "webdev", href: "#services" },
-    { key: "ai", href: "#services" },
+    { key: "automation", href: "#services", icon: "M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" },
+    { key: "ecommerce", href: "#services", icon: "M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" },
+    { key: "webdev", href: "#services", icon: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" },
+    { key: "expert", href: "#contact", icon: "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" },
   ] as const;
 
   return (
@@ -130,42 +130,38 @@ export default function Navbar() {
                       key={item.key}
                       href={item.href}
                       onClick={() => setDropdownOpen(false)}
-                      className="block rounded-xl px-4 py-3 transition hover:bg-white/10"
+                      className="flex items-start gap-3 rounded-xl px-4 py-3 transition hover:bg-white/10"
                     >
-                      <span className="block text-sm font-semibold text-white">
-                        {t(`servicesDropdown.${item.key}`)}
-                      </span>
-                      <span className="block text-xs text-white/60">
-                        {t(`servicesDropdown.${item.key}Desc`)}
-                      </span>
+                      <svg
+                        className="mt-0.5 h-5 w-5 shrink-0 text-accent"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                      </svg>
+                      <div>
+                        <span className="block text-sm font-semibold text-white">
+                          {t(`servicesDropdown.${item.key}`)}
+                        </span>
+                        <span className="block text-xs text-white/60">
+                          {t(`servicesDropdown.${item.key}Desc`)}
+                        </span>
+                      </div>
                     </a>
                   ))}
                 </div>
               </div>
 
-              <a href="#about" className={`${navLinkClass} text-white`}>
-                {t("about")}
-              </a>
-              <a href="#process" className={`${navLinkClass} text-white`}>
-                {t("process")}
-              </a>
-
               {/* Auth buttons */}
-              {isLoading ? null : isAuthenticated ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    className={`${navLinkClass} text-white`}
-                  >
-                    {t("dashboard")}
-                  </Link>
-                  <button
-                    onClick={() => logout()}
-                    className={`${navLinkClass} text-white`}
-                  >
-                    {t("logout")}
-                  </button>
-                </>
+              {isAuthenticated ? (
+                <Link
+                  href="/dashboard"
+                  className="ml-1 inline-flex items-center rounded-xl bg-accent px-5 py-2 text-sm font-semibold text-primary-deep transition hover:bg-accent/90"
+                >
+                  {t("dashboard")}
+                </Link>
               ) : (
                 <>
                   <Link href="/login" className={`${navLinkClass} text-white`}>
@@ -252,53 +248,40 @@ export default function Navbar() {
                     key={item.key}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-xl px-3 py-2.5 transition hover:bg-white/10"
+                    className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/10"
                   >
-                    <span className="block text-sm font-semibold text-white">
-                      {t(`servicesDropdown.${item.key}`)}
-                    </span>
-                    <span className="block text-xs text-white/50">
-                      {t(`servicesDropdown.${item.key}Desc`)}
-                    </span>
+                    <svg
+                      className="mt-0.5 h-5 w-5 shrink-0 text-accent"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                    </svg>
+                    <div>
+                      <span className="block text-sm font-semibold text-white">
+                        {t(`servicesDropdown.${item.key}`)}
+                      </span>
+                      <span className="block text-xs text-white/50">
+                        {t(`servicesDropdown.${item.key}Desc`)}
+                      </span>
+                    </div>
                   </a>
                 ))}
               </div>
             </div>
 
-            <a
-              href="#about"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-xl px-4 py-3 text-lg font-medium text-white transition hover:bg-white/10"
-            >
-              {t("about")}
-            </a>
-            <a
-              href="#process"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-xl px-4 py-3 text-lg font-medium text-white transition hover:bg-white/10"
-            >
-              {t("process")}
-            </a>
-
-            {isLoading ? null : isAuthenticated ? (
-              <>
+            {isAuthenticated ? (
+              <div className="mt-4 px-4">
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-xl px-4 py-3 text-lg font-medium text-white transition hover:bg-white/10"
+                  className="block w-full rounded-xl bg-accent py-3 text-center text-lg font-semibold text-primary-deep transition hover:bg-accent/90"
                 >
                   {t("dashboard")}
                 </Link>
-                <button
-                  onClick={() => {
-                    logout();
-                    setMobileOpen(false);
-                  }}
-                  className="rounded-xl px-4 py-3 text-left text-lg font-medium text-white transition hover:bg-white/10"
-                >
-                  {t("logout")}
-                </button>
-              </>
+              </div>
             ) : (
               <>
                 <Link

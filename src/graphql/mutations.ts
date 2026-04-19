@@ -1,47 +1,5 @@
 import { gql } from "@apollo/client";
 
-export const CREATE_LISTING = gql`
-  mutation CreateListing($input: CreateListingInput!) {
-    createListing(input: $input) {
-      id
-      title
-      type
-      price
-      startingBid
-      endsAt
-      status
-    }
-  }
-`;
-
-export const UPDATE_LISTING = gql`
-  mutation UpdateListing($id: ID!, $input: UpdateListingInput!) {
-    updateListing(id: $id, input: $input) {
-      id
-      title
-      type
-      price
-      startingBid
-      endsAt
-      status
-    }
-  }
-`;
-
-export const PLACE_BID = gql`
-  mutation PlaceBid($listingId: ID!, $amount: Float!) {
-    placeBid(listingId: $listingId, amount: $amount) {
-      id
-      amount
-      createdAt
-      listing {
-        id
-        currentBid
-      }
-    }
-  }
-`;
-
 // ---------------------------------------------------------------------------
 // AutoSite: Leads & Sites
 // ---------------------------------------------------------------------------
@@ -262,6 +220,20 @@ export const RENEW_PURCHASED_DOMAIN = gql`
 `;
 
 // ---------------------------------------------------------------------------
+// Version History
+// ---------------------------------------------------------------------------
+
+export const RESTORE_SITE_VERSION = gql`
+  mutation RestoreSiteVersion($siteId: String!, $versionId: String!) {
+    restoreSiteVersion(siteId: $siteId, versionId: $versionId) {
+      id
+      siteData
+      updatedAt
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
 // Billing
 // ---------------------------------------------------------------------------
 
@@ -280,6 +252,52 @@ export const UPDATE_BILLING_DETAILS = gql`
       zip
       city
       country
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Site Management (Delete, Pause, Settings)
+// ---------------------------------------------------------------------------
+
+export const REQUEST_SITE_DELETION = gql`
+  mutation RequestSiteDeletion($siteId: String!, $slug: String!) {
+    requestSiteDeletion(siteId: $siteId, slug: $slug)
+  }
+`;
+
+export const CONFIRM_SITE_DELETION = gql`
+  mutation ConfirmSiteDeletion($token: String!) {
+    confirmSiteDeletion(token: $token)
+  }
+`;
+
+export const PAUSE_SITE = gql`
+  mutation PauseSite($siteId: String!) {
+    pauseSite(siteId: $siteId) {
+      id
+      status
+      updatedAt
+    }
+  }
+`;
+
+export const UNPAUSE_SITE = gql`
+  mutation UnpauseSite($siteId: String!) {
+    unpauseSite(siteId: $siteId) {
+      id
+      status
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_SITE_SETTINGS = gql`
+  mutation UpdateSiteSettings($siteId: String!, $settings: JSON!) {
+    updateSiteSettings(siteId: $siteId, settings: $settings) {
+      id
+      siteData
+      updatedAt
     }
   }
 `;

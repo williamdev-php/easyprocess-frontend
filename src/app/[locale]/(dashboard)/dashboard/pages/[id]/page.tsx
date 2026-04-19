@@ -8,6 +8,7 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { MY_SITE } from "@/graphql/queries";
 import { SAVE_DRAFT, LOAD_DRAFT, PUBLISH_SITE_DATA, DISCARD_DRAFT } from "@/graphql/mutations";
 import { Link } from "@/i18n/routing";
+import { MediaPickerField } from "@/components/media-picker";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -330,6 +331,57 @@ function CollapsibleListEditor<T extends Record<string, unknown>>({
 }
 
 // ---------------------------------------------------------------------------
+// Validation helpers
+// ---------------------------------------------------------------------------
+
+function isValidEmail(v: string): boolean {
+  return !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+function isValidPhone(v: string): boolean {
+  return !v || /^[+\d\s()-]{3,20}$/.test(v);
+}
+
+function isValidUrl(v: string): boolean {
+  if (!v) return true;
+  try { new URL(v); return true; } catch { return false; }
+}
+
+function ValidatedInput({
+  value,
+  onChange,
+  placeholder,
+  validate,
+  errorText,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  validate: (v: string) => boolean;
+  errorText: string;
+}) {
+  const isValid = validate(value);
+  return (
+    <div>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none transition-colors focus:ring-1 ${
+          !isValid
+            ? "border-red-300 focus:border-red-400 focus:ring-red-200"
+            : "border-border-light focus:border-primary focus:ring-primary/20"
+        }`}
+      />
+      {!isValid && (
+        <p className="mt-0.5 text-[10px] text-red-500">{errorText}</p>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Section editors
 // ---------------------------------------------------------------------------
 
@@ -342,8 +394,12 @@ function BusinessEditor({ data, onChange }: { data: SiteData; onChange: (d: Site
     <div className="space-y-3 p-4">
       <FieldGroup label="Företagsnamn"><TextInput value={b.name || ""} onChange={(v) => set("name", v)} /></FieldGroup>
       <FieldGroup label="Tagline"><TextInput value={b.tagline || ""} onChange={(v) => set("tagline", v)} /></FieldGroup>
-      <FieldGroup label="E-post"><TextInput value={b.email || ""} onChange={(v) => set("email", v)} /></FieldGroup>
-      <FieldGroup label="Telefon"><TextInput value={b.phone || ""} onChange={(v) => set("phone", v)} /></FieldGroup>
+      <FieldGroup label="E-post">
+        <ValidatedInput value={b.email || ""} onChange={(v) => set("email", v)} validate={isValidEmail} errorText="Ogiltig e-postadress" placeholder="namn@foretag.se" />
+      </FieldGroup>
+      <FieldGroup label="Telefon">
+        <ValidatedInput value={b.phone || ""} onChange={(v) => set("phone", v)} validate={isValidPhone} errorText="Ogiltigt telefonnummer" placeholder="+46 70 123 45 67" />
+      </FieldGroup>
       <FieldGroup label="Adress"><TextInput value={b.address || ""} onChange={(v) => set("address", v)} /></FieldGroup>
       <FieldGroup label="Org.nummer"><TextInput value={b.org_number || ""} onChange={(v) => set("org_number", v)} /></FieldGroup>
     </div>
@@ -358,9 +414,18 @@ function BrandingEditor({ data, onChange }: { data: SiteData; onChange: (d: Site
       branding: { ...data.branding, colors: { ...colors, [key]: val } },
     });
   };
+  const setBranding = (key: string, val: unknown) => {
+    onChange({ ...data, branding: { ...data.branding, [key]: val } });
+  };
   const setTheme = (val: string) => onChange({ ...data, theme: val });
   return (
     <div className="space-y-3 p-4">
+      <MediaPickerField
+        value={data.branding?.logo_url || ""}
+        onChange={(url) => setBranding("logo_url", url || null)}
+        label="Logotyp"
+        folder="branding"
+      />
       <FieldGroup label="Tema">
         <select
           value={data.theme || "modern"}
@@ -394,6 +459,12 @@ function HeroEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={hero.headline || ""} onChange={(v) => set("headline", v)} /></FieldGroup>
       <FieldGroup label="Underrubrik"><TextArea value={hero.subtitle || ""} onChange={(v) => set("subtitle", v)} rows={2} /></FieldGroup>
+      <MediaPickerField
+        value={hero.background_image || ""}
+        onChange={(url) => set("background_image", url || null)}
+        label="Bakgrundsbild"
+        folder="hero"
+      />
       <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-2">
         <ToggleSwitch label="Visa CTA-knapp" checked={showCta} onChange={(v) => set("show_cta", v)} />
         {showCta && (
@@ -417,6 +488,12 @@ function AboutEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteDat
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={about.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Text"><TextArea value={about.text || ""} onChange={(v) => set("text", v)} rows={5} /></FieldGroup>
+      <MediaPickerField
+        value={about.image || ""}
+        onChange={(url) => set("image", url || null)}
+        label="Bild"
+        folder="about"
+      />
       <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-2">
         <ToggleSwitch label="Visa höjdpunkter" checked={showHighlights} onChange={(v) => set("show_highlights", v)} />
         {showHighlights && (
@@ -618,26 +695,57 @@ function FAQEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData)
 
 function GalleryEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
   const gallery = data.gallery || { title: "Galleri", subtitle: "", images: [] };
+  const images = gallery.images || [];
   const set = (key: string, val: unknown) => {
     onChange({ ...data, gallery: { ...gallery, [key]: val } });
+  };
+  const updateImage = (idx: number, key: string, val: string) => {
+    const next = deepClone(images);
+    (next[idx] as Record<string, unknown>)[key] = val;
+    set("images", next);
+  };
+  const removeImage = (idx: number) => {
+    set("images", images.filter((_, i) => i !== idx));
+  };
+  const addImage = () => {
+    set("images", [...images, { url: "", alt: "", caption: "" }]);
   };
   return (
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={gallery.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Bilder">
-        <CollapsibleListEditor
-          items={gallery.images || []}
-          onChange={(items) => set("images", items)}
-          fields={[
-            { key: "url", label: "Bild-URL", type: "text" },
-            { key: "alt", label: "Alt-text", type: "text" },
-            { key: "caption", label: "Bildtext", type: "text" },
-          ]}
-          addLabel="Lägg till bild"
-          createDefault={() => ({ url: "", alt: "", caption: "" })}
-          titleKey="alt"
-          titleFallback="Bild"
-        />
+        <div className="space-y-2">
+          {images.map((img, idx) => (
+            <div key={idx} className="rounded-lg border border-border-light bg-gray-50/50 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <MediaPickerField
+                  value={img.url || ""}
+                  onChange={(url) => updateImage(idx, "url", url)}
+                  label={`Bild #${idx + 1}`}
+                  folder="gallery"
+                />
+                <button type="button" onClick={() => removeImage(idx)}
+                  className="mt-5 rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 shrink-0">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <FieldGroup label="Alt-text"><TextInput value={img.alt || ""} onChange={(v) => updateImage(idx, "alt", v)} /></FieldGroup>
+              <FieldGroup label="Bildtext"><TextInput value={img.caption || ""} onChange={(v) => updateImage(idx, "caption", v)} /></FieldGroup>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addImage}
+            className="flex items-center gap-1.5 rounded-lg border border-dashed border-border-light px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:border-primary hover:text-primary"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Lägg till bild
+          </button>
+        </div>
       </FieldGroup>
     </div>
   );
@@ -738,26 +846,59 @@ function StatsEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteDat
 
 function TeamEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
   const team = data.team || { title: "Vårt team", subtitle: "", members: [] };
+  const members = team.members || [];
   const set = (key: string, val: unknown) => {
     onChange({ ...data, team: { ...team, [key]: val } });
+  };
+  const updateMember = (idx: number, key: string, val: unknown) => {
+    const next = deepClone(members);
+    (next[idx] as Record<string, unknown>)[key] = val;
+    set("members", next);
+  };
+  const removeMember = (idx: number) => {
+    set("members", members.filter((_, i) => i !== idx));
+  };
+  const addMember = () => {
+    set("members", [...members, { name: "", role: "", bio: "", image: null }]);
   };
   return (
     <div className="space-y-3 p-4">
       <FieldGroup label="Rubrik"><TextInput value={team.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
       <FieldGroup label="Medlemmar">
-        <CollapsibleListEditor
-          items={team.members || []}
-          onChange={(items) => set("members", items)}
-          fields={[
-            { key: "name", label: "Namn", type: "text" },
-            { key: "role", label: "Roll", type: "text" },
-            { key: "bio", label: "Bio", type: "textarea" },
-          ]}
-          addLabel="Lägg till medlem"
-          createDefault={() => ({ name: "", role: "", bio: "", image: null })}
-          titleKey="name"
-          titleFallback="Medlem"
-        />
+        <div className="space-y-2">
+          {members.map((member, idx) => (
+            <div key={idx} className="rounded-lg border border-border-light bg-gray-50/50 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-medium text-primary-deep">{member.name || `Medlem #${idx + 1}`}</span>
+                <button type="button" onClick={() => removeMember(idx)}
+                  className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 shrink-0">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <MediaPickerField
+                value={member.image || ""}
+                onChange={(url) => updateMember(idx, "image", url || null)}
+                label="Profilbild"
+                folder="team"
+              />
+              <FieldGroup label="Namn"><TextInput value={member.name || ""} onChange={(v) => updateMember(idx, "name", v)} /></FieldGroup>
+              <FieldGroup label="Roll"><TextInput value={member.role || ""} onChange={(v) => updateMember(idx, "role", v)} /></FieldGroup>
+              <FieldGroup label="Bio"><TextArea value={member.bio || ""} onChange={(v) => updateMember(idx, "bio", v)} rows={2} /></FieldGroup>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addMember}
+            className="flex items-center gap-1.5 rounded-lg border border-dashed border-border-light px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:border-primary hover:text-primary"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Lägg till medlem
+          </button>
+        </div>
       </FieldGroup>
     </div>
   );

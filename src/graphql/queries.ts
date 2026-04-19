@@ -1,123 +1,5 @@
 import { gql } from "@apollo/client";
 
-export const GET_LISTINGS = gql`
-  query GetListings(
-    $categoryId: ID
-    $type: String
-    $search: String
-    $offset: Int
-    $limit: Int
-  ) {
-    listings(
-      categoryId: $categoryId
-      type: $type
-      search: $search
-      offset: $offset
-      limit: $limit
-    ) {
-      id
-      title
-      description
-      type
-      price
-      currentBid
-      endsAt
-      imageUrl
-      category {
-        id
-        name
-      }
-      seller {
-        id
-        fullName
-        companyName
-      }
-    }
-  }
-`;
-
-export const GET_LISTING = gql`
-  query GetListing($id: ID!) {
-    listing(id: $id) {
-      id
-      title
-      description
-      type
-      price
-      currentBid
-      startingBid
-      endsAt
-      imageUrl
-      images
-      condition
-      location
-      category {
-        id
-        name
-      }
-      seller {
-        id
-        fullName
-        companyName
-        phone
-        email
-      }
-      bids {
-        id
-        amount
-        createdAt
-        bidder {
-          id
-          fullName
-        }
-      }
-    }
-  }
-`;
-
-export const GET_CATEGORIES = gql`
-  query GetCategories {
-    categories {
-      id
-      name
-      slug
-      listingCount
-    }
-  }
-`;
-
-export const MY_LISTINGS = gql`
-  query MyListings {
-    myListings {
-      id
-      title
-      type
-      price
-      currentBid
-      endsAt
-      imageUrl
-      status
-      createdAt
-    }
-  }
-`;
-
-export const MY_BIDS = gql`
-  query MyBids {
-    myBids {
-      id
-      amount
-      createdAt
-      listing {
-        id
-        title
-        currentBid
-        endsAt
-      }
-    }
-  }
-`;
-
 // ---------------------------------------------------------------------------
 // AutoSite: Leads & Sites
 // ---------------------------------------------------------------------------
@@ -420,6 +302,23 @@ export const MY_PURCHASED_DOMAINS = gql`
       isLocked
       expiresAt
       purchasedAt
+      createdAt
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Version History
+// ---------------------------------------------------------------------------
+
+export const SITE_VERSIONS = gql`
+  query SiteVersions($siteId: String!) {
+    siteVersions(siteId: $siteId) {
+      id
+      siteId
+      versionNumber
+      siteData
+      label
       createdAt
     }
   }

@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import VideoHero from "@/components/video-hero";
+import StatsCounter from "@/components/stats-counter";
 
 export default async function HomePage({
   params,
@@ -87,27 +88,14 @@ export default async function HomePage({
       )}
 
       {/* ─── STATS ─── */}
-      <section className="bg-background py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
-            {[
-              { value: "5+", label: stats("experience") },
-              { value: "50+", label: stats("projects") },
-              { value: "30+", label: stats("clients") },
-              { value: "20+", label: stats("technologies") },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-4xl font-extrabold text-primary-deep lg:text-5xl">
-                  {stat.value}
-                </div>
-                <div className="mt-2 text-sm font-medium text-text-muted">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <StatsCounter
+        items={[
+          { value: 14, label: stats("experience") },
+          { value: 3420, suffix: "+", label: stats("projects") },
+          { value: 24, label: stats("technologies") },
+          { value: 1290, label: stats("clients") },
+        ]}
+      />
 
       {/* ─── SERVICES ─── */}
       <section id="services" className="bg-background py-20 lg:py-28">

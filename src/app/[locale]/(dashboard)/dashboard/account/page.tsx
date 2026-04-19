@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth-context";
 import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
+import { CountrySelect } from "@/components/ui/country-select";
+import { MediaPickerField } from "@/components/media-picker";
 import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 
@@ -24,6 +26,8 @@ const UPDATE_PROFILE = gql`
       companyName
       orgNumber
       phone
+      country
+      avatarUrl
     }
   }
 `;
@@ -174,7 +178,6 @@ export default function AccountPage() {
     { key: "companyName", label: t("company"), value: companyName, onChange: setCompanyName },
     { key: "orgNumber", label: t("orgNumber"), value: orgNumber, onChange: setOrgNumber },
     { key: "phone", label: t("phone"), value: phone, onChange: setPhone },
-    { key: "country", label: t("country"), value: country, onChange: setCountry },
   ];
 
   if (isLoading || !user) {
@@ -209,6 +212,36 @@ export default function AccountPage() {
 
       {error && <Alert variant="error">{t("saveFailed")}</Alert>}
 
+      {/* Avatar */}
+      <div className="rounded-2xl border border-border-light bg-white p-6">
+        <h3 className="mb-4 text-sm font-semibold text-primary-deep">{t("avatar")}</h3>
+        <div className="flex items-center gap-4">
+          {user.avatarUrl ? (
+            <img
+              src={user.avatarUrl}
+              alt={user.fullName || ""}
+              className="h-16 w-16 rounded-full object-cover border border-border-light"
+            />
+          ) : (
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary text-xl font-bold">
+              {(user.fullName || user.email || "?")[0].toUpperCase()}
+            </div>
+          )}
+          <MediaPickerField
+            value={user.avatarUrl || ""}
+            onChange={async (url) => {
+              try {
+                await updateProfile({
+                  variables: { input: { avatarUrl: url || null } },
+                });
+              } catch { /* handled by error state */ }
+            }}
+            label=""
+            folder="avatar"
+          />
+        </div>
+      </div>
+
       <div className="rounded-2xl border border-border-light bg-white p-6">
         <h3 className="mb-5 text-sm font-semibold text-primary-deep">{t("personalInfo")}</h3>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -229,6 +262,21 @@ export default function AccountPage() {
               </div>
             </div>
           ))}
+
+          {/* Country dropdown */}
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-text-secondary">
+              {t("country")}
+            </label>
+            <div className="relative">
+              <CountrySelect
+                value={country}
+                onChange={setCountry}
+              />
+              {savingField === "country" && <FieldSpinner />}
+              {savedField === "country" && <SavedCheck />}
+            </div>
+          </div>
         </div>
         <p className="mt-4 text-xs text-text-muted">{t("autoSaveHint")}</p>
       </div>

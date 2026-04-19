@@ -2,7 +2,9 @@
 
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
-import { getAccessToken } from "@/lib/auth-context";
+import { ErrorLink } from "@apollo/client/link/error";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
+import { getAccessToken, forceLogout } from "@/lib/auth-context";
 
 const GRAPHQL_URL = process.env.NEXT_PUBLIC_GRAPHQL_URL ?? (() => {
   if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
@@ -26,8 +28,21 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const errorLink = new ErrorLink(({ error }) => {
+  if (CombinedGraphQLErrors.is(error)) {
+    const hasAuthError = error.errors.some(
+      (err) =>
+        err.message === "Authentication required" ||
+        err.message === "PermissionError: Authentication required",
+    );
+    if (hasAuthError) {
+      forceLogout();
+    }
+  }
+});
+
 const apolloClient = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: authLink.concat(errorLink).concat(httpLink),
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {

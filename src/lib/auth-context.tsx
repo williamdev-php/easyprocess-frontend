@@ -22,8 +22,16 @@ import {
 // In-memory token store (not localStorage for security)
 let accessToken: string | null = null;
 
+// Callback set by AuthProvider so the error link can trigger logout without
+// importing React hooks (avoids circular dependency).
+let _forceLogoutCb: (() => void) | null = null;
+
 export function getAccessToken(): string | null {
   return accessToken;
+}
+
+export function forceLogout(): void {
+  if (_forceLogoutCb) _forceLogoutCb();
 }
 
 function setAccessToken(token: string | null) {
@@ -52,6 +60,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = !!user;
+
+  // Register the force-logout callback so the Apollo error link can trigger it
+  useEffect(() => {
+    _forceLogoutCb = () => {
+      setAccessToken(null);
+      setUser(null);
+      import("@/lib/apollo-client").then((m) => m.default.resetStore().catch(() => {}));
+    };
+    return () => { _forceLogoutCb = null; };
+  }, []);
 
   // Fetch user profile after obtaining an access token
   const fetchUser = useCallback(async (token: string) => {

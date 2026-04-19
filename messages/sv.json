@@ -20,8 +20,8 @@
       "ecommerceDesc": "Skraddarsydda webbutiker som saljer",
       "webdev": "Webbdesign & Utveckling",
       "webdevDesc": "Moderna, snabba och responsiva hemsidor",
-      "ai": "AI-konsulting",
-      "aiDesc": "Strategisk radgivning inom AI och digitalisering"
+      "expert": "Anlita en expert",
+      "expertDesc": "Fa en dedikerad expert for ditt projekt"
     }
   },
   "hero": {
@@ -266,7 +266,9 @@
     "leads": "Leads",
     "inbox": "Inkorg",
     "revenue": "Intakter",
-    "settings": "Installningar"
+    "settings": "Installningar",
+    "helpCenter": "Hjalpcentret",
+    "contactUs": "Kontakta oss"
   },
   "dashboardOverview": {
     "user": {
@@ -439,7 +441,28 @@
     "lastUpdated": "Senast uppdaterad",
     "preview": "Forhandsvisning",
     "noPreview": "Ingen forhandsvisning",
-    "visitSite": "Besok sidan"
+    "visitSite": "Besok sidan",
+    "statusPaused": "Pausad",
+    "menuEditCode": "Redigera kod",
+    "menuCustomize": "Anpassa sida",
+    "menuSettings": "Installningar",
+    "menuPause": "Pausa",
+    "menuUnpause": "Aterupppta",
+    "menuDelete": "Radera",
+    "deleteTitle": "Radera hemsida",
+    "deleteDescription": "Denna atgard doljer hemsidan fran alla besokare. Alla kopplade domaner och subdomaner tas bort. Datan raderas inte helt men hemsidan blir otillganglig.",
+    "deleteSlugPrompt": "Skriv hemsidans slug for att bekrafta:",
+    "deleteSite": "Radera hemsida",
+    "deleting": "Raderar...",
+    "deleteEmailSentTitle": "Bekraftelse skickad",
+    "deleteEmailSentDesc": "Ett e-postmeddelande har skickats till din registrerade e-postadress. Klicka pa lanken i e-postmeddelandet for att bekrafta raderingen.",
+    "deleteErrorTitle": "Nagonting gick fel",
+    "deleteConfirmed": "Hemsidan har raderats.",
+    "cancel": "Avbryt",
+    "close": "Stang",
+    "tryAgain": "Forsok igen",
+    "pauseSuccess": "Hemsidan har pausats.",
+    "unpauseSuccess": "Hemsidan ar nu aktiv igen."
   },
   "siteEditor": {
     "editingLabel": "Redigerar hemsida",
@@ -651,5 +674,66 @@
     "backToSite": "Tillbaka till Qvicko",
     "menu": "Meny",
     "navigation": "Navigation"
+  },
+  "codeEditor": {
+    "explorer": "Utforskaren",
+    "saved": "Sparad",
+    "draft": "Utkast",
+    "saving": "Sparar...",
+    "saveDraft": "Spara utkast",
+    "publish": "Publicera",
+    "publishSuccess": "Alla andringar har publicerats!",
+    "lines": "rader",
+    "validJson": "Giltig JSON"
+  },
+  "siteSettings": {
+    "title": "Installningar",
+    "subtitle": "Hantera hemsidans installningar",
+    "save": "Spara",
+    "saving": "Sparar...",
+    "saveAll": "Spara alla andringar",
+    "saveSuccess": "Installningarna har sparats!",
+    "seoTitle": "SEO & Metadata",
+    "metaTitle": "Sidtitel",
+    "metaDescription": "Beskrivning",
+    "metaKeywords": "Nyckelord",
+    "keywordsPlaceholder": "hemsida, foretag, tjanster...",
+    "ogImage": "Social media-bild (OG Image)",
+    "favicon": "Favicon URL",
+    "robots": "Sokmotorindexering",
+    "characters": "tecken",
+    "languageTitle": "Sprak",
+    "siteLanguage": "Hemsidans sprak",
+    "ownerTitle": "Agare & Foretag",
+    "businessName": "Foretagsnamn",
+    "businessEmail": "E-post",
+    "businessPhone": "Telefon",
+    "businessOrgNumber": "Organisationsnummer",
+    "businessAddress": "Adress"
+  },
+  "media": {
+    "library": "Mediabibliotek",
+    "upload": "Ladda upp",
+    "newFolder": "Ny mapp",
+    "selectMedia": "Välj media",
+    "changeImage": "Byt bild",
+    "remove": "Ta bort",
+    "cancel": "Avbryt",
+    "select": "Välj",
+    "noFiles": "Inga filer ännu",
+    "dragDrop": "Dra och släpp filer här eller klicka \"Ladda upp\"",
+    "folders": "Mappar",
+    "files": "Filer",
+    "back": "Tillbaka",
+    "deleteConfirm": "Ta bort fil?",
+    "deleteWarning": "Filen tas bort permanent och kan inte återställas.",
+    "create": "Skapa",
+    "folderName": "Mappnamn...",
+    "storageUsed": "använt",
+    "uploading": "Laddar upp",
+    "profileImage": "Profilbild",
+    "logo": "Logotyp",
+    "backgroundImage": "Bakgrundsbild",
+    "image": "Bild"
   }
 }
