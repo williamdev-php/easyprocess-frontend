@@ -163,6 +163,7 @@
     "passwordMismatch": "Passwords do not match",
     "passwordMatch": "Passwords match",
     "passwordTooShort": "Password must be at least 8 characters",
+    "passwordRequirements": "Password must contain uppercase, lowercase, and a number",
     "passwordWeak": "Weak password",
     "passwordOk": "Fair password",
     "passwordStrong": "Strong password",

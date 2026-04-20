@@ -163,6 +163,7 @@
     "passwordMismatch": "Lösenorden matchar inte",
     "passwordMatch": "Lösenorden matchar",
     "passwordTooShort": "Lösenordet måste vara minst 8 tecken",
+    "passwordRequirements": "Lösenordet måste innehålla stora bokstäver, specialtecken såsom #!* etc..x och siffror",
     "passwordWeak": "Svagt lösenord",
     "passwordOk": "Okej lösenord",
     "passwordStrong": "Starkt lösenord",

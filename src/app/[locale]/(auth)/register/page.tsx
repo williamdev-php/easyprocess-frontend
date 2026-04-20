@@ -66,7 +66,7 @@ export default function RegisterPage() {
       return;
     }
     if (!/[A-Z]/.test(form.password) || !/[a-z]/.test(form.password) || !/\d/.test(form.password)) {
-      setError(t("passwordTooShort"));
+      setError(t("passwordRequirements"));
       return;
     }
     if (!agreedToTerms) {
