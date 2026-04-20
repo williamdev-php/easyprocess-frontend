@@ -41,6 +41,7 @@ let _userId: string | null = null;
 let _buffer: TrackingPayload[] = [];
 let _flushTimer: ReturnType<typeof setInterval> | null = null;
 let _initialized = false;
+let _sessionStartTime: number | null = null;
 
 // ---------------------------------------------------------------------------
 // ID helpers
@@ -169,8 +170,10 @@ export function flushEvents(): void {
 export function initTracking(): void {
   if (_initialized || typeof window === "undefined") return;
   _initialized = true;
+  _sessionStartTime = Date.now();
   captureUtmParams();
   startFlushTimer();
+  trackEvent("session_start");
 }
 
 export function trackEvent(
@@ -205,6 +208,30 @@ export function trackEvent(
 
 export function trackPageView(): void {
   trackEvent("page_view");
+}
+
+/**
+ * Call when analytics consent is granted after page load.
+ * Re-fires a page_view for the current page so the initial visit isn't lost.
+ */
+export function onConsentGranted(): void {
+  if (typeof window === "undefined") return;
+  // Fire the events that were blocked before consent
+  trackEvent("session_start");
+  trackEvent("page_view");
+  // Flush immediately so they're not lost
+  flushEvents();
+}
+
+/**
+ * Track session end with duration in seconds.
+ * Called on beforeunload / visibilitychange.
+ */
+export function trackSessionEnd(): void {
+  if (typeof window === "undefined" || !_sessionStartTime) return;
+  const durationSec = Math.round((Date.now() - _sessionStartTime) / 1000);
+  trackEvent("session_end", { duration_seconds: durationSec });
+  flushEvents();
 }
 
 export function identifyUser(userId: string): void {

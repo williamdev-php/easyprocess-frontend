@@ -56,6 +56,14 @@ function getDateRange(key: RangeKey): { startDate: string; endDate: string } {
   };
 }
 
+function formatDuration(seconds: number): string {
+  if (!seconds || seconds < 1) return "0s";
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  if (m === 0) return `${s}s`;
+  return `${m}m ${s}s`;
+}
+
 const FUNNEL_LABELS: Record<string, { en: string; sv: string }> = {
   page_view: { en: "Visitors", sv: "Besökare" },
   cta_click: { en: "CTA Clicks", sv: "CTA-klick" },
@@ -162,7 +170,7 @@ export default function AnalyticsPage() {
 
       {/* Key Metrics */}
       {overview && (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
           <MetricCard label={t("uniqueVisitors")} value={overview.uniqueVisitors.toLocaleString()} />
           <MetricCard label={t("totalSignups")} value={overview.totalSignups.toLocaleString()} />
           <MetricCard label={t("trialStartRate")} value={`${overview.trialStartRate}%`} />
@@ -170,6 +178,10 @@ export default function AnalyticsPage() {
           <MetricCard
             label={t("totalRevenue")}
             value={`${(overview.totalRevenueSek / 100).toLocaleString()} kr`}
+          />
+          <MetricCard
+            label={t("avgSessionDuration")}
+            value={formatDuration(overview.avgSessionDurationSeconds)}
           />
         </div>
       )}
@@ -332,8 +344,8 @@ function AnalyticsSkeleton() {
           <div className="h-8 w-12 rounded-lg bg-background-subtle" />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="h-24 rounded-2xl bg-background-subtle" />
         ))}
       </div>

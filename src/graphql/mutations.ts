@@ -10,6 +10,8 @@ export const CREATE_LEAD = gql`
       id
       businessName
       websiteUrl
+      industryId
+      industryName
       status
     }
   }
@@ -18,6 +20,12 @@ export const CREATE_LEAD = gql`
 export const SCRAPE_LEAD = gql`
   mutation ScrapeLead($leadId: String!) {
     scrapeLead(leadId: $leadId)
+  }
+`;
+
+export const GENERATE_VIDEO = gql`
+  mutation GenerateVideo($leadId: String!) {
+    generateVideo(leadId: $leadId)
   }
 `;
 
@@ -323,6 +331,22 @@ export const REACTIVATE_SUBSCRIPTION = gql`
 `;
 
 // ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+export const MARK_NOTIFICATION_READ = gql`
+  mutation MarkNotificationRead($notificationId: String!) {
+    markNotificationRead(notificationId: $notificationId)
+  }
+`;
+
+export const MARK_ALL_NOTIFICATIONS_READ = gql`
+  mutation MarkAllNotificationsRead {
+    markAllNotificationsRead
+  }
+`;
+
+// ---------------------------------------------------------------------------
 // Support Tickets
 // ---------------------------------------------------------------------------
 
@@ -389,5 +413,39 @@ export const ADMIN_UPDATE_USER = gql`
       isVerified
       updatedAt
     }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Industries
+// ---------------------------------------------------------------------------
+
+export const CREATE_INDUSTRY = gql`
+  mutation CreateIndustry($input: CreateIndustryInput!) {
+    createIndustry(input: $input) {
+      id
+      name
+      slug
+      description
+      createdAt
+    }
+  }
+`;
+
+export const UPDATE_INDUSTRY = gql`
+  mutation UpdateIndustry($input: UpdateIndustryInput!) {
+    updateIndustry(input: $input) {
+      id
+      name
+      slug
+      description
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_INDUSTRY = gql`
+  mutation DeleteIndustry($industryId: String!) {
+    deleteIndustry(industryId: $industryId)
   }
 `;

@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { getAccessToken } from "@/lib/auth-context";
@@ -13,7 +13,20 @@ export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const claimToken = searchParams.get("claim");
+  const rawRedirect = searchParams.get("redirect") || "/dashboard";
+  let redirect = "/dashboard";
+  try {
+    if (typeof window !== "undefined") {
+      const parsed = new URL(rawRedirect, window.location.origin);
+      if (parsed.origin === window.location.origin) {
+        redirect = parsed.pathname + parsed.search + parsed.hash;
+      }
+    }
+  } catch {
+    // Invalid URL — use default
+  }
   const t = useTranslations("auth");
+  const locale = useLocale();
 
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -38,6 +51,12 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
+    // Validate email format
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(form.email)) {
+      setError(t("invalidEmail"));
+      return;
+    }
     if (form.password !== form.confirmPassword) {
       setError(t("passwordMismatch"));
       return;
@@ -70,6 +89,7 @@ export default function RegisterPage() {
         companyName: form.companyName || undefined,
         orgNumber: form.orgNumber || undefined,
         phone: form.phone || undefined,
+        locale,
       });
 
       // If registering with a claim token, claim the site after registration
@@ -91,7 +111,7 @@ export default function RegisterPage() {
         router.push("/dashboard/pages");
         return;
       }
-      router.push("/dashboard");
+      router.push(redirect as "/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : t("registerFailed"));
     } finally {
@@ -376,7 +396,7 @@ export default function RegisterPage() {
       </div>
 
       <Link
-        href="/login"
+        href={redirect !== "/dashboard" ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login"}
         className="flex w-full items-center justify-center rounded-xl border-2 border-border-theme px-6 py-3 text-sm font-semibold text-primary-deep transition hover:border-primary hover:bg-primary-deep/5"
       >
         {t("loginLink")}

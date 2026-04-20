@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/routing";
+import PricingCtaLink from "@/components/pricing-cta-link";
+import CtaTrackLink from "@/components/cta-track-link";
 
 export async function generateMetadata({
   params,
@@ -166,8 +167,9 @@ export default async function PricingPage({
                 </ul>
 
                 <div className="mt-8">
-                  <Link
+                  <PricingCtaLink
                     href={plan.href}
+                    planKey={plan.key}
                     className={`block w-full rounded-xl py-3 text-center text-sm font-semibold transition ${
                       plan.popular
                         ? "bg-primary-deep text-white hover:bg-primary-dark"
@@ -175,7 +177,7 @@ export default async function PricingPage({
                     }`}
                   >
                     {plan.cta}
-                  </Link>
+                  </PricingCtaLink>
                 </div>
               </div>
             ))}
@@ -222,9 +224,10 @@ export default async function PricingPage({
             {t("title")}
           </h2>
           <div className="mt-10">
-            <Link
+            <CtaTrackLink
               href="/create-site"
               className="inline-flex items-center rounded-xl bg-accent px-10 py-4 text-lg font-semibold text-primary-deep shadow-lg transition hover:bg-accent/90 hover:shadow-xl"
+              eventMeta={{ location: "pricing_bottom_cta" }}
             >
               {t("getStarted")}
               <svg
@@ -240,7 +243,7 @@ export default async function PricingPage({
                   d="M17 8l4 4m0 0l-4 4m4-4H3"
                 />
               </svg>
-            </Link>
+            </CtaTrackLink>
           </div>
         </div>
       </section>

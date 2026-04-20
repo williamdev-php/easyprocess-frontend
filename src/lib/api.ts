@@ -43,6 +43,7 @@ export interface RegisterPayload {
   companyName?: string;
   orgNumber?: string;
   phone?: string;
+  locale?: string;
 }
 
 export interface LoginPayload {
@@ -102,7 +103,14 @@ async function request<T>(
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body.detail || body.message || `Request failed: ${res.status}`);
+      const detail = body.detail;
+      const message =
+        typeof detail === "string"
+          ? detail
+          : Array.isArray(detail)
+            ? detail.map((e: { msg?: string }) => (e.msg ?? "").replace(/^Value error, /i, "")).filter(Boolean).join(". ")
+            : body.message || `Request failed: ${res.status}`;
+      throw new Error(message);
     }
 
     if (res.status === 204) return {} as T;
@@ -129,6 +137,20 @@ export function loginUser(payload: LoginPayload): Promise<TokenResponse> {
   return request<TokenResponse>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify(convertKeys(payload, toSnakeCase)),
+  });
+}
+
+export function forgotPassword(email: string): Promise<void> {
+  return request<void>("/api/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token: string, newPassword: string): Promise<void> {
+  return request<void>("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, new_password: newPassword }),
   });
 }
 

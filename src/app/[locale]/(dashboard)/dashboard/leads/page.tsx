@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useRouter } from "@/i18n/routing";
-import { GET_LEADS, GET_DASHBOARD_STATS, GET_OUTREACH_STATS } from "@/graphql/queries";
+import { GET_LEADS, GET_DASHBOARD_STATS, GET_OUTREACH_STATS, GET_INDUSTRIES } from "@/graphql/queries";
 import { CREATE_LEAD, DELETE_LEAD } from "@/graphql/mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,16 +131,22 @@ function OutreachStatsBar() {
 
 export default function LeadsPage() {
   const t = useTranslations("leads");
+  const tSettings = useTranslations("settings");
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [industryFilter, setIndustryFilter] = useState("");
 
   // Create lead state
   const [showCreate, setShowCreate] = useState(false);
   const [newUrl, setNewUrl] = useState("");
   const [newName, setNewName] = useState("");
-  const [newIndustry, setNewIndustry] = useState("");
+  const [newIndustryId, setNewIndustryId] = useState("");
+
+  // Industries
+  const { data: industriesData } = useQuery<any>(GET_INDUSTRIES);
+  const industries: { id: string; name: string }[] = industriesData?.industries ?? [];
 
   const { data, loading, refetch } = useQuery<any>(GET_LEADS, {
     variables: {
@@ -149,6 +155,7 @@ export default function LeadsPage() {
         pageSize: 20,
         ...(search ? { search } : {}),
         ...(statusFilter ? { status: statusFilter } : {}),
+        ...(industryFilter ? { industryId: industryFilter } : {}),
       },
     },
     fetchPolicy: "cache-and-network",
@@ -177,13 +184,13 @@ export default function LeadsPage() {
           input: {
             websiteUrl: newUrl.trim(),
             ...(newName ? { businessName: newName } : {}),
-            ...(newIndustry ? { industry: newIndustry } : {}),
+            ...(newIndustryId ? { industryId: newIndustryId } : {}),
           },
         },
       });
       setNewUrl("");
       setNewName("");
-      setNewIndustry("");
+      setNewIndustryId("");
       setShowCreate(false);
       refetch();
     } catch {
@@ -228,12 +235,16 @@ export default function LeadsPage() {
               onChange={(e) => setNewName(e.target.value)}
               className="sm:w-48"
             />
-            <Input
-              placeholder={t("industryPlaceholder")}
-              value={newIndustry}
-              onChange={(e) => setNewIndustry(e.target.value)}
-              className="sm:w-36"
-            />
+            <select
+              value={newIndustryId}
+              onChange={(e) => setNewIndustryId(e.target.value)}
+              className="rounded-xl border border-border-theme bg-white px-4 py-2.5 text-sm text-text-theme focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-44"
+            >
+              <option value="">{t("industryPlaceholder")}</option>
+              {industries.map((ind) => (
+                <option key={ind.id} value={ind.id}>{ind.name}</option>
+              ))}
+            </select>
             <Button onClick={handleCreate} disabled={creating || !newUrl.trim()}>
               {creating ? t("processing") : t("create")}
             </Button>
@@ -259,6 +270,16 @@ export default function LeadsPage() {
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
+        <select
+          value={industryFilter}
+          onChange={(e) => { setIndustryFilter(e.target.value); setPage(1); }}
+          className="rounded-xl border border-border-theme bg-white px-4 py-2.5 text-sm text-text-theme focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        >
+          <option value="">{tSettings("allIndustries")}</option>
+          {industries.map((ind) => (
+            <option key={ind.id} value={ind.id}>{ind.name}</option>
+          ))}
+        </select>
       </div>
 
       {/* Table */}
@@ -268,9 +289,10 @@ export default function LeadsPage() {
             <tr className="border-b border-border-light bg-primary-deep/[0.02]">
               <th className="px-4 py-3 text-left font-semibold text-primary-deep">{t("business")}</th>
               <th className="hidden px-4 py-3 text-left font-semibold text-primary-deep sm:table-cell">{t("contact")}</th>
+              <th className="hidden px-4 py-3 text-left font-semibold text-primary-deep md:table-cell">{t("industry")}</th>
               <th className="px-4 py-3 text-left font-semibold text-primary-deep">{t("status")}</th>
-              <th className="hidden px-4 py-3 text-center font-semibold text-primary-deep md:table-cell">{t("messages")}</th>
-              <th className="hidden px-4 py-3 text-left font-semibold text-primary-deep lg:table-cell">{t("site")}</th>
+              <th className="hidden px-4 py-3 text-center font-semibold text-primary-deep lg:table-cell">{t("messages")}</th>
+              <th className="hidden px-4 py-3 text-left font-semibold text-primary-deep xl:table-cell">{t("site")}</th>
               <th className="px-4 py-3 text-right font-semibold text-primary-deep">{t("actions")}</th>
             </tr>
           </thead>
@@ -280,20 +302,22 @@ export default function LeadsPage() {
                 <tr key={i} className="border-b border-border-light">
                   <td className="px-4 py-3"><Skeleton className="h-5 w-32" /></td>
                   <td className="hidden px-4 py-3 sm:table-cell"><Skeleton className="h-5 w-40" /></td>
+                  <td className="hidden px-4 py-3 md:table-cell"><Skeleton className="h-5 w-20" /></td>
                   <td className="px-4 py-3"><Skeleton className="h-5 w-20" /></td>
-                  <td className="hidden px-4 py-3 md:table-cell"><Skeleton className="h-5 w-8 mx-auto" /></td>
-                  <td className="hidden px-4 py-3 lg:table-cell"><Skeleton className="h-5 w-16" /></td>
+                  <td className="hidden px-4 py-3 lg:table-cell"><Skeleton className="h-5 w-8 mx-auto" /></td>
+                  <td className="hidden px-4 py-3 xl:table-cell"><Skeleton className="h-5 w-16" /></td>
                   <td className="px-4 py-3"><Skeleton className="h-5 w-12 ml-auto" /></td>
                 </tr>
               ))
             ) : leads.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-text-muted">{t("noLeads")}</td>
+                <td colSpan={7} className="px-4 py-12 text-center text-text-muted">{t("noLeads")}</td>
               </tr>
             ) : (
               leads.map((lead: {
                 id: string; businessName: string | null; websiteUrl: string;
                 email: string | null; phone: string | null; status: string;
+                industryName: string | null;
                 inboundEmailsCount: number;
                 generatedSite: { id: string; status: string; views: number } | null;
               }) => (
@@ -310,12 +334,21 @@ export default function LeadsPage() {
                     <p className="text-text-secondary">{lead.email || "—"}</p>
                     <p className="text-xs text-text-muted">{lead.phone || ""}</p>
                   </td>
+                  <td className="hidden px-4 py-3 md:table-cell">
+                    {lead.industryName ? (
+                      <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">
+                        {lead.industryName}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-text-muted">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_COLORS[lead.status] || "bg-gray-100"}`}>
                       {lead.status}
                     </span>
                   </td>
-                  <td className="hidden px-4 py-3 md:table-cell text-center">
+                  <td className="hidden px-4 py-3 lg:table-cell text-center">
                     {lead.inboundEmailsCount > 0 ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -327,7 +360,7 @@ export default function LeadsPage() {
                       <span className="text-xs text-text-muted">0</span>
                     )}
                   </td>
-                  <td className="hidden px-4 py-3 lg:table-cell">
+                  <td className="hidden px-4 py-3 xl:table-cell">
                     {lead.generatedSite ? (
                       <a
                         href={`${process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001"}/${lead.generatedSite.id}`}

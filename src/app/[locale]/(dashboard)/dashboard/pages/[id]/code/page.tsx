@@ -5,8 +5,189 @@ import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { MY_SITE } from "@/graphql/queries";
-import { UPDATE_SITE_DATA, SAVE_DRAFT, LOAD_DRAFT } from "@/graphql/mutations";
+import { PUBLISH_SITE_DATA, SAVE_DRAFT, LOAD_DRAFT } from "@/graphql/mutations";
 import { Link } from "@/i18n/routing";
+
+// ---------------------------------------------------------------------------
+// Section schema validation (mirrors backend Pydantic SiteSchema)
+// ---------------------------------------------------------------------------
+
+const VALID_SECTION_KEYS = [
+  "hero", "about", "features", "stats", "services", "process",
+  "gallery", "team", "testimonials", "faq", "cta", "contact",
+];
+
+type FieldRule = {
+  field: string;
+  type: "string" | "number" | "boolean" | "array" | "object";
+  required?: boolean;
+};
+
+type SectionRule = {
+  nullable: boolean;
+  fields?: FieldRule[];
+  /** Name of the list field + required fields per item */
+  items?: { list: string; fields: FieldRule[] };
+};
+
+const SECTION_RULES: Record<string, SectionRule> = {
+  meta: {
+    nullable: false,
+    fields: [
+      { field: "title", type: "string" },
+      { field: "description", type: "string" },
+      { field: "keywords", type: "array" },
+      { field: "language", type: "string" },
+    ],
+  },
+  branding: {
+    nullable: false,
+    fields: [
+      { field: "colors", type: "object" },
+      { field: "fonts", type: "object" },
+    ],
+  },
+  business: {
+    nullable: false,
+    fields: [
+      { field: "name", type: "string" },
+      { field: "tagline", type: "string" },
+    ],
+  },
+  seo: {
+    nullable: false,
+    fields: [
+      { field: "structured_data", type: "object" },
+      { field: "robots", type: "string" },
+    ],
+  },
+  hero: {
+    nullable: true,
+    fields: [{ field: "headline", type: "string", required: true }],
+  },
+  about: {
+    nullable: true,
+    fields: [{ field: "title", type: "string" }, { field: "text", type: "string" }],
+  },
+  features: {
+    nullable: true,
+    items: { list: "items", fields: [{ field: "title", type: "string", required: true }, { field: "description", type: "string", required: true }] },
+  },
+  stats: {
+    nullable: true,
+    items: { list: "items", fields: [{ field: "value", type: "string", required: true }, { field: "label", type: "string", required: true }] },
+  },
+  services: {
+    nullable: true,
+    items: { list: "items", fields: [{ field: "title", type: "string", required: true }, { field: "description", type: "string", required: true }] },
+  },
+  process: {
+    nullable: true,
+    items: { list: "steps", fields: [{ field: "title", type: "string", required: true }, { field: "description", type: "string", required: true }] },
+  },
+  gallery: {
+    nullable: true,
+    items: { list: "images", fields: [{ field: "url", type: "string", required: true }] },
+  },
+  team: {
+    nullable: true,
+    items: { list: "members", fields: [{ field: "name", type: "string", required: true }] },
+  },
+  testimonials: {
+    nullable: true,
+    items: { list: "items", fields: [{ field: "text", type: "string", required: true }, { field: "author", type: "string", required: true }] },
+  },
+  faq: {
+    nullable: true,
+    items: { list: "items", fields: [{ field: "question", type: "string", required: true }, { field: "answer", type: "string", required: true }] },
+  },
+  cta: {
+    nullable: true,
+    fields: [{ field: "title", type: "string", required: true }],
+  },
+  contact: {
+    nullable: true,
+    fields: [{ field: "title", type: "string" }],
+  },
+};
+
+function checkType(value: unknown, expected: FieldRule["type"]): boolean {
+  if (value === null || value === undefined) return true; // optional fields
+  switch (expected) {
+    case "string": return typeof value === "string";
+    case "number": return typeof value === "number";
+    case "boolean": return typeof value === "boolean";
+    case "array": return Array.isArray(value);
+    case "object": return typeof value === "object" && !Array.isArray(value);
+  }
+}
+
+/** Validate a single section value against its schema rules. Returns error string or null. */
+function validateSection(key: string, value: unknown): string | null {
+  // section_order is a special case
+  if (key === "section_order") {
+    if (!Array.isArray(value)) return "section_order must be an array";
+    for (const item of value) {
+      if (typeof item !== "string" || !VALID_SECTION_KEYS.includes(item)) {
+        return `Invalid section in section_order: "${item}". Valid: ${VALID_SECTION_KEYS.join(", ")}`;
+      }
+    }
+    return null;
+  }
+
+  const rule = SECTION_RULES[key];
+  if (!rule) return null; // unknown key — no validation
+
+  // null check
+  if (value === null || value === undefined) {
+    return rule.nullable ? null : `"${key}" cannot be null`;
+  }
+
+  if (typeof value !== "object" || Array.isArray(value)) {
+    return "Section must be an object or null";
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  // Check top-level fields
+  if (rule.fields) {
+    for (const f of rule.fields) {
+      if (f.required && (obj[f.field] === undefined || obj[f.field] === null || obj[f.field] === "")) {
+        return `Required: "${f.field}"`;
+      }
+      if (obj[f.field] !== undefined && obj[f.field] !== null && !checkType(obj[f.field], f.type)) {
+        return `"${f.field}" must be ${f.type}`;
+      }
+    }
+  }
+
+  // Check list items
+  if (rule.items) {
+    const list = obj[rule.items.list];
+    if (list !== undefined && list !== null) {
+      if (!Array.isArray(list)) {
+        return `"${rule.items.list}" must be an array`;
+      }
+      for (let i = 0; i < list.length; i++) {
+        const item = list[i];
+        if (typeof item !== "object" || item === null || Array.isArray(item)) {
+          return `${rule.items.list}[${i}] must be an object`;
+        }
+        for (const f of rule.items.fields) {
+          const val = (item as Record<string, unknown>)[f.field];
+          if (f.required && (val === undefined || val === null || val === "")) {
+            return `"${f.field}" required in ${rule.items.list}[${i}]`;
+          }
+          if (val !== undefined && val !== null && !checkType(val, f.type)) {
+            return `${rule.items.list}[${i}].${f.field} must be ${f.type}`;
+          }
+        }
+      }
+    }
+  }
+
+  return null;
+}
 
 // Section keys that map to top-level site_data keys
 const SECTION_FILES = [
@@ -42,7 +223,7 @@ export default function CodeEditorPage() {
   const siteId = params.id;
 
   const { data, loading } = useQuery<{ mySite: { siteData: Record<string, unknown>; businessName?: string } | null }>(MY_SITE, { variables: { id: siteId } });
-  const [updateSiteData] = useMutation(UPDATE_SITE_DATA);
+  const [publishSiteData] = useMutation(PUBLISH_SITE_DATA);
   const [saveDraftMut] = useMutation(SAVE_DRAFT);
   const [loadDraftMut] = useMutation<{ loadDraft: { siteId: string; draftData: Record<string, unknown>; updatedAt: string } | null }>(LOAD_DRAFT);
 
@@ -50,6 +231,7 @@ export default function CodeEditorPage() {
   const [activeFile, setActiveFile] = useState("meta");
   const [editorContent, setEditorContent] = useState("");
   const [parseError, setParseError] = useState<string | null>(null);
+  const [schemaError, setSchemaError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -77,10 +259,13 @@ export default function CodeEditorPage() {
   useEffect(() => {
     const section = siteData[activeFile];
     try {
-      setEditorContent(JSON.stringify(section ?? null, null, 2));
+      const content = JSON.stringify(section ?? null, null, 2);
+      setEditorContent(content);
       setParseError(null);
+      setSchemaError(validateSection(activeFile, section ?? null));
     } catch {
       setEditorContent("");
+      setSchemaError(null);
     }
   }, [activeFile, siteData]);
 
@@ -89,12 +274,16 @@ export default function CodeEditorPage() {
     setEditorContent(value);
     setSaved(false);
     try {
-      JSON.parse(value);
+      const parsed = JSON.parse(value);
       setParseError(null);
+      // Schema validation
+      const sError = validateSection(activeFile, parsed);
+      setSchemaError(sError);
     } catch (e: unknown) {
       setParseError(e instanceof Error ? e.message : "Invalid JSON");
+      setSchemaError(null);
     }
-  }, []);
+  }, [activeFile]);
 
   // Save current file back to siteData
   const saveCurrentFile = useCallback(() => {
@@ -128,13 +317,25 @@ export default function CodeEditorPage() {
     }
   }, [siteId, siteData, activeFile, editorContent, saveCurrentFile, saveDraftMut]);
 
-  // Publish all changes
+  // Publish all changes — also validates ALL sections before sending
   const handlePublish = useCallback(async () => {
     if (!saveCurrentFile()) return;
     setSaving(true);
     try {
       const merged = { ...siteData, [activeFile]: JSON.parse(editorContent) };
-      await updateSiteData({
+
+      // Validate every section client-side before publishing
+      for (const sectionFile of SECTION_FILES) {
+        const sErr = validateSection(sectionFile.key, merged[sectionFile.key] ?? null);
+        if (sErr) {
+          setMessage({ type: "error", text: `${sectionFile.label}: ${sErr}` });
+          setTimeout(() => setMessage(null), 5000);
+          setSaving(false);
+          return;
+        }
+      }
+
+      await publishSiteData({
         variables: { input: { siteId, siteData: merged } },
       });
       setHasDraft(false);
@@ -146,7 +347,7 @@ export default function CodeEditorPage() {
     } finally {
       setSaving(false);
     }
-  }, [siteId, siteData, activeFile, editorContent, saveCurrentFile, updateSiteData, t]);
+  }, [siteId, siteData, activeFile, editorContent, saveCurrentFile, publishSiteData, t]);
 
   // Keyboard shortcut: Ctrl+S to save draft
   useEffect(() => {
@@ -215,6 +416,14 @@ export default function CodeEditorPage() {
               JSON-fel
             </span>
           )}
+          {!parseError && schemaError && (
+            <span className="flex items-center gap-1.5 rounded-lg bg-amber-500/20 px-2.5 py-1 text-xs text-amber-400" title={schemaError}>
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+              </svg>
+              {t("schemaError")}
+            </span>
+          )}
           {saved && (
             <span className="flex items-center gap-1.5 rounded-lg bg-emerald-500/20 px-2.5 py-1 text-xs text-emerald-400">
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -238,7 +447,7 @@ export default function CodeEditorPage() {
           </button>
           <button
             onClick={handlePublish}
-            disabled={saving || !!parseError}
+            disabled={saving || !!parseError || !!schemaError}
             className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-500 disabled:opacity-40"
           >
             {t("publish")}
@@ -334,8 +543,10 @@ export default function CodeEditorPage() {
             <div className="flex items-center gap-3">
               {parseError ? (
                 <span className="text-red-400">{parseError}</span>
+              ) : schemaError ? (
+                <span className="text-amber-400">{schemaError}</span>
               ) : (
-                <span className="text-emerald-400">{t("validJson")}</span>
+                <span className="text-emerald-400">{t("validSchema")}</span>
               )}
               <span>UTF-8</span>
             </div>

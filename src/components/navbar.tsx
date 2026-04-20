@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { usePathname } from "@/i18n/routing";
+import { trackEvent } from "@/lib/tracking";
 
 export default function Navbar() {
   const { isAuthenticated } = useAuth();
@@ -168,7 +169,16 @@ export default function Navbar() {
                 </div>
               </div>
 
-              <Link href="/pricing" className={`${navLinkClass} text-white`}>
+              <Link
+                href="/pricing"
+                className={`${navLinkClass} text-white`}
+                onClick={() =>
+                  trackEvent("cta_click", {
+                    target: "/pricing",
+                    location: "navbar",
+                  })
+                }
+              >
                 {t("pricing")}
               </Link>
 
@@ -292,7 +302,13 @@ export default function Navbar() {
 
             <Link
               href="/pricing"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => {
+                trackEvent("cta_click", {
+                  target: "/pricing",
+                  location: "navbar_mobile",
+                });
+                setMobileOpen(false);
+              }}
               className="rounded-xl px-4 py-3 text-lg font-medium text-white transition hover:bg-white/10"
             >
               {t("pricing")}

@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "@/i18n/routing";
+import { useRouter, usePathname } from "@/i18n/routing";
 import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import Image from "next/image";
@@ -48,6 +48,7 @@ export default function DashboardLayout({
 }) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const { data: sitesData, loading: sitesLoading } = useQuery<{ mySites: Array<{ id: string }> }>(MY_SITES, {
     skip: !isAuthenticated,
@@ -55,12 +56,29 @@ export default function DashboardLayout({
   });
 
   const [siteCreated, setSiteCreated] = useState(false);
+  const [billingRedirectHandled, setBillingRedirectHandled] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/login" as "/dashboard");
+      const returnUrl = pathname && pathname !== "/dashboard" ? `?redirect=${encodeURIComponent(pathname)}` : "";
+      router.push(`/login${returnUrl}` as "/dashboard");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, pathname]);
+
+  // Redirect to billing if user clicked a paid plan on pricing page
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && !sitesLoading && !billingRedirectHandled) {
+      const billingRedirect = localStorage.getItem("billing_redirect");
+      if (billingRedirect) {
+        localStorage.removeItem("billing_redirect");
+        setBillingRedirectHandled(true);
+        const hasSitesNow = siteCreated || (sitesData?.mySites && sitesData.mySites.length > 0);
+        if (hasSitesNow || user?.isSuperuser) {
+          router.push("/dashboard/billing" as "/dashboard");
+        }
+      }
+    }
+  }, [isLoading, isAuthenticated, sitesLoading, siteCreated, sitesData, user, router, billingRedirectHandled]);
 
   if (isLoading || sitesLoading) {
     return null;
@@ -83,7 +101,13 @@ export default function DashboardLayout({
             embedded
             onComplete={() => {
               setSiteCreated(true);
-              router.push("/dashboard");
+              const billingRedirect = localStorage.getItem("billing_redirect");
+              if (billingRedirect) {
+                localStorage.removeItem("billing_redirect");
+                router.push("/dashboard/billing" as "/dashboard");
+              } else {
+                router.push("/dashboard");
+              }
             }}
           />
         </Suspense>

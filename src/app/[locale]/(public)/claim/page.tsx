@@ -24,6 +24,7 @@ interface ClaimInfo {
   description: string;
   createdAt: string | null;
   colors: { primary?: string; secondary?: string; accent?: string };
+  videoUrl: string | null;
 }
 
 export default function ClaimPage() {
@@ -79,6 +80,7 @@ function ClaimPageInner() {
           description: data.description,
           createdAt: data.created_at,
           colors: data.colors || {},
+          videoUrl: data.video_url || null,
         });
       })
       .catch((err) => setError(err.message))
@@ -322,8 +324,26 @@ function ClaimPageInner() {
             </div>
           </div>
 
-          {/* Right: Preview */}
-          <div className="lg:col-span-3">
+          {/* Right: Preview + Video */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Before/after video */}
+            {claimInfo?.videoUrl && (
+              <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                <div className="border-b border-gray-100 px-4 py-3">
+                  <h3 className="text-sm font-semibold text-gray-700">{t("videoTitle")}</h3>
+                </div>
+                <div className="p-4">
+                  <video
+                    src={claimInfo.videoUrl}
+                    controls
+                    className="w-full rounded-lg"
+                    preload="metadata"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Live preview */}
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
               <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
                 <div className="flex gap-1.5">

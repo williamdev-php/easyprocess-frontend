@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
@@ -10,6 +10,7 @@ import {
   SCRAPE_LEAD,
   SEND_OUTREACH_EMAIL,
   PUBLISH_SITE,
+  GENERATE_VIDEO,
 } from "@/graphql/mutations";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
@@ -295,9 +296,31 @@ export default function LeadDetailPage() {
   const [scrapeLead] = useMutation(SCRAPE_LEAD);
   const [sendEmail] = useMutation(SEND_OUTREACH_EMAIL);
   const [publishSite] = useMutation(PUBLISH_SITE);
+  const [generateVideo] = useMutation(GENERATE_VIDEO);
   const [actionLoading, setActionLoading] = useState("");
+  const [videoGenerating, setVideoGenerating] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const lead = data?.lead;
+
+  // Stop polling when video URL appears or on unmount
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (videoGenerating && lead?.generatedSite?.videoUrl) {
+      setVideoGenerating(false);
+      stopPolling();
+    }
+  }, [lead?.generatedSite?.videoUrl, videoGenerating, stopPolling]);
+
+  useEffect(() => {
+    return () => stopPolling();
+  }, [stopPolling]);
 
   async function handleAction(action: string) {
     setActionLoading(action);
@@ -308,6 +331,13 @@ export default function LeadDetailPage() {
         await sendEmail({ variables: { leadId } });
       } else if (action === "publish" && lead?.generatedSite?.id) {
         await publishSite({ variables: { siteId: lead.generatedSite.id } });
+      } else if (action === "video") {
+        await generateVideo({ variables: { leadId } });
+        setVideoGenerating(true);
+        stopPolling();
+        pollRef.current = setInterval(() => {
+          refetch();
+        }, 5000);
       }
       await refetch();
     } catch {
@@ -376,6 +406,19 @@ export default function LeadDetailPage() {
                 {actionLoading === "email" ? t("processing") : t("sendEmail")}
               </Button>
             )}
+            {lead.generatedSite && (
+              <Button size="sm" variant="outline" onClick={() => handleAction("video")} disabled={actionLoading === "video" || videoGenerating}>
+                {actionLoading === "video" || videoGenerating ? (
+                  <span className="flex items-center gap-1.5">
+                    <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    {t("videoGenerating")}
+                  </span>
+                ) : t("generateVideo")}
+              </Button>
+            )}
           </div>
         </div>
         <a href={lead.websiteUrl} target="_blank" rel="noopener" className="text-sm text-primary hover:underline">
@@ -392,7 +435,7 @@ export default function LeadDetailPage() {
             {[
               { label: t("email"), value: lead.email },
               { label: t("phone"), value: lead.phone },
-              { label: t("industry"), value: lead.industry },
+              { label: t("industry"), value: lead.industryName || lead.industry },
               { label: t("address"), value: lead.address },
               { label: t("qualityScore"), value: lead.qualityScore != null ? `${(lead.qualityScore * 100).toFixed(0)}%` : null },
               { label: t("createdAt"), value: formatDate(lead.createdAt) },
@@ -432,6 +475,37 @@ export default function LeadDetailPage() {
               </a>
             </div>
           )}
+
+          {/* Before/after video */}
+          {lead.generatedSite?.videoUrl ? (
+            <div className="rounded-xl border border-border-light bg-white p-4">
+              <h4 className="mb-3 text-sm font-semibold text-primary-deep">{t("beforeAfterVideo")}</h4>
+              <video
+                src={lead.generatedSite.videoUrl}
+                controls
+                className="w-full rounded-lg"
+                preload="metadata"
+              />
+            </div>
+          ) : videoGenerating ? (
+            <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100">
+                  <svg className="h-5 w-5 animate-spin text-purple-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-semibold text-purple-900">{t("videoGeneratingTitle")}</h4>
+                  <p className="mt-1 text-xs text-purple-700">{t("videoGeneratingDescription")}</p>
+                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-purple-200">
+                    <div className="h-full animate-indeterminate rounded-full bg-purple-500" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           {/* Scraped data */}
           <ScrapedDataPanel data={lead.scrapedData} />

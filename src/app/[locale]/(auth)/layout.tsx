@@ -20,25 +20,25 @@ export default function AuthLayout({
             <Image
               src="/logo-sand-mist.png"
               alt="Qvicko"
-              width={160}
-              height={53}
-              className="h-12"
+              width={200}
+              height={67}
+              className="h-16"
               style={{ width: "auto" }}
               priority
             />
           </Link>
           <p className="mt-6 text-xl font-semibold leading-relaxed">
-            Digitala losningar som driver tillvaxt
+            Din hemsida, live på minuter
           </p>
           <p className="mt-4 text-white/60">
-            AI-automatiseringar, e-handelslosningar, webbdesign och digitala tjanster — allt pa ett stalle.
+            Beskriv ditt företag och vår AI bygger en professionell, SEO-optimerad hemsida — redo att publicera direkt.
           </p>
 
           <div className="mt-12 space-y-4">
             {[
-              { icon: "M13 10V3L4 14h7v7l9-11h-7z", text: "Snabb onboarding" },
-              { icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", text: "Saker plattform" },
-              { icon: "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z", text: "Spar dina projekt" },
+              { icon: "M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z", text: "Klar på under 5 minuter" },
+              { icon: "M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941", text: "Inbyggd SEO från dag ett" },
+              { icon: "M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42", text: "Snygg design, varje gång" },
             ].map((item) => (
               <div key={item.text} className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10">

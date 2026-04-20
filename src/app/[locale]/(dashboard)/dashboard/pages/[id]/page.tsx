@@ -1083,19 +1083,26 @@ export default function SiteEditorPage() {
     }
   }, [data, siteData, siteId, loadDraftMutation]);
 
+  // Viewer origin for postMessage security — restrict to known origin
+  const viewerOrigin = process.env.NEXT_PUBLIC_VIEWER_URL ?? "";
+
   // Send current data to iframe
   const pushToIframe = useCallback((d: SiteData) => {
     if (iframeRef.current?.contentWindow) {
+      const targetOrigin = viewerOrigin || "*";
       iframeRef.current.contentWindow.postMessage(
         { type: "SITE_DATA_UPDATE", siteData: d },
-        "*"
+        targetOrigin
       );
     }
-  }, []);
+  }, [viewerOrigin]);
 
   // Listen for messages from the viewer iframe
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
+      // Validate origin when viewer URL is configured
+      if (viewerOrigin && event.origin !== viewerOrigin) return;
+
       const msg = event.data;
       if (!msg?.type) return;
 
@@ -1120,7 +1127,7 @@ export default function SiteEditorPage() {
     }
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [pushToIframe]);
+  }, [pushToIframe, viewerOrigin]);
 
   // Handle changes: update preview + auto-save draft
   const handleChange = useCallback(

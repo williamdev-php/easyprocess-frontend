@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
+import { forgotPassword } from "@/lib/api";
 import { Button, Input, Label, Alert } from "@/components/ui";
 
 function LoginForm() {
@@ -29,18 +30,55 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordStatus, setForgotPasswordStatus] = useState<
+    "idle" | "loading" | "sent" | "limited"
+  >("idle");
+
+  const FORGOT_PASSWORD_STORAGE_KEY = "lastPasswordResetRequest";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    setShowForgotPassword(false);
+    setForgotPasswordStatus("idle");
     setLoading(true);
     try {
       await login({ email, password });
       router.push(redirect as "/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("loginFailed"));
+      const message = err instanceof Error ? err.message : t("loginFailed");
+      if (message === "Invalid email or password") {
+        setError(t("invalidCredentials"));
+        setShowForgotPassword(true);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    if (!email) return;
+
+    const lastRequest = localStorage.getItem(FORGOT_PASSWORD_STORAGE_KEY);
+    if (lastRequest) {
+      const elapsed = Date.now() - parseInt(lastRequest, 10);
+      const oneDay = 24 * 60 * 60 * 1000;
+      if (elapsed < oneDay) {
+        setForgotPasswordStatus("limited");
+        return;
+      }
+    }
+
+    setForgotPasswordStatus("loading");
+    try {
+      await forgotPassword(email);
+      localStorage.setItem(FORGOT_PASSWORD_STORAGE_KEY, Date.now().toString());
+      setForgotPasswordStatus("sent");
+    } catch {
+      setForgotPasswordStatus("sent");
     }
   }
 
@@ -116,6 +154,29 @@ function LoginForm() {
           </div>
         </div>
 
+        {showForgotPassword && (
+          <div className="space-y-1">
+            {forgotPasswordStatus === "idle" && (
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm font-medium text-primary hover:text-primary-deep transition underline"
+              >
+                {t("forgotPassword")}
+              </button>
+            )}
+            {forgotPasswordStatus === "loading" && (
+              <p className="text-sm text-text-muted">...</p>
+            )}
+            {forgotPasswordStatus === "sent" && (
+              <p className="text-sm text-green-600">{t("forgotPasswordSent")}</p>
+            )}
+            {forgotPasswordStatus === "limited" && (
+              <p className="text-sm text-amber-600">{t("forgotPasswordLimit")}</p>
+            )}
+          </div>
+        )}
+
         <Button type="submit" disabled={loading} fullWidth size="lg">
           {loading ? (
             <span className="inline-flex items-center gap-2">
@@ -139,7 +200,7 @@ function LoginForm() {
       </div>
 
       <Link
-        href="/register"
+        href={redirect !== "/dashboard" ? `/register?redirect=${encodeURIComponent(redirect)}` : "/register"}
         className="flex w-full items-center justify-center rounded-xl border-2 border-border-theme px-6 py-3 text-sm font-semibold text-primary-deep transition hover:border-primary hover:bg-primary-deep/5"
       >
         {t("registerLink")}

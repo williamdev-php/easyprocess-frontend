@@ -14,6 +14,8 @@ export const GET_LEADS = gql`
         email
         phone
         industry
+        industryId
+        industryName
         status
         qualityScore
         errorMessage
@@ -45,6 +47,8 @@ export const GET_LEAD = gql`
       phone
       address
       industry
+      industryId
+      industryName
       source
       status
       qualityScore
@@ -72,6 +76,7 @@ export const GET_LEAD = gql`
         tokensUsed
         aiModel
         generationCostUsd
+        videoUrl
         publishedAt
         createdAt
         updatedAt
@@ -560,6 +565,23 @@ export const GET_MY_SUPPORT_TICKETS = gql`
   }
 `;
 
+export const GET_MY_NOTIFICATIONS = gql`
+  query MyNotifications {
+    myNotifications {
+      items {
+        id
+        type
+        title
+        body
+        link
+        isRead
+        createdAt
+      }
+      unreadCount
+    }
+  }
+`;
+
 export const GET_SUPPORT_TICKET = gql`
   query SupportTicket($id: String!) {
     supportTicket(id: $id) {
@@ -653,6 +675,7 @@ export const GET_ANALYTICS_OVERVIEW = gql`
       trialStartRate
       trialConversionRate
       totalRevenueSek
+      avgSessionDurationSeconds
     }
   }
 `;
@@ -704,6 +727,76 @@ export const GET_TOP_PAGES = gql`
 `;
 
 // ---------------------------------------------------------------------------
+// Admin: Subscriptions (Super Admin)
+// ---------------------------------------------------------------------------
+
+export const GET_ADMIN_SUBSCRIPTIONS = gql`
+  query AdminSubscriptions($filter: AdminSubscriptionFilterInput) {
+    adminSubscriptions(filter: $filter) {
+      items {
+        id
+        userId
+        userEmail
+        userName
+        companyName
+        stripeSubscriptionId
+        stripeCustomerId
+        status
+        currentPeriodStart
+        currentPeriodEnd
+        cancelAtPeriodEnd
+        trialStart
+        trialEnd
+        createdAt
+        updatedAt
+        paymentsCount
+        totalPaidSek
+      }
+      total
+      page
+      pageSize
+    }
+  }
+`;
+
+export const GET_ADMIN_SUBSCRIPTION_STATS = gql`
+  query AdminSubscriptionStats {
+    adminSubscriptionStats {
+      totalSubscriptions
+      active
+      trialing
+      pastDue
+      canceled
+      incomplete
+    }
+  }
+`;
+
+export const GET_ADMIN_SUBSCRIPTION = gql`
+  query AdminSubscription($id: String!) {
+    adminSubscription(id: $id) {
+      id
+      userId
+      userEmail
+      userName
+      companyName
+      stripeSubscriptionId
+      stripeCustomerId
+      status
+      currentPeriodStart
+      currentPeriodEnd
+      cancelAtPeriodEnd
+      trialStart
+      trialEnd
+      createdAt
+      updatedAt
+      paymentsCount
+      totalPaidSek
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
 // Revenue (Super Admin)
 // ---------------------------------------------------------------------------
 
@@ -728,6 +821,23 @@ export const GET_REVENUE_STATS = gql`
         cardLast4
         createdAt
       }
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Industries
+// ---------------------------------------------------------------------------
+
+export const GET_INDUSTRIES = gql`
+  query GetIndustries {
+    industries {
+      id
+      name
+      slug
+      description
+      createdAt
+      updatedAt
     }
   }
 `;
