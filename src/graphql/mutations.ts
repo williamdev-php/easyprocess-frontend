@@ -323,6 +323,53 @@ export const REACTIVATE_SUBSCRIPTION = gql`
 `;
 
 // ---------------------------------------------------------------------------
+// Support Tickets
+// ---------------------------------------------------------------------------
+
+export const CREATE_SUPPORT_TICKET = gql`
+  mutation CreateSupportTicket($input: CreateSupportTicketInput!) {
+    createSupportTicket(input: $input) {
+      id
+      subject
+      message
+      status
+      createdAt
+    }
+  }
+`;
+
+export const UPDATE_SUPPORT_TICKET = gql`
+  mutation UpdateSupportTicket($input: UpdateSupportTicketInput!) {
+    updateSupportTicket(input: $input) {
+      id
+      status
+      priority
+      adminReply
+      repliedAt
+      updatedAt
+    }
+  }
+`;
+
+export const MARK_TICKET_READ = gql`
+  mutation MarkTicketRead($ticketId: String!, $isRead: Boolean!) {
+    markTicketRead(ticketId: $ticketId, isRead: $isRead) {
+      id
+      isRead
+    }
+  }
+`;
+
+export const ARCHIVE_TICKET = gql`
+  mutation ArchiveTicket($ticketId: String!, $isArchived: Boolean!) {
+    archiveTicket(ticketId: $ticketId, isArchived: $isArchived) {
+      id
+      isArchived
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
 // Admin: User Management
 // ---------------------------------------------------------------------------
 

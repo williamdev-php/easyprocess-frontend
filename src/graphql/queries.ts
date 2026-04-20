@@ -541,6 +541,73 @@ export const GET_ADMIN_USER = gql`
 `;
 
 // ---------------------------------------------------------------------------
+// Support Tickets
+// ---------------------------------------------------------------------------
+
+export const GET_MY_SUPPORT_TICKETS = gql`
+  query MySupportTickets {
+    mySupportTickets {
+      id
+      subject
+      message
+      status
+      priority
+      adminReply
+      repliedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_SUPPORT_TICKET = gql`
+  query SupportTicket($id: String!) {
+    supportTicket(id: $id) {
+      id
+      userId
+      userEmail
+      userName
+      subject
+      message
+      status
+      priority
+      isRead
+      isArchived
+      adminReply
+      repliedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_SUPPORT_TICKETS = gql`
+  query SupportTickets($filter: SupportTicketFilterInput) {
+    supportTickets(filter: $filter) {
+      items {
+        id
+        userId
+        userEmail
+        userName
+        subject
+        message
+        status
+        priority
+        isRead
+        isArchived
+        adminReply
+        repliedAt
+        createdAt
+        updatedAt
+      }
+      total
+      page
+      pageSize
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
 // Admin: All Sites (Super Admin)
 // ---------------------------------------------------------------------------
 
@@ -632,6 +699,35 @@ export const GET_TOP_PAGES = gql`
     topPages(startDate: $startDate, endDate: $endDate, limit: $limit) {
       path
       count
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Revenue (Super Admin)
+// ---------------------------------------------------------------------------
+
+export const GET_REVENUE_STATS = gql`
+  query RevenueStats($limit: Int) {
+    revenueStats(limit: $limit) {
+      mrrSek
+      totalRevenueSek
+      activeSubscriptions
+      trialingSubscriptions
+      chargesCount
+      refundedSek
+      recentCharges {
+        id
+        amountSek
+        currency
+        status
+        description
+        customerEmail
+        customerName
+        cardBrand
+        cardLast4
+        createdAt
+      }
     }
   }
 `;

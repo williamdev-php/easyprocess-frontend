@@ -144,12 +144,16 @@ export default function DashboardSidebar() {
                 </svg>
                 <span>{t("helpCenter")}</span>
               </Link>
-              <a
-                href="mailto:hello@qvicko.com"
-                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-text-secondary transition-all duration-200 hover:bg-primary-deep/5 hover:text-primary-deep"
+              <Link
+                href="/dashboard/contact"
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  pathname.startsWith("/dashboard/contact")
+                    ? "bg-primary-deep text-white shadow-sm"
+                    : "text-text-secondary hover:bg-primary-deep/5 hover:text-primary-deep"
+                }`}
               >
                 <svg
-                  className="h-5 w-5 shrink-0"
+                  className={`h-5 w-5 shrink-0 ${pathname.startsWith("/dashboard/contact") ? "text-accent" : ""}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -158,7 +162,7 @@ export default function DashboardSidebar() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                 </svg>
                 <span>{t("contactUs")}</span>
-              </a>
+              </Link>
             </nav>
           </div>
         </div>

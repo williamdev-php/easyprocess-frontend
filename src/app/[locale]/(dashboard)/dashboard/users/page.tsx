@@ -184,6 +184,7 @@ export default function UsersPage() {
                   key={u.id}
                   className="border-b border-border-light transition-colors hover:bg-primary-deep/[0.02] cursor-pointer"
                   onClick={() => router.push(`/dashboard/users/${u.id}`)}
+                >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-deep/10 text-sm font-semibold text-primary-deep">

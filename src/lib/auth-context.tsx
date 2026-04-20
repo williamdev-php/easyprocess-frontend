@@ -54,6 +54,15 @@ function setAccessToken(token: string | null) {
     Cookies.set("auth_flag", "1", { sameSite: "lax" });
   } else {
     Cookies.remove("auth_flag");
+    Cookies.remove("su_flag");
+  }
+}
+
+function setSuperuserFlag(isSuperuser: boolean) {
+  if (isSuperuser) {
+    Cookies.set("su_flag", "1", { sameSite: "lax" });
+  } else {
+    Cookies.remove("su_flag");
   }
 }
 
@@ -89,6 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUser = useCallback(async (token: string) => {
     const userData = await getMe(token);
     setUser(userData);
+    setSuperuserFlag(userData.isSuperuser);
   }, []);
 
   // Try to refresh token on mount (with timeout to prevent indefinite hang)
@@ -117,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(data.accessToken);
     const me = await getMe(data.accessToken);
     setUser(me);
+    setSuperuserFlag(me.isSuperuser);
     trackEvent("login");
     identifyUser(me.id);
   }, []);
@@ -126,6 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(data.accessToken);
     const me = await getMe(data.accessToken);
     setUser(me);
+    setSuperuserFlag(me.isSuperuser);
     trackEvent("signup");
     identifyUser(me.id);
   }, []);

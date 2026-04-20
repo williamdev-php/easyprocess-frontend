@@ -4,11 +4,29 @@ import { NextRequest, NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
 
-const protectedPatterns = ["/dashboard", "/dashboard/domain", "/dashboard/pages", "/dashboard/account", "/dashboard/leads", "/dashboard/revenue", "/dashboard/settings"];
+const protectedPatterns = ["/dashboard", "/dashboard/domain", "/dashboard/pages", "/dashboard/account", "/dashboard/leads", "/dashboard/revenue", "/dashboard/settings", "/dashboard/contact"];
+
+// Admin-only routes that require superuser access
+const adminOnlyPatterns = [
+  "/dashboard/leads",
+  "/dashboard/users",
+  "/dashboard/sites",
+  "/dashboard/inbox",
+  "/dashboard/revenue",
+  "/dashboard/analytics",
+  "/dashboard/settings",
+];
 
 function isProtectedPath(pathname: string): boolean {
   const pathWithoutLocale = pathname.replace(/^\/(sv|en)/, "") || "/";
   return protectedPatterns.some(
+    (p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(`${p}/`)
+  );
+}
+
+function isAdminOnlyPath(pathname: string): boolean {
+  const pathWithoutLocale = pathname.replace(/^\/(sv|en)/, "") || "/";
+  return adminOnlyPatterns.some(
     (p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(`${p}/`)
   );
 }
@@ -54,6 +72,16 @@ export default function middleware(request: NextRequest) {
       const loginUrl = new URL(`/${locale}/login`, request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
+    }
+
+    // Admin-only routes require superuser flag
+    if (isAdminOnlyPath(pathname)) {
+      const suFlag = request.cookies.get("su_flag")?.value;
+      if (!suFlag) {
+        const locale = pathname.match(/^\/(sv|en)/)?.[1] || routing.defaultLocale;
+        const dashboardUrl = new URL(`/${locale}/dashboard`, request.url);
+        return NextResponse.redirect(dashboardUrl);
+      }
     }
   }
 
