@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@apollo/client/react";
-import { MY_SITES, GET_SITE_ANALYTICS, GET_DASHBOARD_STATS, GET_OUTREACH_STATS } from "@/graphql/queries";
+import { MY_SITES, GET_SITE_ANALYTICS, GET_DASHBOARD_STATS, GET_OUTREACH_STATS, GET_ADMIN_USER_STATS } from "@/graphql/queries";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useGreeting } from "@/hooks/use-greeting";
 
 /* ──────────────── Skeleton shimmer ──────────────── */
 
@@ -273,9 +274,13 @@ function AdminOverview() {
   const { data: outreachData } = useQuery<any>(GET_OUTREACH_STATS, {
     fetchPolicy: "cache-and-network",
   });
+  const { data: userStatsData } = useQuery<any>(GET_ADMIN_USER_STATS, {
+    fetchPolicy: "cache-and-network",
+  });
 
   const stats = statsData?.dashboardStats;
   const outreach = outreachData?.outreachStats;
+  const userStats = userStatsData?.adminUserStats;
 
   if (statsLoading) return <OverviewSkeleton />;
 
@@ -285,6 +290,39 @@ function AdminOverview() {
         <h2 className="text-2xl font-bold text-primary-deep">{t("title")}</h2>
         <p className="mt-1 text-text-muted">{t("subtitle")}</p>
       </div>
+
+      {/* Platform stats */}
+      {userStats && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            label={t("totalUsers")}
+            value={String(userStats.totalUsers)}
+            change={`+${userStats.newUsers30d} senaste 30d`}
+            icon="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.228A2 2 0 013 17.16V14.82"
+          />
+          <MetricCard
+            label={t("totalSitesLabel")}
+            value={String(stats?.totalSites ?? 0)}
+            change={`${stats?.totalViews ?? 0} visningar`}
+            icon="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+            delay={100}
+          />
+          <MetricCard
+            label={t("verifiedLabel")}
+            value={String(userStats.verifiedUsers)}
+            change={`${userStats.activeUsers} aktiva`}
+            icon="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+            delay={200}
+          />
+          <MetricCard
+            label={t("aiCostLabel")}
+            value={`$${(stats?.totalAiCostUsd ?? 0).toFixed(2)}`}
+            change={`${stats?.totalEmailsSent ?? 0} mail skickade`}
+            icon="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            delay={300}
+          />
+        </div>
+      )}
 
       {/* Lead pipeline stats */}
       <div className="grid gap-4 sm:grid-cols-3">
@@ -380,6 +418,8 @@ interface SiteOption {
 function UserOverview() {
   const { user } = useAuth();
   const t = useTranslations("dashboardOverview.user");
+  const firstName = user?.fullName?.split(" ")[0] || "";
+  const { greeting, subtitle: greetingSubtitle } = useGreeting(firstName);
 
   // First, get user's sites to find the site ID
   const { data: sitesData, loading: sitesLoading } = useQuery<{ mySites: Array<SiteOption> }>(MY_SITES);
@@ -452,9 +492,9 @@ function UserOverview() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-primary-deep">
-            {t("greeting", { name: user?.fullName?.split(" ")[0] || "" })}
+            {greeting}
           </h2>
-          <p className="mt-1 text-text-muted">{t("subtitle")}</p>
+          <p className="mt-1 text-text-muted">{greetingSubtitle}</p>
         </div>
 
         {sites.length > 1 && (

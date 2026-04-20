@@ -321,3 +321,26 @@ export const REACTIVATE_SUBSCRIPTION = gql`
     }
   }
 `;
+
+// ---------------------------------------------------------------------------
+// Admin: User Management
+// ---------------------------------------------------------------------------
+
+export const ADMIN_UPDATE_USER = gql`
+  mutation AdminUpdateUser($input: AdminUpdateUserInput!) {
+    adminUpdateUser(input: $input) {
+      id
+      email
+      fullName
+      companyName
+      orgNumber
+      phone
+      locale
+      role
+      isSuperuser
+      isActive
+      isVerified
+      updatedAt
+    }
+  }
+`;

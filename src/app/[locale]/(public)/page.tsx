@@ -3,6 +3,7 @@ import { Link } from "@/i18n/routing";
 import VideoHero from "@/components/video-hero";
 import StatsCounter from "@/components/stats-counter";
 import LazySection from "@/components/lazy-section";
+import CtaTrackLink from "@/components/cta-track-link";
 
 export default async function HomePage({
   params,
@@ -35,8 +36,9 @@ export default async function HomePage({
       />
 
       {/* ─── WEBSITE BUILDER ─── */}
+      <div id="builder" className="scroll-mt-24" />
       <LazySection>
-        <section id="services" className="bg-background py-20 lg:py-28">
+        <section className="bg-background py-20 lg:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <span className="inline-flex items-center rounded-full bg-accent/20 px-4 py-1.5 text-sm font-semibold text-primary-deep">
@@ -77,21 +79,23 @@ export default async function HomePage({
             </div>
 
             <div className="mt-12 text-center">
-              <Link
+              <CtaTrackLink
                 href="/create-site"
                 className="inline-flex items-center rounded-xl bg-primary-deep px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-primary-dark hover:shadow-xl"
+                eventMeta={{ location: "builder_section" }}
               >
                 {builder("cta")}
                 <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
-              </Link>
+              </CtaTrackLink>
             </div>
           </div>
         </section>
       </LazySection>
 
       {/* ─── SPLIT-SCREEN: SHOWCASE + AI VIDEO ─── */}
+      <div id="showcase" className="scroll-mt-24" />
       <LazySection>
         <section className="bg-primary-deep text-white py-20 lg:py-28 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -141,6 +145,7 @@ export default async function HomePage({
       </LazySection>
 
       {/* ─── SEO BOOST ─── */}
+      <div id="seo" className="scroll-mt-24" />
       <LazySection>
         <section className="bg-background py-20 lg:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -202,6 +207,7 @@ export default async function HomePage({
       </LazySection>
 
       {/* ─── SIMPLE STEPS ─── */}
+      <div id="how-it-works" className="scroll-mt-24" />
       <LazySection>
         <section className="bg-surface py-20 lg:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -237,8 +243,9 @@ export default async function HomePage({
       </LazySection>
 
       {/* ─── CTA ─── */}
+      <div id="contact" className="scroll-mt-24" />
       <LazySection>
-        <section id="contact" className="bg-primary-deep text-white py-20 lg:py-28 relative overflow-hidden">
+        <section className="bg-primary-deep text-white py-20 lg:py-28 relative overflow-hidden">
           <div className="absolute top-10 left-10 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="absolute bottom-10 right-10 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
 
@@ -250,15 +257,16 @@ export default async function HomePage({
               {cta("description")}
             </p>
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link
+              <CtaTrackLink
                 href="/create-site"
                 className="inline-flex items-center rounded-xl bg-accent px-10 py-4 text-lg font-semibold text-primary-deep shadow-lg transition hover:bg-accent/90 hover:shadow-xl"
+                eventMeta={{ location: "cta_section" }}
               >
                 {cta("button")}
                 <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
-              </Link>
+              </CtaTrackLink>
               <Link
                 href="/login"
                 className="inline-flex items-center rounded-xl border-2 border-white/20 px-8 py-4 text-lg font-semibold text-white transition hover:border-white/40 hover:bg-white/5"

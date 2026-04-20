@@ -120,19 +120,15 @@ export default function AccountPage() {
             },
           },
         });
-        prevValues.current = {
-          ...prevValues.current,
-          [field]:
-            field === "fullName"
-              ? debouncedFullName
-              : field === "companyName"
-                ? debouncedCompanyName
-                : field === "orgNumber"
-                  ? debouncedOrgNumber
-                  : field === "phone"
-                    ? debouncedPhone
-                    : debouncedCountry,
+        const updatedValues = {
+          fullName: field === "fullName" ? debouncedFullName : prevValues.current.fullName,
+          companyName: field === "companyName" ? debouncedCompanyName : prevValues.current.companyName,
+          orgNumber: field === "orgNumber" ? debouncedOrgNumber : prevValues.current.orgNumber,
+          phone: field === "phone" ? debouncedPhone : prevValues.current.phone,
+          country: field === "country" ? debouncedCountry : prevValues.current.country,
         };
+        prevValues.current = updatedValues;
+        updateUser(updatedValues);
         setSavingField(null);
         setSavedField(field);
         setTimeout(() => setSavedField((prev) => (prev === field ? null : prev)), 2000);

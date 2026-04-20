@@ -650,8 +650,9 @@ export default function DomainPage() {
           {/* Domain rows */}
           {sortedDomains.map((ud) => (
             <div key={ud.key}>
+              {/* Desktop row */}
               <div
-                className={`grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 px-6 py-4 border-b border-border-light/50 items-center transition-colors ${
+                className={`hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-4 border-b border-border-light/50 items-center transition-colors ${
                   ud.type !== "subdomain" ? "cursor-pointer hover:bg-primary-deep/[0.01]" : ""
                 }`}
                 onClick={() => {
@@ -660,39 +661,60 @@ export default function DomainPage() {
                   }
                 }}
               >
-                {/* Domain name */}
-                <div className="sm:col-span-4 flex items-center gap-2">
+                <div className="col-span-4 flex items-center gap-2">
                   <svg className="h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                   </svg>
                   <span className="font-medium text-primary-deep text-sm truncate">{ud.domainName}</span>
                 </div>
-
-                {/* Connected site */}
-                <div className="sm:col-span-3 text-sm text-text-secondary">
-                  {ud.siteName ? (
-                    <span>{ud.siteName}</span>
-                  ) : (
-                    <span className="text-text-muted text-xs">{t("unassigned")}</span>
-                  )}
+                <div className="col-span-3 text-sm text-text-secondary">
+                  {ud.siteName ? <span>{ud.siteName}</span> : <span className="text-text-muted text-xs">{t("unassigned")}</span>}
                 </div>
-
-                {/* Type */}
-                <div className="sm:col-span-2">
-                  {typeBadge(ud.type)}
-                </div>
-
-                {/* Status */}
-                <div className="sm:col-span-2">
-                  {statusBadge(ud.status)}
-                </div>
-
-                {/* Expand arrow */}
-                <div className="sm:col-span-1 flex justify-end">
+                <div className="col-span-2">{typeBadge(ud.type)}</div>
+                <div className="col-span-2">{statusBadge(ud.status)}</div>
+                <div className="col-span-1 flex justify-end">
                   {ud.type !== "subdomain" && (
                     <svg className={`h-4 w-4 text-text-muted transition-transform ${expandedDomainKey === ud.key ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile card */}
+              <div
+                className={`sm:hidden px-4 py-3 border-b border-border-light/50 transition-colors ${
+                  ud.type !== "subdomain" ? "cursor-pointer active:bg-primary-deep/[0.02]" : ""
+                }`}
+                onClick={() => {
+                  if (ud.type !== "subdomain") {
+                    setExpandedDomainKey(expandedDomainKey === ud.key ? null : ud.key);
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <svg className="h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                    </svg>
+                    <span className="font-medium text-primary-deep text-sm truncate">{ud.domainName}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {statusBadge(ud.status)}
+                    {ud.type !== "subdomain" && (
+                      <svg className={`h-4 w-4 text-text-muted transition-transform ${expandedDomainKey === ud.key ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-1.5 flex items-center gap-2 pl-6">
+                  {typeBadge(ud.type)}
+                  {ud.siteName && (
+                    <span className="text-xs text-text-muted truncate">{ud.siteName}</span>
+                  )}
+                  {!ud.siteName && ud.type !== "subdomain" && (
+                    <span className="text-xs text-text-muted">{t("unassigned")}</span>
                   )}
                 </div>
               </div>

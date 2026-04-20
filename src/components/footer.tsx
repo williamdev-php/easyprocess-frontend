@@ -10,9 +10,9 @@ export default function Footer() {
   return (
     <footer className="bg-primary-deep text-white">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
           {/* Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
+          <div>
             <Link href="/" className="inline-block">
               <Image
                 src="/logo-sand-mist.png"
@@ -23,35 +23,6 @@ export default function Footer() {
               />
             </Link>
             <p className="mt-4 text-sm text-white/60">{t("tagline")}</p>
-            <div className="mt-6 flex gap-3">
-              {/* Social placeholders */}
-              {["LinkedIn", "GitHub", "X"].map((social) => (
-                <a
-                  key={social}
-                  href="#"
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 text-sm text-white/60 transition hover:border-white/30 hover:text-white"
-                  aria-label={social}
-                >
-                  {social.charAt(0)}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40">
-              {t("services")}
-            </h4>
-            <ul className="mt-4 space-y-3">
-              {(["automation", "ecommerce", "webdev", "ai"] as const).map((key) => (
-                <li key={key}>
-                  <a href="#services" className="text-sm text-white/60 transition hover:text-white">
-                    {t(key)}
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* Company */}
@@ -61,19 +32,14 @@ export default function Footer() {
             </h4>
             <ul className="mt-4 space-y-3">
               <li>
-                <a href="#about" className="text-sm text-white/60 transition hover:text-white">
+                <a href="/#services" className="text-sm text-white/60 transition hover:text-white">
                   {t("aboutLink")}
                 </a>
               </li>
               <li>
-                <a href="#process" className="text-sm text-white/60 transition hover:text-white">
-                  {t("processLink")}
-                </a>
-              </li>
-              <li>
-                <a href="#contact" className="text-sm text-white/60 transition hover:text-white">
-                  {t("contactLink")}
-                </a>
+                <Link href="/pricing" className="text-sm text-white/60 transition hover:text-white">
+                  {t("pricingLink")}
+                </Link>
               </li>
               <li>
                 <Link href="/help" className="text-sm text-white/60 transition hover:text-white">

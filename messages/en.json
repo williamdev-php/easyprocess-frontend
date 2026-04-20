@@ -9,19 +9,20 @@
     "about": "About",
     "process": "Process",
     "contact": "Contact",
+    "pricing": "Pricing",
     "login": "Log in",
     "register": "Get started",
     "dashboard": "Dashboard",
     "logout": "Log out",
     "servicesDropdown": {
-      "automation": "AI Automations",
-      "automationDesc": "Intelligent workflows that save time",
-      "ecommerce": "E-commerce Solutions",
-      "ecommerceDesc": "Custom online stores that sell",
-      "webdev": "Web Design & Development",
-      "webdevDesc": "Modern, fast and responsive websites",
-      "expert": "Hire an Expert",
-      "expertDesc": "Get a dedicated expert for your project"
+      "builder": "Website Builder",
+      "builderDesc": "AI-powered websites in minutes",
+      "showcase": "See It in Action",
+      "showcaseDesc": "Watch AI build a real website",
+      "seo": "SEO Tools",
+      "seoDesc": "Rank higher on Google",
+      "howItWorks": "How It Works",
+      "howItWorksDesc": "Three simple steps to go live"
     }
   },
   "hero": {
@@ -117,24 +118,17 @@
   },
   "footer": {
     "tagline": "Digital solutions that drive growth.",
-    "services": "Services",
-    "automation": "AI Automations",
-    "ecommerce": "E-commerce Solutions",
-    "webdev": "Web Design",
-    "ai": "AI Consulting",
     "company": "Company",
-    "aboutLink": "About me",
-    "processLink": "How I work",
-    "portfolioLink": "Portfolio",
-    "contactLink": "Contact",
+    "aboutLink": "About",
+    "pricingLink": "Pricing",
     "helpCenter": "Help Center",
+    "contact": "Contact",
+    "email": "hello@qvicko.com",
+    "phone": "+46 70 123 45 67",
     "legal": "Legal",
     "privacy": "Privacy policy",
     "terms": "Terms",
     "cookies": "Cookies",
-    "contact": "Contact",
-    "email": "hello@qvicko.com",
-    "phone": "+46 70 123 45 67",
     "copyright": "© 2026 Qvicko. All rights reserved."
   },
   "auth": {
@@ -189,7 +183,9 @@
   },
   "dashboardHeader": {
     "logout": "Log out",
-    "account": "My account"
+    "account": "My account",
+    "helpCenter": "Help Center",
+    "contactUs": "Contact Us"
   },
   "dashboardNav": {
     "overview": "Overview",
@@ -198,8 +194,11 @@
     "account": "Account",
     "billing": "Billing",
     "leads": "Leads",
+    "users": "Users",
+    "sites": "All Sites",
     "inbox": "Inbox",
     "revenue": "Revenue",
+    "analytics": "Analytics",
     "settings": "Settings",
     "helpCenter": "Help Center",
     "contactUs": "Contact Us"
@@ -208,6 +207,68 @@
     "user": {
       "greeting": "Hi, {name}",
       "subtitle": "Here's an overview of your website.",
+      "greetings": {
+        "earlyMorning": {
+          "greeting": "Good morning, {name}! Up early?",
+          "subtitle": "The early bird catches the worm. Perfect time to check your site."
+        },
+        "morning": {
+          "greeting": "Good morning, {name}!",
+          "subtitle": "New day, new opportunities. Here's how your website is doing."
+        },
+        "midday": {
+          "greeting": "Hey there, {name}!",
+          "subtitle": "Halfway through the day. How's your website doing?"
+        },
+        "afternoon": {
+          "greeting": "Good afternoon, {name}!",
+          "subtitle": "Afternoon check-in. Everything looks great!"
+        },
+        "evening": {
+          "greeting": "Good evening, {name}!",
+          "subtitle": "Working late? Your website is working around the clock for you."
+        },
+        "night": {
+          "greeting": "Burning the midnight oil, {name}?",
+          "subtitle": "Night owls build empires. Check how your site is doing."
+        },
+        "monday": {
+          "greeting": "New week, {name}! Ready to crush it?",
+          "subtitle": "Mondays are for new goals. Check out this week's start."
+        },
+        "friday": {
+          "greeting": "Happy Friday, {name}!",
+          "subtitle": "Another week done. Great job! Here's your weekly overview."
+        },
+        "christmas": {
+          "greeting": "Merry Christmas, {name}!",
+          "subtitle": "Hope your holidays are cozy! Your website keeps working through the break."
+        },
+        "newYear": {
+          "greeting": "Happy New Year, {name}!",
+          "subtitle": "New year, new records? See how your site started the year."
+        },
+        "easter": {
+          "greeting": "Happy Easter, {name}!",
+          "subtitle": "Easter eggs and web stats — what more do you need?"
+        },
+        "midsummer": {
+          "greeting": "Happy Midsummer, {name}!",
+          "subtitle": "Enjoy the sun! Your site is dancing around the maypole for you."
+        },
+        "halloween": {
+          "greeting": "Boo! Happy Halloween, {name}!",
+          "subtitle": "Nothing scary here — just great numbers."
+        },
+        "lucia": {
+          "greeting": "Happy Lucia, {name}!",
+          "subtitle": "A light in the dark — just like your website shining across the web."
+        },
+        "valborg": {
+          "greeting": "Happy Walpurgis, {name}!",
+          "subtitle": "Spring is here and your website is blooming!"
+        }
+      },
       "visitors": "Visitors",
       "visitorsTooltip": "Number of unique visitors to your website in the selected period.",
       "pagesPerSession": "Pages per session",
@@ -229,6 +290,10 @@
       "title": "Admin overview",
       "subtitle": "Overview of all clients and revenue.",
       "totalLeads": "Total leads",
+      "totalUsers": "Total users",
+      "totalSitesLabel": "Total sites",
+      "verifiedLabel": "Verified users",
+      "aiCostLabel": "AI cost",
       "monthlyRevenue": "Monthly revenue",
       "activeClients": "Active clients",
       "revenueChart": "Revenue per month (tSEK)"
@@ -236,9 +301,19 @@
   },
   "cookies": {
     "title": "We use cookies",
-    "description": "We use cookies to improve your experience on our website. By continuing you accept our use of cookies.",
-    "accept": "Accept",
-    "decline": "Decline"
+    "description": "We use cookies to improve your experience on our website and to analyze traffic.",
+    "acceptAll": "Accept all",
+    "managePreferences": "Manage preferences",
+    "preferencesTitle": "Cookie preferences",
+    "preferencesDescription": "Choose which cookies you want to allow. Essential cookies are always active.",
+    "essential": "Essential",
+    "essentialDescription": "Required for the website to function. Cannot be disabled.",
+    "analytics": "Analytics",
+    "analyticsDescription": "Help us understand how visitors use our website so we can improve it.",
+    "marketing": "Marketing",
+    "marketingDescription": "Used to show relevant ads and measure campaign effectiveness.",
+    "savePreferences": "Save preferences",
+    "cancel": "Cancel"
   },
   "collections": {
     "title": "Our services",
@@ -571,6 +646,60 @@
     "step2ChoosePlan": "2. Choose plan",
     "requiresCard": "Add a payment card first to choose a plan."
   },
+  "pricing": {
+    "metaTitle": "Pricing — Qvicko",
+    "metaDescription": "Simple, transparent pricing for your website. Start free and upgrade when you're ready.",
+    "badge": "Pricing",
+    "title": "Simple, transparent pricing",
+    "subtitle": "Start free and upgrade when you need more. No hidden fees, no surprises.",
+    "monthly": "per month",
+    "freePlan": "Free",
+    "freePlanDesc": "Perfect for trying out the platform.",
+    "basicPlan": "Basic",
+    "basicPlanDesc": "Everything you need to go live.",
+    "proPlan": "Pro",
+    "proPlanDesc": "For businesses that want it all.",
+    "popular": "Most popular",
+    "trialNote": "{days}-day free trial",
+    "getStarted": "Get started",
+    "currentPlan": "Current plan",
+    "upgrade": "Upgrade",
+    "features": {
+      "freeSite": "1 website (draft)",
+      "subdomain": "Subdomain on qvickosite.com",
+      "basicEditing": "Basic editing",
+      "aiWebsites": "AI-generated websites",
+      "publishSite": "Publish your website",
+      "customDomain": "Custom domain",
+      "basicStats": "Basic analytics",
+      "seoTools": "SEO tools",
+      "unlimitedSites": "Unlimited websites",
+      "fullStats": "Full analytics",
+      "prioritySupport": "Priority support",
+      "advancedSeo": "Advanced SEO tools",
+      "allInBasic": "Everything in Basic"
+    },
+    "faqTitle": "Frequently asked questions",
+    "faqSubtitle": "Got questions? We've got answers.",
+    "faq": {
+      "q1": "What is Qvicko?",
+      "a1": "Qvicko is an AI-powered website builder created by William Söderström. It lets you create a professional, SEO-optimized website in minutes — just describe your business and our AI handles the design, copy, and structure. No coding skills required.",
+      "q2": "Can I try it for free?",
+      "a2": "Yes! You can create a website completely free. The Free plan lets you build and preview your site on a qvickosite.com subdomain. When you're ready to publish with your own domain, upgrade to Basic or Pro.",
+      "q3": "What happens after my free trial ends?",
+      "a3": "After your 30-day free trial, your subscription automatically continues at the plan price. You can cancel anytime before the trial ends and you won't be charged.",
+      "q4": "Can I use my own domain?",
+      "a4": "Yes! With the Basic or Pro plan you can connect your own domain. You can also purchase a new domain directly through Qvicko — DNS is configured automatically.",
+      "q5": "How does the AI website builder work?",
+      "a5": "Simply describe your business — name, industry, and what makes you unique. Our AI creates a complete website with design, copy, images, and SEO optimization in seconds. You can also transform an existing website by entering its URL.",
+      "q6": "Can I cancel anytime?",
+      "a6": "Absolutely. There are no lock-in periods. You can cancel your subscription at any time and it will remain active until the end of your current billing period.",
+      "q7": "What payment methods do you accept?",
+      "a7": "We accept all major credit and debit cards (Visa, Mastercard, American Express) through our secure payment partner Stripe.",
+      "q8": "Is my website optimized for search engines?",
+      "a8": "Yes! Every website built with Qvicko is SEO-optimized from day one. This includes meta tags, fast load times, mobile responsiveness, and structured content that search engines love."
+    }
+  },
   "notFound": {
     "title": "Page not found",
     "description": "The page you are looking for does not exist or has been moved.",
@@ -722,6 +851,26 @@
     "back": "Back",
     "next": "Next"
   },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Track your funnel from first visit to paid subscription.",
+    "uniqueVisitors": "Unique visitors",
+    "totalSignups": "Signups",
+    "trialStartRate": "Trial start rate",
+    "trialConversion": "Trial → Paid",
+    "totalRevenue": "Revenue",
+    "funnelTitle": "Conversion funnel",
+    "filterUtmSource": "Filter by UTM source...",
+    "visitorsChart": "Daily visitors",
+    "utmSources": "UTM Sources",
+    "topPages": "Top pages",
+    "source": "Source",
+    "medium": "Medium",
+    "campaign": "Campaign",
+    "visitors": "Visitors",
+    "noData": "No data yet for this period.",
+    "noUtmData": "No UTM data yet."
+  },
   "media": {
     "library": "Media Library",
     "upload": "Upload",
@@ -746,5 +895,88 @@
     "logo": "Logo",
     "backgroundImage": "Background image",
     "image": "Image"
+  },
+  "adminUsers": {
+    "title": "Users",
+    "subtitle": "All registered users on the platform.",
+    "searchPlaceholder": "Search by name, email, or company...",
+    "totalUsers": "Total users",
+    "activeUsers": "Active users",
+    "verifiedUsers": "Verified",
+    "newUsers30d": "New (30 days)",
+    "user": "User",
+    "email": "Email",
+    "sites": "Sites",
+    "subscription": "Plan",
+    "status": "Status",
+    "joined": "Joined",
+    "active": "Active",
+    "free": "Free",
+    "verified": "Verified",
+    "inactive": "Inactive",
+    "noUsers": "No users found.",
+    "showing": "Showing {from}–{to} of {total}"
+  },
+  "adminSites": {
+    "title": "All Sites",
+    "subtitle": "All generated sites on the platform.",
+    "searchPlaceholder": "Search by name, domain, or URL...",
+    "totalSites": "Total sites",
+    "leadSites": "Lead sites",
+    "userSites": "User sites",
+    "allTypes": "All types",
+    "leadSitesOnly": "Lead sites only",
+    "userSitesOnly": "User sites only",
+    "allStatuses": "All statuses",
+    "site": "Site",
+    "owner": "Owner",
+    "type": "Type",
+    "status": "Status",
+    "views": "Views",
+    "created": "Created",
+    "leadTag": "Lead",
+    "userTag": "User",
+    "noSites": "No sites found.",
+    "showing": "Showing {from}–{to} of {total}"
+  },
+  "adminUserDetail": {
+    "backToUsers": "Back to Users",
+    "notFound": "User not found.",
+    "subscribed": "Subscribed",
+    "inactive": "Inactive",
+    "saved": "Changes saved successfully.",
+    "editProfile": "Edit Profile",
+    "fullName": "Full name",
+    "email": "Email",
+    "company": "Company",
+    "orgNumber": "Org. number",
+    "phone": "Phone",
+    "locale": "Language",
+    "permissions": "Permissions",
+    "active": "Active",
+    "verified": "Verified",
+    "superuser": "Superuser",
+    "role": "Role",
+    "saving": "Saving...",
+    "saveChanges": "Save changes",
+    "accountDetails": "Account Details",
+    "twoFactor": "Two-factor auth",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "failedAttempts": "Failed login attempts",
+    "lockedUntil": "Locked until",
+    "notLocked": "Not locked",
+    "passwordChanged": "Password changed",
+    "stripeId": "Stripe customer ID",
+    "billingAddress": "Billing Address",
+    "userSites": "Sites",
+    "sites": "Sites",
+    "activeSessions": "Active Sessions",
+    "lastLogin": "Last login",
+    "memberSince": "Member since",
+    "noSessions": "No active sessions.",
+    "expires": "Expires",
+    "auditLog": "Audit Log",
+    "noAuditLog": "No audit events."
   }
 }

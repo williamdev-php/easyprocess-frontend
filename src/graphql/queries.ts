@@ -440,3 +440,198 @@ export const AVAILABLE_PLANS = gql`
     }
   }
 `;
+
+// ---------------------------------------------------------------------------
+// Admin: Users (Super Admin)
+// ---------------------------------------------------------------------------
+
+export const GET_ALL_USERS = gql`
+  query AllUsers($filter: AdminUserFilterInput) {
+    allUsers(filter: $filter) {
+      items {
+        id
+        email
+        fullName
+        companyName
+        phone
+        country
+        avatarUrl
+        role
+        isSuperuser
+        isActive
+        isVerified
+        createdAt
+        lastLoginAt
+        sitesCount
+        hasSubscription
+      }
+      total
+      page
+      pageSize
+    }
+  }
+`;
+
+export const GET_ADMIN_USER_STATS = gql`
+  query AdminUserStats {
+    adminUserStats {
+      totalUsers
+      activeUsers
+      verifiedUsers
+      usersWithSubscription
+      newUsers30d
+    }
+  }
+`;
+
+export const GET_ADMIN_USER = gql`
+  query AdminUser($id: String!) {
+    adminUser(id: $id) {
+      id
+      email
+      fullName
+      companyName
+      orgNumber
+      phone
+      country
+      avatarUrl
+      locale
+      role
+      isSuperuser
+      isActive
+      isVerified
+      twoFactorEnabled
+      failedLoginAttempts
+      lockedUntil
+      lastLoginAt
+      passwordChangedAt
+      createdAt
+      updatedAt
+      billingStreet
+      billingCity
+      billingZip
+      billingCountry
+      stripeCustomerId
+      sitesCount
+      hasSubscription
+      sessions {
+        id
+        ipAddress
+        userAgent
+        createdAt
+        expiresAt
+      }
+      auditLog {
+        id
+        eventType
+        ipAddress
+        userAgent
+        createdAt
+      }
+      recentSites {
+        id
+        businessName
+        subdomain
+        status
+        views
+        createdAt
+      }
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Admin: All Sites (Super Admin)
+// ---------------------------------------------------------------------------
+
+export const GET_ALL_SITES = gql`
+  query AllSites($filter: AdminSiteFilterInput) {
+    allSites(filter: $filter) {
+      items {
+        id
+        template
+        status
+        subdomain
+        customDomain
+        views
+        generationCostUsd
+        publishedAt
+        createdAt
+        updatedAt
+        businessName
+        websiteUrl
+        ownerId
+        ownerEmail
+        ownerName
+        isLeadSite
+      }
+      total
+      page
+      pageSize
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Analytics (Super Admin)
+// ---------------------------------------------------------------------------
+
+export const GET_ANALYTICS_OVERVIEW = gql`
+  query AnalyticsOverview($startDate: String!, $endDate: String!) {
+    analyticsOverview(startDate: $startDate, endDate: $endDate) {
+      uniqueVisitors
+      totalSignups
+      totalTrials
+      totalSubscriptions
+      trialStartRate
+      trialConversionRate
+      totalRevenueSek
+    }
+  }
+`;
+
+export const GET_FUNNEL_STATS = gql`
+  query FunnelStats($startDate: String!, $endDate: String!, $utmSource: String, $utmCampaign: String) {
+    funnelStats(startDate: $startDate, endDate: $endDate, utmSource: $utmSource, utmCampaign: $utmCampaign) {
+      steps {
+        name
+        count
+        conversionRate
+      }
+      startDate
+      endDate
+    }
+  }
+`;
+
+export const GET_VISITOR_STATS = gql`
+  query VisitorStats($startDate: String!, $endDate: String!) {
+    visitorStats(startDate: $startDate, endDate: $endDate) {
+      points {
+        date
+        count
+      }
+      total
+    }
+  }
+`;
+
+export const GET_UTM_STATS = gql`
+  query UtmStats($startDate: String!, $endDate: String!) {
+    utmStats(startDate: $startDate, endDate: $endDate) {
+      source
+      medium
+      campaign
+      count
+    }
+  }
+`;
+
+export const GET_TOP_PAGES = gql`
+  query TopPages($startDate: String!, $endDate: String!, $limit: Int) {
+    topPages(startDate: $startDate, endDate: $endDate, limit: $limit) {
+      path
+      count
+    }
+  }
+`;

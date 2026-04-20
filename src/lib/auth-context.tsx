@@ -18,6 +18,7 @@ import {
   type LoginPayload,
   type RegisterPayload,
 } from "@/lib/api";
+import { trackEvent, identifyUser } from "@/lib/tracking";
 
 // In-memory token store (not localStorage for security)
 let accessToken: string | null = null;
@@ -114,14 +115,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (payload: LoginPayload) => {
     const data = await loginUser(payload);
     setAccessToken(data.accessToken);
-    await fetchUser(data.accessToken);
-  }, [fetchUser]);
+    const me = await getMe(data.accessToken);
+    setUser(me);
+    trackEvent("login");
+    identifyUser(me.id);
+  }, []);
 
   const register = useCallback(async (payload: RegisterPayload) => {
     const data = await registerUser(payload);
     setAccessToken(data.accessToken);
-    await fetchUser(data.accessToken);
-  }, [fetchUser]);
+    const me = await getMe(data.accessToken);
+    setUser(me);
+    trackEvent("signup");
+    identifyUser(me.id);
+  }, []);
 
   const updateUser = useCallback((updates: Partial<User>) => {
     setUser((prev) => prev ? { ...prev, ...updates } : prev);

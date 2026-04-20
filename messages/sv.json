@@ -9,19 +9,20 @@
     "about": "Om mig",
     "process": "Process",
     "contact": "Kontakt",
+    "pricing": "Priser",
     "login": "Logga in",
     "register": "Kom igång",
     "dashboard": "Dashboard",
     "logout": "Logga ut",
     "servicesDropdown": {
-      "automation": "AI-automatiseringar",
-      "automationDesc": "Intelligenta arbetsflöden som sparar tid",
-      "ecommerce": "E-handelslösningar",
-      "ecommerceDesc": "Skräddarsydda webbutiker som säljer",
-      "webdev": "Webbdesign & Utveckling",
-      "webdevDesc": "Moderna, snabba och responsiva hemsidor",
-      "expert": "Anlita en expert",
-      "expertDesc": "Få en dedikerad expert för ditt projekt"
+      "builder": "Hemsidebyggare",
+      "builderDesc": "AI-drivna hemsidor på minuter",
+      "showcase": "Se det i aktion",
+      "showcaseDesc": "Se AI bygga en riktig hemsida",
+      "seo": "SEO-verktyg",
+      "seoDesc": "Ranka högre på Google",
+      "howItWorks": "Så funkar det",
+      "howItWorksDesc": "Tre enkla steg till en live-sida"
     }
   },
   "hero": {
@@ -117,24 +118,17 @@
   },
   "footer": {
     "tagline": "Digitala lösningar som driver tillväxt.",
-    "services": "Tjänster",
-    "automation": "AI-automatiseringar",
-    "ecommerce": "E-handelslösningar",
-    "webdev": "Webbdesign",
-    "ai": "AI-konsulting",
     "company": "Företaget",
-    "aboutLink": "Om mig",
-    "processLink": "Så jobbar jag",
-    "portfolioLink": "Portfolio",
-    "contactLink": "Kontakt",
+    "aboutLink": "Om oss",
+    "pricingLink": "Priser",
     "helpCenter": "Hjälpcenter",
+    "contact": "Kontakt",
+    "email": "hej@qvicko.com",
+    "phone": "+46 70 123 45 67",
     "legal": "Juridiskt",
     "privacy": "Integritetspolicy",
     "terms": "Villkor",
     "cookies": "Cookies",
-    "contact": "Kontakt",
-    "email": "hej@qvicko.com",
-    "phone": "+46 70 123 45 67",
     "copyright": "© 2026 Qvicko. Alla rättigheter förbehållna."
   },
   "auth": {
@@ -189,7 +183,9 @@
   },
   "dashboardHeader": {
     "logout": "Logga ut",
-    "account": "Mitt konto"
+    "account": "Mitt konto",
+    "helpCenter": "Hjälpcenter",
+    "contactUs": "Kontakta oss"
   },
   "dashboardNav": {
     "overview": "Översikt",
@@ -198,8 +194,11 @@
     "account": "Konto",
     "billing": "Betalning",
     "leads": "Leads",
+    "users": "Användare",
+    "sites": "Alla sidor",
     "inbox": "Inkorg",
     "revenue": "Intäkter",
+    "analytics": "Analys",
     "settings": "Inställningar",
     "helpCenter": "Hjälpcentret",
     "contactUs": "Kontakta oss"
@@ -208,6 +207,68 @@
     "user": {
       "greeting": "Hej, {name}",
       "subtitle": "Här är en översikt över din webbplats.",
+      "greetings": {
+        "earlyMorning": {
+          "greeting": "Godmorgon, {name}! Uppe tidigt?",
+          "subtitle": "Morgonstunden har guld i mun. Perfekt tid att kolla hur sidan presterar."
+        },
+        "morning": {
+          "greeting": "Godmorgon, {name}!",
+          "subtitle": "Ny dag, nya möjligheter. Här är läget med din webbplats."
+        },
+        "midday": {
+          "greeting": "Tjena, {name}!",
+          "subtitle": "Halvvägs genom dagen. Hur mår din hemsida?"
+        },
+        "afternoon": {
+          "greeting": "Hej igen, {name}!",
+          "subtitle": "Eftermiddagskollen. Allt ser bra ut!"
+        },
+        "evening": {
+          "greeting": "God kväll, {name}!",
+          "subtitle": "Jobbar du övertid? Din hemsida jobbar i alla fall dygnet runt."
+        },
+        "night": {
+          "greeting": "Uppe sent, {name}?",
+          "subtitle": "Nattugglor bygger imperier. Kolla hur din sida går."
+        },
+        "monday": {
+          "greeting": "Ny vecka, {name}! Redo att ta i?",
+          "subtitle": "Måndagar är till för nya mål. Kolla veckans start."
+        },
+        "friday": {
+          "greeting": "Äntligen fredag, {name}!",
+          "subtitle": "En vecka till avklarad. Bra jobbat! Här är din veckoöversikt."
+        },
+        "christmas": {
+          "greeting": "God jul, {name}!",
+          "subtitle": "Hoppas julen är mysig! Din hemsida jobbar vidare under helgen."
+        },
+        "newYear": {
+          "greeting": "Gott nytt år, {name}!",
+          "subtitle": "Nytt år, nya rekord? Kolla hur din sida startade året."
+        },
+        "easter": {
+          "greeting": "Glad påsk, {name}!",
+          "subtitle": "Påskägg och webbstatistik — vad mer behöver man?"
+        },
+        "midsummer": {
+          "greeting": "Glad midsommar, {name}!",
+          "subtitle": "Njut av solen! Din sida dansar runt stången för dig."
+        },
+        "halloween": {
+          "greeting": "Bu! Glad Halloween, {name}!",
+          "subtitle": "Inget skrämmande här — bara bra siffror."
+        },
+        "lucia": {
+          "greeting": "Glad Lucia, {name}!",
+          "subtitle": "Ljus i mörkret — precis som din webbplats lyser upp nätet."
+        },
+        "valborg": {
+          "greeting": "Glad Valborg, {name}!",
+          "subtitle": "Våren är här och din hemsida blomstrar!"
+        }
+      },
       "visitors": "Besökare",
       "visitorsTooltip": "Antal unika besökare på din webbplats under vald period.",
       "pagesPerSession": "Sidor per session",
@@ -229,6 +290,10 @@
       "title": "Admin-översikt",
       "subtitle": "Översikt över alla kunder och intäkter.",
       "totalLeads": "Totala leads",
+      "totalUsers": "Totala användare",
+      "totalSitesLabel": "Totala sidor",
+      "verifiedLabel": "Verifierade användare",
+      "aiCostLabel": "AI-kostnad",
       "monthlyRevenue": "Månadsintäkt",
       "activeClients": "Aktiva kunder",
       "revenueChart": "Intäkter per månad (tkr)"
@@ -236,9 +301,19 @@
   },
   "cookies": {
     "title": "Vi använder cookies",
-    "description": "Vi använder cookies för att förbättra din upplevelse på vår webbplats. Genom att fortsätta godkänner du vår användning av cookies.",
-    "accept": "Godkänn",
-    "decline": "Avvisa"
+    "description": "Vi använder cookies för att förbättra din upplevelse på vår webbplats och för att analysera trafik.",
+    "acceptAll": "Acceptera alla",
+    "managePreferences": "Hantera inställningar",
+    "preferencesTitle": "Cookie-inställningar",
+    "preferencesDescription": "Välj vilka cookies du vill tillåta. Nödvändiga cookies är alltid aktiva.",
+    "essential": "Nödvändiga",
+    "essentialDescription": "Krävs för att webbplatsen ska fungera. Kan inte inaktiveras.",
+    "analytics": "Analys",
+    "analyticsDescription": "Hjälper oss förstå hur besökare använder vår webbplats så vi kan förbättra den.",
+    "marketing": "Marknadsföring",
+    "marketingDescription": "Används för att visa relevanta annonser och mäta kampanjers effektivitet.",
+    "savePreferences": "Spara inställningar",
+    "cancel": "Avbryt"
   },
   "collections": {
     "title": "Våra tjänster",
@@ -571,6 +646,60 @@
     "step2ChoosePlan": "2. Välj plan",
     "requiresCard": "Lägg till ett betalkort först för att kunna välja plan."
   },
+  "pricing": {
+    "metaTitle": "Priser — Qvicko",
+    "metaDescription": "Enkla och transparenta priser för din hemsida. Börja gratis och uppgradera när du är redo.",
+    "badge": "Priser",
+    "title": "Enkla, transparenta priser",
+    "subtitle": "Börja gratis och uppgradera när du behöver mer. Inga dolda avgifter, inga överraskningar.",
+    "monthly": "per månad",
+    "freePlan": "Free",
+    "freePlanDesc": "Perfekt för att testa plattformen.",
+    "basicPlan": "Basic",
+    "basicPlanDesc": "Allt du behöver för att gå live.",
+    "proPlan": "Pro",
+    "proPlanDesc": "För företag som vill ha allt.",
+    "popular": "Mest populär",
+    "trialNote": "{days} dagars gratis provperiod",
+    "getStarted": "Kom igång",
+    "currentPlan": "Nuvarande plan",
+    "upgrade": "Uppgradera",
+    "features": {
+      "freeSite": "1 hemsida (utkast)",
+      "subdomain": "Subdomän på qvickosite.com",
+      "basicEditing": "Grundläggande redigering",
+      "aiWebsites": "AI-genererade hemsidor",
+      "publishSite": "Publicera din hemsida",
+      "customDomain": "Egen domän",
+      "basicStats": "Grundläggande statistik",
+      "seoTools": "SEO-verktyg",
+      "unlimitedSites": "Obegränsat antal hemsidor",
+      "fullStats": "Fullständig statistik",
+      "prioritySupport": "Prioriterad support",
+      "advancedSeo": "Avancerade SEO-verktyg",
+      "allInBasic": "Allt i Basic"
+    },
+    "faqTitle": "Vanliga frågor",
+    "faqSubtitle": "Har du frågor? Vi har svaren.",
+    "faq": {
+      "q1": "Vad är Qvicko?",
+      "a1": "Qvicko är en AI-driven hemsidebyggare skapad av William Söderström. Du kan skapa en professionell, SEO-optimerad hemsida på bara några minuter — beskriv ditt företag och vår AI sköter design, texter och struktur. Inga programmeringskunskaper krävs.",
+      "q2": "Kan jag testa gratis?",
+      "a2": "Ja! Du kan skapa en hemsida helt gratis. Free-planen låter dig bygga och förhandsgranska din sida på en qvickosite.com-subdomän. När du är redo att publicera med egen domän uppgraderar du till Basic eller Pro.",
+      "q3": "Vad händer efter min gratis provperiod?",
+      "a3": "Efter din 30 dagars gratis provperiod fortsätter ditt abonnemang automatiskt till planens pris. Du kan avsluta när som helst innan provperioden tar slut och du debiteras inte.",
+      "q4": "Kan jag använda min egen domän?",
+      "a4": "Ja! Med Basic- eller Pro-planen kan du koppla din egen domän. Du kan också köpa en ny domän direkt via Qvicko — DNS konfigureras automatiskt.",
+      "q5": "Hur fungerar AI-hemsidebyggaren?",
+      "a5": "Beskriv ditt företag — namn, bransch och vad som gör er unika. Vår AI skapar en komplett hemsida med design, texter, bilder och SEO-optimering på sekunder. Du kan även transformera en befintlig hemsida genom att ange dess URL.",
+      "q6": "Kan jag avsluta när som helst?",
+      "a6": "Absolut. Det finns inga bindningstider. Du kan avsluta ditt abonnemang när som helst och det förblir aktivt till slutet av din nuvarande betalningsperiod.",
+      "q7": "Vilka betalningsmetoder accepterar ni?",
+      "a7": "Vi accepterar alla vanliga kredit- och betalkort (Visa, Mastercard, American Express) via vår säkra betalningspartner Stripe.",
+      "q8": "Är min hemsida optimerad för sökmotorer?",
+      "a8": "Ja! Varje hemsida byggd med Qvicko är SEO-optimerad från dag ett. Det inkluderar meta-taggar, snabba laddningstider, mobilanpassning och strukturerat innehåll som sökmotorer älskar."
+    }
+  },
   "notFound": {
     "title": "Sidan hittades inte",
     "description": "Sidan du letar efter finns inte eller har flyttats.",
@@ -722,6 +851,26 @@
     "back": "Tillbaka",
     "next": "Nästa"
   },
+  "analytics": {
+    "title": "Analys",
+    "subtitle": "Spåra din funnel från första besöket till betald prenumeration.",
+    "uniqueVisitors": "Unika besökare",
+    "totalSignups": "Registreringar",
+    "trialStartRate": "Trial-startgrad",
+    "trialConversion": "Trial → Betald",
+    "totalRevenue": "Intäkter",
+    "funnelTitle": "Konverteringsfunnel",
+    "filterUtmSource": "Filtrera per UTM-källa...",
+    "visitorsChart": "Dagliga besökare",
+    "utmSources": "UTM-källor",
+    "topPages": "Populära sidor",
+    "source": "Källa",
+    "medium": "Medium",
+    "campaign": "Kampanj",
+    "visitors": "Besökare",
+    "noData": "Ingen data ännu för denna period.",
+    "noUtmData": "Ingen UTM-data ännu."
+  },
   "media": {
     "library": "Mediabibliotek",
     "upload": "Ladda upp",
@@ -746,5 +895,88 @@
     "logo": "Logotyp",
     "backgroundImage": "Bakgrundsbild",
     "image": "Bild"
+  },
+  "adminUsers": {
+    "title": "Användare",
+    "subtitle": "Alla registrerade användare på plattformen.",
+    "searchPlaceholder": "Sök på namn, e-post eller företag...",
+    "totalUsers": "Totala användare",
+    "activeUsers": "Aktiva användare",
+    "verifiedUsers": "Verifierade",
+    "newUsers30d": "Nya (30 dagar)",
+    "user": "Användare",
+    "email": "E-post",
+    "sites": "Sidor",
+    "subscription": "Plan",
+    "status": "Status",
+    "joined": "Registrerad",
+    "active": "Aktiv",
+    "free": "Gratis",
+    "verified": "Verifierad",
+    "inactive": "Inaktiv",
+    "noUsers": "Inga användare hittades.",
+    "showing": "Visar {from}–{to} av {total}"
+  },
+  "adminSites": {
+    "title": "Alla sidor",
+    "subtitle": "Alla genererade sidor på plattformen.",
+    "searchPlaceholder": "Sök på namn, domän eller URL...",
+    "totalSites": "Totala sidor",
+    "leadSites": "Lead-sidor",
+    "userSites": "Användarsidor",
+    "allTypes": "Alla typer",
+    "leadSitesOnly": "Bara lead-sidor",
+    "userSitesOnly": "Bara användarsidor",
+    "allStatuses": "Alla statusar",
+    "site": "Sida",
+    "owner": "Ägare",
+    "type": "Typ",
+    "status": "Status",
+    "views": "Visningar",
+    "created": "Skapad",
+    "leadTag": "Lead",
+    "userTag": "Användare",
+    "noSites": "Inga sidor hittades.",
+    "showing": "Visar {from}–{to} av {total}"
+  },
+  "adminUserDetail": {
+    "backToUsers": "Tillbaka till Användare",
+    "notFound": "Användaren hittades inte.",
+    "subscribed": "Prenumerant",
+    "inactive": "Inaktiv",
+    "saved": "Ändringarna sparades.",
+    "editProfile": "Redigera profil",
+    "fullName": "Fullständigt namn",
+    "email": "E-post",
+    "company": "Företag",
+    "orgNumber": "Org.nummer",
+    "phone": "Telefon",
+    "locale": "Språk",
+    "permissions": "Behörigheter",
+    "active": "Aktiv",
+    "verified": "Verifierad",
+    "superuser": "Superuser",
+    "role": "Roll",
+    "saving": "Sparar...",
+    "saveChanges": "Spara ändringar",
+    "accountDetails": "Kontodetaljer",
+    "twoFactor": "Tvåfaktorsautentisering",
+    "enabled": "Aktiverad",
+    "disabled": "Avaktiverad",
+    "failedAttempts": "Misslyckade inloggningsförsök",
+    "lockedUntil": "Låst till",
+    "notLocked": "Inte låst",
+    "passwordChanged": "Lösenord ändrat",
+    "stripeId": "Stripe kund-ID",
+    "billingAddress": "Faktureringsadress",
+    "userSites": "Sidor",
+    "sites": "Sidor",
+    "activeSessions": "Aktiva sessioner",
+    "lastLogin": "Senaste inloggning",
+    "memberSince": "Medlem sedan",
+    "noSessions": "Inga aktiva sessioner.",
+    "expires": "Upphör",
+    "auditLog": "Aktivitetslogg",
+    "noAuditLog": "Inga aktivitetshändelser."
   }
 }

@@ -12,6 +12,7 @@ import {
 } from "@stripe/react-stripe-js";
 
 import { useAuth } from "@/lib/auth-context";
+import { trackEvent } from "@/lib/tracking";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
@@ -173,6 +174,11 @@ export default function BillingPage() {
   const [billingError, setBillingError] = useState(false);
   const [cancelConfirm, setCancelConfirm] = useState(false);
 
+  // Track billing page view
+  useEffect(() => {
+    trackEvent("billing_page_viewed");
+  }, []);
+
   // Pre-fill billing details when data loads
   useEffect(() => {
     if (billingDetails) {
@@ -244,7 +250,14 @@ export default function BillingPage() {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.detail || "Subscribe failed");
       }
+      const subRes = await res.json().catch(() => ({}));
       await refetchSub();
+      // Track subscription event — determine if trial or direct paid
+      if (subRes.status === "trialing" || subRes.trial_end) {
+        trackEvent("trial_started", { plan: planKey });
+      } else {
+        trackEvent("subscription_created", { plan: planKey });
+      }
     } catch (err) {
       console.error("Subscribe error:", err);
     } finally {

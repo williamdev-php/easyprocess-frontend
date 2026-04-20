@@ -3,54 +3,64 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui";
-
-const COOKIE_CONSENT_KEY = "cookie_consent";
+import { getCookieConsent, acceptAllCookies } from "@/lib/cookie-consent";
+import CookiePreferencesDialog from "@/components/cookie-preferences-dialog";
 
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
   const t = useTranslations("cookies");
 
   useEffect(() => {
-    const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
+    const consent = getCookieConsent();
     if (!consent) {
       setVisible(true);
     }
   }, []);
 
-  function accept() {
-    localStorage.setItem(COOKIE_CONSENT_KEY, "accepted");
+  function handleAcceptAll() {
+    acceptAllCookies();
     setVisible(false);
   }
 
-  function decline() {
-    localStorage.setItem(COOKIE_CONSENT_KEY, "declined");
+  function handlePreferencesSaved() {
+    setShowPreferences(false);
     setVisible(false);
   }
 
-  if (!visible) return null;
+  if (!visible && !showPreferences) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 p-4 sm:p-6">
-      <div className="mx-auto max-w-2xl rounded-2xl border border-border-theme bg-surface p-6 shadow-xl">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex-1">
+    <>
+      {visible && !showPreferences && (
+        <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm">
+          <div className="rounded-2xl border border-border-theme bg-surface p-5 shadow-xl">
             <h3 className="text-sm font-semibold text-primary-deep">
               {t("title")}
             </h3>
-            <p className="mt-1 text-sm text-text-muted">
+            <p className="mt-1 text-sm text-text-muted leading-relaxed">
               {t("description")}
             </p>
-          </div>
-          <div className="flex shrink-0 gap-3">
-            <Button variant="ghost" size="sm" onClick={decline}>
-              {t("decline")}
-            </Button>
-            <Button variant="primary" size="sm" onClick={accept}>
-              {t("accept")}
-            </Button>
+            <div className="mt-4 flex gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPreferences(true)}
+              >
+                {t("managePreferences")}
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleAcceptAll}>
+                {t("acceptAll")}
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      )}
+
+      <CookiePreferencesDialog
+        open={showPreferences}
+        onClose={handlePreferencesSaved}
+      />
+    </>
   );
 }

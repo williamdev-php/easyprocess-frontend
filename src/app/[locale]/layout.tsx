@@ -4,6 +4,7 @@ import { setRequestLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
 import Providers from "@/components/providers";
+import TrackingProvider from "@/components/tracking-provider";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -66,9 +67,11 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider messages={messages}>
       <Providers>
-        <div className="bg-background text-text-theme min-h-full flex flex-col" lang={locale}>
-          {children}
-        </div>
+        <TrackingProvider>
+          <div className="bg-background text-text-theme min-h-full flex flex-col" lang={locale}>
+            {children}
+          </div>
+        </TrackingProvider>
       </Providers>
     </NextIntlClientProvider>
   );

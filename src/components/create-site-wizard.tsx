@@ -7,6 +7,8 @@ import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { getAccessToken } from "@/lib/auth-context";
 import { Button, Input, Label, Alert, ColorPicker } from "@/components/ui";
+import Confetti from "@/components/confetti";
+import { trackEvent } from "@/lib/tracking";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -243,6 +245,7 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
           setSiteId(data.site_id);
           setSubdomain(data.subdomain);
           setSiteClaimToken(data.claim_token);
+          trackEvent("create_site_completed", { site_id: data.site_id });
           setStep("done");
           clearInterval(interval);
         } else if (data.status === "FAILED") {
@@ -314,6 +317,7 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
     setError("");
     if (!businessName.trim()) return;
 
+    trackEvent("create_site_started", { mode: "new" });
     setLoading(true);
     try {
       const data = await apiCall("/api/sites/create", {
@@ -743,6 +747,7 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
         )}
 
         {/* Step 5: Done */}
+        {step === "done" && <Confetti />}
         {step === "done" && (
           <div className="py-8 text-center">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary-deep/10">

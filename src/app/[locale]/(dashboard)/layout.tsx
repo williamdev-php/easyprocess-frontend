@@ -94,7 +94,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div className={`mx-auto px-4 py-8 sm:px-6 ${isSuperuser ? "max-w-[1400px]" : "max-w-6xl"}`}>
         <div className="flex gap-8">
           <DashboardSidebar />
           <main className="min-w-0 flex-1 pb-20 lg:pb-0">

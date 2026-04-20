@@ -5,16 +5,19 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
-
+import { usePathname } from "@/i18n/routing";
 
 export default function Navbar() {
   const { isAuthenticated } = useAuth();
   const t = useTranslations("nav");
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>(null);
+
+  const isHomePage = pathname === "/" || pathname === "";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -22,7 +25,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Clean up dropdown timeout on unmount to prevent memory leak
   useEffect(() => {
     return () => {
       if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
@@ -49,14 +51,26 @@ export default function Navbar() {
     dropdownTimeout.current = setTimeout(() => setDropdownOpen(false), 150);
   };
 
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    if (isHomePage) {
+      e.preventDefault();
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+    setDropdownOpen(false);
+    setMobileOpen(false);
+  };
+
   const navLinkClass =
     "rounded-xl px-3 py-2 text-sm font-medium transition hover:bg-white/10";
 
   const dropdownItems = [
-    { key: "automation", href: "#services", icon: "M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" },
-    { key: "ecommerce", href: "#services", icon: "M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" },
-    { key: "webdev", href: "#services", icon: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" },
-    { key: "expert", href: "#contact", icon: "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" },
+    { key: "builder", section: "builder", icon: "M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" },
+    { key: "showcase", section: "showcase", icon: "M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" },
+    { key: "seo", section: "seo", icon: "M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" },
+    { key: "howItWorks", section: "how-it-works", icon: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
   ] as const;
 
   return (
@@ -128,8 +142,8 @@ export default function Navbar() {
                   {dropdownItems.map((item) => (
                     <a
                       key={item.key}
-                      href={item.href}
-                      onClick={() => setDropdownOpen(false)}
+                      href={isHomePage ? `#${item.section}` : `/#${item.section}`}
+                      onClick={(e) => scrollToSection(e, item.section)}
                       className="flex items-start gap-3 rounded-xl px-4 py-3 transition hover:bg-white/10"
                     >
                       <svg
@@ -153,6 +167,10 @@ export default function Navbar() {
                   ))}
                 </div>
               </div>
+
+              <Link href="/pricing" className={`${navLinkClass} text-white`}>
+                {t("pricing")}
+              </Link>
 
               {/* Auth buttons */}
               {isAuthenticated ? (
@@ -246,8 +264,8 @@ export default function Navbar() {
                 {dropdownItems.map((item) => (
                   <a
                     key={item.key}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
+                    href={isHomePage ? `#${item.section}` : `/#${item.section}`}
+                    onClick={(e) => scrollToSection(e, item.section)}
                     className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/10"
                   >
                     <svg
@@ -271,6 +289,14 @@ export default function Navbar() {
                 ))}
               </div>
             </div>
+
+            <Link
+              href="/pricing"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-xl px-4 py-3 text-lg font-medium text-white transition hover:bg-white/10"
+            >
+              {t("pricing")}
+            </Link>
 
             {isAuthenticated ? (
               <div className="mt-4 px-4">
