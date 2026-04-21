@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { Suspense, useState, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
@@ -9,6 +9,14 @@ import { getAccessToken } from "@/lib/auth-context";
 import { Button, Input, Label, Alert } from "@/components/ui";
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPageInner />
+    </Suspense>
+  );
+}
+
+function RegisterPageInner() {
   const { register } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
