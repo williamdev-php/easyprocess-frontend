@@ -26,6 +26,12 @@ function isProtectedPath(pathname: string): boolean {
 
 function isAdminOnlyPath(pathname: string): boolean {
   const pathWithoutLocale = pathname.replace(/^\/(sv|en)/, "") || "/";
+
+  // /dashboard/sites/<id> and /dashboard/sites/<id>/... are user-scoped site routes, not admin-only
+  if (/^\/dashboard\/sites\/[^/]+/.test(pathWithoutLocale) && pathWithoutLocale !== "/dashboard/sites") {
+    return false;
+  }
+
   return adminOnlyPatterns.some(
     (p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(`${p}/`)
   );

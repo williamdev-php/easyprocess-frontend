@@ -6,9 +6,10 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { getAccessToken } from "@/lib/auth-context";
-import { Button, Input, Label, Alert, ColorPicker } from "@/components/ui";
+import { Button, Input, Label, Alert, ColorPicker, FontSelector } from "@/components/ui";
 import Confetti from "@/components/confetti";
 import { trackEvent } from "@/lib/tracking";
+import { pickSafeDefaultFont } from "@/lib/fonts";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -35,7 +36,7 @@ function randomPalette() {
 // Types
 // ---------------------------------------------------------------------------
 
-type Step = "email" | "choose" | "new-details" | "transform-url" | "generating" | "done" | "failed";
+type Step = "email" | "choose" | "new-details" | "transform-url" | "auth-required" | "generating" | "done" | "failed";
 
 interface Colors {
   primary: string;
@@ -48,6 +49,20 @@ interface Colors {
 // ---------------------------------------------------------------------------
 // Step indicator
 // ---------------------------------------------------------------------------
+
+function Tooltip({ text }: { text: string }) {
+  return (
+    <div className="group relative inline-flex ml-1">
+      <svg className="h-4 w-4 text-text-muted cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+      </svg>
+      <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg bg-primary-deep px-3 py-2 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+        {text}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-primary-deep" />
+      </div>
+    </div>
+  );
+}
 
 function StepIndicator({ currentStep, mode }: { currentStep: Step; mode: "new" | "transform" | null }) {
   const t = useTranslations("createSite");
@@ -64,6 +79,7 @@ function StepIndicator({ currentStep, mode }: { currentStep: Step; mode: "new" |
     choose: 1,
     "new-details": 2,
     "transform-url": 2,
+    "auth-required": 2,
     generating: 3,
     done: 4,
     failed: 3,
@@ -179,11 +195,18 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
   // New site form
   const [businessName, setBusinessName] = useState("");
   const [industry, setIndustry] = useState("");
+  const [industryId, setIndustryId] = useState<string | null>(null);
+  const [showIndustryPicker, setShowIndustryPicker] = useState(false);
+  const [industries, setIndustries] = useState<{ id: string; name: string; slug: string }[]>([]);
+  const [industriesLoaded, setIndustriesLoaded] = useState(false);
   const [context, setContext] = useState("");
   const [colors, setColors] = useState<Colors>(randomPalette());
   const [logoUrl, setLogoUrl] = useState("");
   const [logoPreview, setLogoPreview] = useState("");
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [imageFiles, setImageFiles] = useState<{ preview: string; url: string }[]>([]);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [font, setFont] = useState(pickSafeDefaultFont());
 
   // Transform form
   const [websiteUrl, setWebsiteUrl] = useState("");
@@ -227,6 +250,30 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
       setStep("choose");
     }
   }, [embedded, authLoading, isAuthenticated, step]);
+
+  // Auto-continue generation after user authenticates from auth-required step
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && step === "auth-required") {
+      if (mode === "new") {
+        startGeneration();
+      } else if (mode === "transform") {
+        startTransformGeneration();
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, isAuthenticated, step, mode]);
+
+  // Fetch industries when picker is shown
+  useEffect(() => {
+    if (!showIndustryPicker || industriesLoaded) return;
+    fetch(`${API_URL}/api/sites/industries`, { credentials: "include" })
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((data: { id: string; name: string; slug: string }[]) => {
+        setIndustries(data);
+        setIndustriesLoaded(true);
+      })
+      .catch(() => setIndustriesLoaded(true));
+  }, [showIndustryPicker, industriesLoaded]);
 
   // Poll generation status
   useEffect(() => {
@@ -300,6 +347,30 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
     reader.readAsDataURL(file);
   }
 
+  // Handle image file uploads (up to 12)
+  function handleImageFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files) return;
+    const remaining = 12 - imageFiles.length;
+    const toAdd = Array.from(files).slice(0, remaining);
+    for (const file of toAdd) {
+      if (file.size > 5 * 1024 * 1024) continue;
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageFiles((prev) => {
+          if (prev.length >= 12) return prev;
+          return [...prev, { preview: reader.result as string, url: "" }];
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+    if (imageInputRef.current) imageInputRef.current.value = "";
+  }
+
+  function removeImage(idx: number) {
+    setImageFiles((prev) => prev.filter((_, i) => i !== idx));
+  }
+
   // Submit: email step
   function handleEmailSubmit(e: FormEvent) {
     e.preventDefault();
@@ -311,22 +382,34 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
     setStep("choose");
   }
 
-  // Submit: create new site
+  // Submit: create new site (gate on auth)
   async function handleCreateNew(e: FormEvent) {
     e.preventDefault();
     setError("");
     if (!businessName.trim()) return;
 
+    if (!isAuthenticated) {
+      setStep("auth-required");
+      return;
+    }
+
+    await startGeneration();
+  }
+
+  async function startGeneration() {
     trackEvent("create_site_started", { mode: "new" });
     setLoading(true);
     try {
       const data = await apiCall("/api/sites/create", {
         business_name: businessName,
         industry: industry || null,
+        industry_id: industryId || null,
         context: context || null,
         colors,
         logo_url: logoUrl || null,
         email: isAuthenticated ? user?.email : email,
+        image_urls: imageFiles.length > 0 ? imageFiles.map((f) => f.preview) : null,
+        font: font || null,
       });
       setLeadId(data.lead_id);
       setStep("generating");
@@ -337,12 +420,21 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
     }
   }
 
-  // Submit: transform existing site
+  // Submit: transform existing site (gate on auth)
   async function handleTransform(e: FormEvent) {
     e.preventDefault();
     setError("");
     if (!websiteUrl.trim()) return;
 
+    if (!isAuthenticated) {
+      setStep("auth-required");
+      return;
+    }
+
+    await startTransformGeneration();
+  }
+
+  async function startTransformGeneration() {
     setLoading(true);
     try {
       const data = await apiCall("/api/sites/create-from-url", {
@@ -531,7 +623,10 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
             <h2 className="text-lg font-bold text-primary-deep">{t("newSiteTitle")}</h2>
 
             <div>
-              <Label htmlFor="businessName" required>{t("businessName")}</Label>
+              <div className="flex items-center">
+                <Label htmlFor="businessName" required>{t("businessName")}</Label>
+                <Tooltip text={t("businessNameTooltip")} />
+              </div>
               <Input
                 id="businessName"
                 required
@@ -543,18 +638,70 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
             </div>
 
             <div>
-              <Label htmlFor="industry">{t("industry")}</Label>
+              <div className="flex items-center">
+                <Label htmlFor="industry">{t("industry")}</Label>
+                <Tooltip text={t("industryTooltip")} />
+              </div>
               <Input
                 id="industry"
                 placeholder={t("industryPlaceholder")}
                 value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
+                onChange={(e) => { setIndustry(e.target.value); setIndustryId(null); }}
                 className="mt-1.5"
               />
+
+              {/* Industry-specific toggle */}
+              {!showIndustryPicker ? (
+                <button
+                  type="button"
+                  onClick={() => setShowIndustryPicker(true)}
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary-deep/70 hover:text-primary-deep transition"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                  {t("industrySpecificToggle")}
+                </button>
+              ) : (
+                <div className="mt-3 rounded-xl border border-primary/20 bg-primary-deep/5 p-3">
+                  <p className="mb-2 text-xs text-text-muted">{t("industrySpecificHint")}</p>
+                  <label htmlFor="industrySelect" className="text-xs font-semibold text-primary-deep">
+                    {t("industryDropdownLabel")}
+                  </label>
+                  <select
+                    id="industrySelect"
+                    value={industryId || ""}
+                    onChange={(e) => {
+                      const id = e.target.value || null;
+                      setIndustryId(id);
+                      if (id) {
+                        const found = industries.find((ind) => ind.id === id);
+                        if (found) setIndustry(found.name);
+                      }
+                    }}
+                    className="mt-1 w-full rounded-lg border-2 border-border-theme bg-white px-3 py-2 text-sm text-primary-deep focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+                  >
+                    <option value="">{t("industryDropdownPlaceholder")}</option>
+                    {industries.map((ind) => (
+                      <option key={ind.id} value={ind.id}>{ind.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => { setShowIndustryPicker(false); setIndustryId(null); }}
+                    className="mt-2 text-xs text-text-muted hover:text-primary-deep transition"
+                  >
+                    {t("back")}
+                  </button>
+                </div>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="context">{t("context")}</Label>
+              <div className="flex items-center">
+                <Label htmlFor="context">{t("context")}</Label>
+                <Tooltip text={t("contextTooltip")} />
+              </div>
               <textarea
                 id="context"
                 rows={4}
@@ -568,9 +715,10 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
 
             <div>
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex items-center">
                   <h3 className="text-sm font-semibold text-primary-deep">{t("colorsTitle")}</h3>
-                  <p className="text-xs text-text-muted">{t("colorsSubtitle")}</p>
+                  <Tooltip text={t("colorsTooltip")} />
+                  <p className="ml-2 text-xs text-text-muted">{t("colorsSubtitle")}</p>
                 </div>
                 <button
                   type="button"
@@ -600,7 +748,72 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold text-primary-deep">{t("logoTitle")}</h3>
+              <div className="flex items-center">
+                <h3 className="text-sm font-semibold text-primary-deep">{t("fontTitle")}</h3>
+                <Tooltip text={t("fontTooltip")} />
+              </div>
+              <p className="text-xs text-text-muted">{t("fontSubtitle")}</p>
+              <div className="mt-2">
+                <FontSelector value={font} onChange={setFont} />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center">
+                <h3 className="text-sm font-semibold text-primary-deep">{t("imagesTitle")}</h3>
+                <Tooltip text={t("imagesTooltip")} />
+              </div>
+              <p className="text-xs text-text-muted">{t("imagesSubtitle")}</p>
+              <div className="mt-3">
+                {imageFiles.length > 0 && (
+                  <div className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    {imageFiles.map((img, idx) => (
+                      <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border-2 border-border-theme bg-white">
+                        <img src={img.preview} alt={`Image ${idx + 1}`} className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(idx)}
+                          className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100"
+                        >
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {imageFiles.length < 12 && (
+                  <div className="flex items-center gap-3">
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageFiles}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => imageInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 rounded-xl border-2 border-dashed border-border-theme px-4 py-3 text-sm font-medium text-text-secondary transition hover:border-primary hover:text-primary-deep"
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                      </svg>
+                      {t("uploadImages")}
+                    </button>
+                    <span className="text-xs text-text-muted">{t("imagesCount", { count: imageFiles.length })}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center">
+                <h3 className="text-sm font-semibold text-primary-deep">{t("logoTitle")}</h3>
+                <Tooltip text={t("logoTooltip")} />
+              </div>
               <p className="text-xs text-text-muted">{t("logoSubtitle")}</p>
               <div className="mt-3">
                 {logoPreview ? (
@@ -728,6 +941,44 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
               </Button>
             </div>
           </form>
+        )}
+
+        {/* Step: Auth required before generation */}
+        {step === "auth-required" && (
+          <div className="space-y-6 py-4 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-deep/10">
+              <svg className="h-8 w-8 text-primary-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-primary-deep">{t("authRequiredTitle")}</h2>
+            <p className="text-sm text-text-muted">{t("authRequiredSubtitle")}</p>
+
+            <div className="flex flex-col gap-3">
+              <Link
+                href={`/register?redirect=${encodeURIComponent("/create-site")}`}
+                className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-primary to-primary-deep px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:from-primary-dark hover:to-primary-deep"
+              >
+                {t("authRequiredRegister")}
+              </Link>
+              <Link
+                href={`/login?redirect=${encodeURIComponent("/create-site")}`}
+                className="flex w-full items-center justify-center rounded-xl border-2 border-border-theme px-6 py-3 text-sm font-semibold text-primary-deep transition hover:border-primary hover:bg-primary-deep/5"
+              >
+                {t("authRequiredLogin")}
+              </Link>
+            </div>
+
+            <button
+              onClick={() => setStep(mode === "new" ? "new-details" : "transform-url")}
+              className="mt-2 flex items-center gap-1 text-sm text-text-muted hover:text-primary-deep transition mx-auto"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+              </svg>
+              {t("back")}
+            </button>
+          </div>
         )}
 
         {/* Step 4: Generating */}

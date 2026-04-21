@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link, usePathname } from "@/i18n/routing";
 
 export default function Footer() {
   const t = useTranslations("footer");
+  const pathname = usePathname();
 
   return (
     <footer className="bg-primary-deep text-white">
@@ -42,7 +43,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/help" className="text-sm text-white/60 transition hover:text-white">
+                <Link href={{ pathname: "/help", query: { from: pathname } }} className="text-sm text-white/60 transition hover:text-white">
                   {t("helpCenter")}
                 </Link>
               </li>

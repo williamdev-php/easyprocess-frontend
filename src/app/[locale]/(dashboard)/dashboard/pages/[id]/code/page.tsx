@@ -15,6 +15,7 @@ import { Link } from "@/i18n/routing";
 const VALID_SECTION_KEYS = [
   "hero", "about", "features", "stats", "services", "process",
   "gallery", "team", "testimonials", "faq", "cta", "contact",
+  "pricing", "video", "logo_cloud", "custom_content", "banner",
 ];
 
 type FieldRule = {
@@ -108,6 +109,26 @@ const SECTION_RULES: Record<string, SectionRule> = {
   contact: {
     nullable: true,
     fields: [{ field: "title", type: "string" }],
+  },
+  pricing: {
+    nullable: true,
+    items: { list: "tiers", fields: [{ field: "name", type: "string", required: true }, { field: "price", type: "string", required: true }] },
+  },
+  video: {
+    nullable: true,
+    fields: [{ field: "video_url", type: "string" }],
+  },
+  logo_cloud: {
+    nullable: true,
+    items: { list: "logos", fields: [{ field: "name", type: "string", required: true }] },
+  },
+  custom_content: {
+    nullable: true,
+    items: { list: "blocks", fields: [{ field: "type", type: "string", required: true }] },
+  },
+  banner: {
+    nullable: true,
+    fields: [{ field: "text", type: "string", required: true }],
   },
 };
 
@@ -206,6 +227,12 @@ const SECTION_FILES = [
   { key: "faq", label: "faq.json", icon: "F" },
   { key: "cta", label: "cta.json", icon: "C" },
   { key: "contact", label: "contact.json", icon: "C" },
+  { key: "pricing", label: "pricing.json", icon: "P" },
+  { key: "video", label: "video.json", icon: "V" },
+  { key: "logo_cloud", label: "logo_cloud.json", icon: "L" },
+  { key: "custom_content", label: "custom_content.json", icon: "X" },
+  { key: "banner", label: "banner.json", icon: "B" },
+  { key: "section_settings", label: "section_settings.json", icon: "⚙" },
   { key: "seo", label: "seo.json", icon: "S" },
   { key: "section_order", label: "section_order.json", icon: "O" },
 ];

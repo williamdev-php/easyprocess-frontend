@@ -4,11 +4,29 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import LocaleSwitcher from "@/components/locale-switcher";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+
+const RETURN_URL_KEY = "helpCenterReturnUrl";
 
 export default function HelpHeader() {
   const t = useTranslations("helpCenter");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const [returnUrl, setReturnUrl] = useState("/");
+
+  useEffect(() => {
+    const from = searchParams.get("from");
+    if (from && from.startsWith("/")) {
+      sessionStorage.setItem(RETURN_URL_KEY, from);
+      setReturnUrl(from);
+    } else {
+      const stored = sessionStorage.getItem(RETURN_URL_KEY);
+      if (stored && stored.startsWith("/")) {
+        setReturnUrl(stored);
+      }
+    }
+  }, [searchParams]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border-theme bg-surface/80 backdrop-blur-xl">
@@ -32,7 +50,7 @@ export default function HelpHeader() {
 
         <div className="flex items-center gap-2">
           <Link
-            href="/"
+            href={returnUrl as "/"}
             className="hidden text-sm text-text-muted transition hover:text-primary-deep sm:block"
           >
             {t("backToSite")}

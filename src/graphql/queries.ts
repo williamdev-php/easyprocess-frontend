@@ -841,3 +841,105 @@ export const GET_INDUSTRIES = gql`
     }
   }
 `;
+
+// ---------------------------------------------------------------------------
+// Apps
+// ---------------------------------------------------------------------------
+
+export const GET_APPS = gql`
+  query GetApps {
+    apps {
+      id
+      slug
+      name
+      description
+      iconUrl
+      version
+      scopes
+      sidebarLinks
+    }
+  }
+`;
+
+export const GET_SITE_APPS = gql`
+  query GetSiteApps($siteId: String!) {
+    siteApps(siteId: $siteId) {
+      id
+      appId
+      appSlug
+      appName
+      siteId
+      isActive
+      settings
+      sidebarLinks
+      installedAt
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Blog
+// ---------------------------------------------------------------------------
+
+export const GET_BLOG_POSTS = gql`
+  query GetBlogPosts($siteId: String!, $filter: BlogPostFilterInput) {
+    blogPosts(siteId: $siteId, filter: $filter) {
+      items {
+        id
+        siteId
+        title
+        slug
+        excerpt
+        featuredImage
+        authorName
+        categoryId
+        categoryName
+        status
+        publishedAt
+        createdAt
+        updatedAt
+      }
+      total
+      page
+      pageSize
+    }
+  }
+`;
+
+export const GET_BLOG_POST = gql`
+  query GetBlogPost($siteId: String!, $postId: String!) {
+    blogPost(siteId: $siteId, postId: $postId) {
+      id
+      siteId
+      title
+      slug
+      excerpt
+      content
+      featuredImage
+      authorName
+      authorId
+      categoryId
+      categoryName
+      status
+      publishedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_BLOG_CATEGORIES = gql`
+  query GetBlogCategories($siteId: String!) {
+    blogCategories(siteId: $siteId) {
+      id
+      siteId
+      name
+      slug
+      description
+      sortOrder
+      postCount
+      createdAt
+      updatedAt
+    }
+  }
+`;

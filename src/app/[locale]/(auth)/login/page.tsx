@@ -14,15 +14,10 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/dashboard";
   // Only allow same-origin relative path redirects (prevent open redirect).
-  let redirect = "/dashboard";
-  try {
-    const parsed = new URL(rawRedirect, window.location.origin);
-    if (parsed.origin === window.location.origin) {
-      redirect = parsed.pathname + parsed.search + parsed.hash;
-    }
-  } catch {
-    // Invalid URL — use default
-  }
+  // Relative paths starting with "/" are safe; reject absolute URLs to other origins.
+  const redirect = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+    ? rawRedirect
+    : "/dashboard";
   const t = useTranslations("auth");
 
   const [email, setEmail] = useState("");

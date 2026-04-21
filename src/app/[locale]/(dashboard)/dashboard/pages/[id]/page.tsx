@@ -9,6 +9,8 @@ import { MY_SITE } from "@/graphql/queries";
 import { SAVE_DRAFT, LOAD_DRAFT, PUBLISH_SITE_DATA, DISCARD_DRAFT } from "@/graphql/mutations";
 import { Link } from "@/i18n/routing";
 import { MediaPickerField } from "@/components/media-picker";
+import { FontSelector } from "@/components/ui/font-selector";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -18,6 +20,9 @@ interface SiteData {
   meta?: { title?: string; description?: string; keywords?: string[]; language?: string };
   section_order?: string[];
   theme?: string;
+  style_variant?: number;
+  nav_style?: string;
+  footer_style?: string;
   branding?: {
     logo_url?: string | null;
     colors?: { primary?: string; secondary?: string; accent?: string; background?: string; text?: string };
@@ -39,6 +44,12 @@ interface SiteData {
   faq?: { title?: string; subtitle?: string; items?: { question: string; answer: string }[] } | null;
   cta?: { title?: string; text?: string; button?: { label: string; href: string } | null; show_button?: boolean } | null;
   contact?: { title?: string; text?: string; show_form?: boolean; show_info?: boolean } | null;
+  pricing?: { title?: string; subtitle?: string; tiers?: { name: string; price: string; description?: string; features?: string[]; highlighted?: boolean; cta?: { label: string; href: string } | null }[] } | null;
+  video?: { title?: string; subtitle?: string; video_url?: string; caption?: string } | null;
+  logo_cloud?: { title?: string; subtitle?: string; logos?: { name: string; image_url?: string }[] } | null;
+  custom_content?: { title?: string; subtitle?: string; layout?: string; blocks?: { type: string; content?: string; url?: string; alt?: string; label?: string; href?: string }[] } | null;
+  banner?: { text?: string; button?: { label: string; href: string } | null; background_color?: string } | null;
+  section_settings?: Record<string, { animation?: string; background_color?: string }>;
   seo?: { structured_data?: Record<string, unknown>; robots?: string };
 }
 
@@ -186,35 +197,6 @@ function ToggleSwitch({
   );
 }
 
-function ColorInput({
-  value,
-  onChange,
-  label,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  label: string;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <input
-        type="color"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-8 w-8 shrink-0 cursor-pointer rounded border border-border-light"
-      />
-      <div className="flex-1">
-        <span className="text-xs text-text-muted">{label}</span>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="block w-full rounded border border-border-light bg-white px-2 py-1 text-xs font-mono outline-none focus:border-primary"
-        />
-      </div>
-    </div>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // List editor for items (services, features, FAQ, etc.)
@@ -387,8 +369,14 @@ function ValidatedInput({
 
 function BusinessEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
   const b = data.business || {};
-  const set = (key: string, val: string) => {
+  const set = (key: string, val: unknown) => {
     onChange({ ...data, business: { ...b, [key]: val } });
+  };
+  const socialLinks = b.social_links || {};
+  const setSocial = (platform: string, val: string) => {
+    const next = { ...socialLinks, [platform]: val };
+    if (!val) delete next[platform];
+    set("social_links", next);
   };
   return (
     <div className="space-y-3 p-4">
@@ -402,12 +390,25 @@ function BusinessEditor({ data, onChange }: { data: SiteData; onChange: (d: Site
       </FieldGroup>
       <FieldGroup label="Adress"><TextInput value={b.address || ""} onChange={(v) => set("address", v)} /></FieldGroup>
       <FieldGroup label="Org.nummer"><TextInput value={b.org_number || ""} onChange={(v) => set("org_number", v)} /></FieldGroup>
+      <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-2">
+        <span className="text-xs font-medium text-text-muted">Sociala medier</span>
+        <FieldGroup label="Facebook">
+          <ValidatedInput value={socialLinks.facebook || ""} onChange={(v) => setSocial("facebook", v)} validate={isValidUrl} errorText="Ogiltig URL" placeholder="https://facebook.com/foretag" />
+        </FieldGroup>
+        <FieldGroup label="Instagram">
+          <ValidatedInput value={socialLinks.instagram || ""} onChange={(v) => setSocial("instagram", v)} validate={isValidUrl} errorText="Ogiltig URL" placeholder="https://instagram.com/foretag" />
+        </FieldGroup>
+        <FieldGroup label="LinkedIn">
+          <ValidatedInput value={socialLinks.linkedin || ""} onChange={(v) => setSocial("linkedin", v)} validate={isValidUrl} errorText="Ogiltig URL" placeholder="https://linkedin.com/company/foretag" />
+        </FieldGroup>
+      </div>
     </div>
   );
 }
 
 function BrandingEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
   const colors = data.branding?.colors || {};
+  const fonts = data.branding?.fonts || {};
   const setColor = (key: string, val: string) => {
     onChange({
       ...data,
@@ -417,7 +418,14 @@ function BrandingEditor({ data, onChange }: { data: SiteData; onChange: (d: Site
   const setBranding = (key: string, val: unknown) => {
     onChange({ ...data, branding: { ...data.branding, [key]: val } });
   };
+  const setFont = (key: string, val: string) => {
+    onChange({
+      ...data,
+      branding: { ...data.branding, fonts: { ...fonts, [key]: val } },
+    });
+  };
   const setTheme = (val: string) => onChange({ ...data, theme: val });
+  const selectCls = "w-full rounded-lg border border-border-light bg-white px-3 py-2 text-sm outline-none focus:border-primary";
   return (
     <div className="space-y-3 p-4">
       <MediaPickerField
@@ -427,23 +435,60 @@ function BrandingEditor({ data, onChange }: { data: SiteData; onChange: (d: Site
         folder="branding"
       />
       <FieldGroup label="Tema">
-        <select
-          value={data.theme || "modern"}
-          onChange={(e) => setTheme(e.target.value)}
-          className="w-full rounded-lg border border-border-light bg-white px-3 py-2 text-sm outline-none focus:border-primary"
-        >
+        <select value={data.theme || "modern"} onChange={(e) => setTheme(e.target.value)} className={selectCls}>
           <option value="modern">Modern</option>
           <option value="bold">Bold</option>
           <option value="elegant">Elegant</option>
           <option value="minimal">Minimal</option>
         </select>
       </FieldGroup>
-      <div className="grid grid-cols-2 gap-3">
-        <ColorInput value={colors.primary || "#2563eb"} onChange={(v) => setColor("primary", v)} label="Primär" />
-        <ColorInput value={colors.secondary || "#1e40af"} onChange={(v) => setColor("secondary", v)} label="Sekundär" />
-        <ColorInput value={colors.accent || "#f59e0b"} onChange={(v) => setColor("accent", v)} label="Accent" />
-        <ColorInput value={colors.background || "#ffffff"} onChange={(v) => setColor("background", v)} label="Bakgrund" />
-        <ColorInput value={colors.text || "#111827"} onChange={(v) => setColor("text", v)} label="Text" />
+      <FieldGroup label="Designstil">
+        <select
+          value={data.style_variant ?? 0}
+          onChange={(e) => onChange({ ...data, style_variant: Number(e.target.value) })}
+          className={selectCls}
+        >
+          <option value={0}>Original</option>
+          <option value={1}>Modern Cards</option>
+          <option value={2}>Clean &amp; Minimal</option>
+          <option value={3}>Bold &amp; Filled</option>
+        </select>
+      </FieldGroup>
+      <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-2">
+        <span className="text-xs font-medium text-text-muted">Layout</span>
+        <FieldGroup label="Navbar-stil">
+          <select
+            value={data.nav_style || ""}
+            onChange={(e) => onChange({ ...data, nav_style: e.target.value })}
+            className={selectCls}
+          >
+            <option value="">Standard (från designstil)</option>
+            <option value="floating">Flytande (pill)</option>
+            <option value="sticky">Sticky (fast)</option>
+            <option value="minimal">Minimal</option>
+          </select>
+        </FieldGroup>
+        <FieldGroup label="Footer-stil">
+          <select
+            value={data.footer_style || ""}
+            onChange={(e) => onChange({ ...data, footer_style: e.target.value })}
+            className={selectCls}
+          >
+            <option value="">Standard (från designstil)</option>
+            <option value="columns">Kolumner</option>
+            <option value="centered">Centrerad</option>
+            <option value="minimal">Minimal</option>
+          </select>
+        </FieldGroup>
+      </div>
+      <FontSelector value={fonts.heading || "Inter"} onChange={(v) => setFont("heading", v)} label="Rubrik-typsnitt" />
+      <FontSelector value={fonts.body || "Inter"} onChange={(v) => setFont("body", v)} label="Brödtext-typsnitt" />
+      <div className="grid grid-cols-3 gap-3 justify-items-center">
+        <ColorPicker value={colors.primary || "#2563eb"} onChange={(v) => setColor("primary", v)} label="Primär" />
+        <ColorPicker value={colors.secondary || "#1e40af"} onChange={(v) => setColor("secondary", v)} label="Sekundär" />
+        <ColorPicker value={colors.accent || "#f59e0b"} onChange={(v) => setColor("accent", v)} label="Accent" />
+        <ColorPicker value={colors.background || "#ffffff"} onChange={(v) => setColor("background", v)} label="Bakgrund" />
+        <ColorPicker value={colors.text || "#111827"} onChange={(v) => setColor("text", v)} label="Text" />
       </div>
     </div>
   );
@@ -818,6 +863,222 @@ function ContactEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteD
   );
 }
 
+function PricingEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
+  const pricing = data.pricing || { title: "Priser", subtitle: "", tiers: [] };
+  const tiers = pricing.tiers || [];
+  const set = (key: string, val: unknown) => {
+    onChange({ ...data, pricing: { ...pricing, [key]: val } });
+  };
+  const updateTier = (idx: number, key: string, val: unknown) => {
+    const next = deepClone(tiers);
+    (next[idx] as Record<string, unknown>)[key] = val;
+    set("tiers", next);
+  };
+  const removeTier = (idx: number) => set("tiers", tiers.filter((_, i) => i !== idx));
+  const addTier = () => set("tiers", [...tiers, { name: "", price: "", description: "", features: [], highlighted: false, cta: null }]);
+
+  return (
+    <div className="space-y-3 p-4">
+      <FieldGroup label="Rubrik"><TextInput value={pricing.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
+      <FieldGroup label="Underrubrik"><TextInput value={pricing.subtitle || ""} onChange={(v) => set("subtitle", v)} /></FieldGroup>
+      <FieldGroup label="Prisplaner">
+        <div className="space-y-2">
+          {tiers.map((tier, idx) => (
+            <div key={idx} className="rounded-lg border border-border-light bg-gray-50/50 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-medium text-primary-deep">{tier.name || `Plan #${idx + 1}`}</span>
+                <button type="button" onClick={() => removeTier(idx)} className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 shrink-0">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <FieldGroup label="Namn"><TextInput value={tier.name || ""} onChange={(v) => updateTier(idx, "name", v)} /></FieldGroup>
+              <FieldGroup label="Pris"><TextInput value={tier.price || ""} onChange={(v) => updateTier(idx, "price", v)} placeholder="t.ex. 299 kr/mån" /></FieldGroup>
+              <FieldGroup label="Beskrivning"><TextArea value={tier.description || ""} onChange={(v) => updateTier(idx, "description", v)} rows={2} /></FieldGroup>
+              <FieldGroup label="Funktioner (en per rad)">
+                <TextArea
+                  value={(tier.features || []).join("\n")}
+                  onChange={(v) => updateTier(idx, "features", v.split("\n").filter(Boolean))}
+                  rows={3}
+                  placeholder="Funktion 1&#10;Funktion 2&#10;Funktion 3"
+                />
+              </FieldGroup>
+              <ToggleSwitch label="Markera som populär" checked={tier.highlighted || false} onChange={(v) => updateTier(idx, "highlighted", v)} />
+              <div className="rounded-lg border border-border-light bg-gray-50/80 p-2 space-y-2">
+                <span className="text-[10px] font-medium text-text-muted uppercase tracking-wide">CTA-knapp</span>
+                <FieldGroup label="Knapptext"><TextInput value={tier.cta?.label || ""} onChange={(v) => updateTier(idx, "cta", { ...tier.cta, label: v, href: tier.cta?.href || "#contact" })} /></FieldGroup>
+                <FieldGroup label="Knapplänk"><TextInput value={tier.cta?.href || ""} onChange={(v) => updateTier(idx, "cta", { ...tier.cta, label: tier.cta?.label || "", href: v })} /></FieldGroup>
+              </div>
+            </div>
+          ))}
+          <button type="button" onClick={addTier} className="flex items-center gap-1.5 rounded-lg border border-dashed border-border-light px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:border-primary hover:text-primary">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Lägg till prisplan
+          </button>
+        </div>
+      </FieldGroup>
+    </div>
+  );
+}
+
+function VideoEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
+  const video = data.video || { title: "", subtitle: "", video_url: "", caption: "" };
+  const set = (key: string, val: unknown) => {
+    onChange({ ...data, video: { ...video, [key]: val } });
+  };
+  return (
+    <div className="space-y-3 p-4">
+      <FieldGroup label="Rubrik"><TextInput value={video.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
+      <FieldGroup label="Underrubrik"><TextInput value={video.subtitle || ""} onChange={(v) => set("subtitle", v)} /></FieldGroup>
+      <FieldGroup label="Video-URL">
+        <ValidatedInput value={video.video_url || ""} onChange={(v) => set("video_url", v)} validate={isValidUrl} errorText="Ogiltig URL" placeholder="https://youtube.com/watch?v=..." />
+      </FieldGroup>
+      <FieldGroup label="Bildtext"><TextInput value={video.caption || ""} onChange={(v) => set("caption", v)} /></FieldGroup>
+    </div>
+  );
+}
+
+function LogoCloudEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
+  const logoCloud = data.logo_cloud || { title: "", subtitle: "", logos: [] };
+  const logos = logoCloud.logos || [];
+  const set = (key: string, val: unknown) => {
+    onChange({ ...data, logo_cloud: { ...logoCloud, [key]: val } });
+  };
+  const updateLogo = (idx: number, key: string, val: unknown) => {
+    const next = deepClone(logos);
+    (next[idx] as Record<string, unknown>)[key] = val;
+    set("logos", next);
+  };
+  const removeLogo = (idx: number) => set("logos", logos.filter((_, i) => i !== idx));
+  const addLogo = () => set("logos", [...logos, { name: "", image_url: "" }]);
+
+  return (
+    <div className="space-y-3 p-4">
+      <FieldGroup label="Rubrik"><TextInput value={logoCloud.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
+      <FieldGroup label="Underrubrik"><TextInput value={logoCloud.subtitle || ""} onChange={(v) => set("subtitle", v)} /></FieldGroup>
+      <FieldGroup label="Logotyper">
+        <div className="space-y-2">
+          {logos.map((logo, idx) => (
+            <div key={idx} className="rounded-lg border border-border-light bg-gray-50/50 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-medium text-primary-deep">{logo.name || `Logo #${idx + 1}`}</span>
+                <button type="button" onClick={() => removeLogo(idx)} className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 shrink-0">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <FieldGroup label="Namn"><TextInput value={logo.name || ""} onChange={(v) => updateLogo(idx, "name", v)} /></FieldGroup>
+              <MediaPickerField
+                value={logo.image_url || ""}
+                onChange={(url) => updateLogo(idx, "image_url", url)}
+                label="Logotyp"
+                folder="logos"
+              />
+            </div>
+          ))}
+          <button type="button" onClick={addLogo} className="flex items-center gap-1.5 rounded-lg border border-dashed border-border-light px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:border-primary hover:text-primary">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Lägg till logotyp
+          </button>
+        </div>
+      </FieldGroup>
+    </div>
+  );
+}
+
+function CustomContentEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
+  const cc = data.custom_content || { title: "", subtitle: "", layout: "default", blocks: [] };
+  const blocks = cc.blocks || [];
+  const set = (key: string, val: unknown) => {
+    onChange({ ...data, custom_content: { ...cc, [key]: val } });
+  };
+  const selectCls = "w-full rounded-lg border border-border-light bg-white px-3 py-2 text-sm outline-none focus:border-primary";
+  const updateBlock = (idx: number, key: string, val: unknown) => {
+    const next = deepClone(blocks);
+    (next[idx] as Record<string, unknown>)[key] = val;
+    set("blocks", next);
+  };
+  const removeBlock = (idx: number) => set("blocks", blocks.filter((_, i) => i !== idx));
+  const addBlock = () => set("blocks", [...blocks, { type: "text", content: "" }]);
+
+  return (
+    <div className="space-y-3 p-4">
+      <FieldGroup label="Rubrik"><TextInput value={cc.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
+      <FieldGroup label="Underrubrik"><TextInput value={cc.subtitle || ""} onChange={(v) => set("subtitle", v)} /></FieldGroup>
+      <FieldGroup label="Layout">
+        <select value={cc.layout || "default"} onChange={(e) => set("layout", e.target.value)} className={selectCls}>
+          <option value="default">Standard</option>
+          <option value="grid">Rutnät</option>
+          <option value="columns">Kolumner</option>
+        </select>
+      </FieldGroup>
+      <FieldGroup label="Innehållsblock">
+        <div className="space-y-2">
+          {blocks.map((block, idx) => (
+            <div key={idx} className="rounded-lg border border-border-light bg-gray-50/50 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-medium text-primary-deep">Block #{idx + 1} ({block.type})</span>
+                <button type="button" onClick={() => removeBlock(idx)} className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 shrink-0">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <FieldGroup label="Typ">
+                <select value={block.type || "text"} onChange={(e) => updateBlock(idx, "type", e.target.value)} className={selectCls}>
+                  <option value="text">Text</option>
+                  <option value="image">Bild</option>
+                  <option value="button">Knapp</option>
+                </select>
+              </FieldGroup>
+              {block.type === "text" && (
+                <FieldGroup label="Innehåll"><TextArea value={block.content || ""} onChange={(v) => updateBlock(idx, "content", v)} rows={3} /></FieldGroup>
+              )}
+              {block.type === "image" && (
+                <>
+                  <MediaPickerField value={block.url || ""} onChange={(url) => updateBlock(idx, "url", url)} label="Bild" folder="custom" />
+                  <FieldGroup label="Alt-text"><TextInput value={block.alt || ""} onChange={(v) => updateBlock(idx, "alt", v)} /></FieldGroup>
+                </>
+              )}
+              {block.type === "button" && (
+                <>
+                  <FieldGroup label="Knapptext"><TextInput value={block.label || ""} onChange={(v) => updateBlock(idx, "label", v)} /></FieldGroup>
+                  <FieldGroup label="Knapplänk"><TextInput value={block.href || ""} onChange={(v) => updateBlock(idx, "href", v)} /></FieldGroup>
+                </>
+              )}
+            </div>
+          ))}
+          <button type="button" onClick={addBlock} className="flex items-center gap-1.5 rounded-lg border border-dashed border-border-light px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:border-primary hover:text-primary">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Lägg till block
+          </button>
+        </div>
+      </FieldGroup>
+    </div>
+  );
+}
+
+function BannerEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
+  const banner = data.banner || { text: "", button: null, background_color: "" };
+  const set = (key: string, val: unknown) => {
+    onChange({ ...data, banner: { ...banner, [key]: val } });
+  };
+  const hasButton = !!banner.button;
+  return (
+    <div className="space-y-3 p-4">
+      <FieldGroup label="Text"><TextInput value={banner.text || ""} onChange={(v) => set("text", v)} /></FieldGroup>
+      <div className="flex justify-center">
+        <ColorPicker value={banner.background_color || "#2563eb"} onChange={(v) => set("background_color", v)} label="Bakgrundsfärg" />
+      </div>
+      <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-2">
+        <ToggleSwitch label="Visa knapp" checked={hasButton} onChange={(v) => set("button", v ? { label: "", href: "#contact" } : null)} />
+        {hasButton && (
+          <>
+            <FieldGroup label="Knapptext"><TextInput value={banner.button?.label || ""} onChange={(v) => set("button", { ...banner.button, label: v, href: banner.button?.href || "#contact" })} /></FieldGroup>
+            <FieldGroup label="Knapplänk"><TextInput value={banner.button?.href || ""} onChange={(v) => set("button", { ...banner.button, label: banner.button?.label || "", href: v })} /></FieldGroup>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function StatsEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
   const stats = data.stats || { title: "", items: [] };
   const set = (key: string, val: unknown) => {
@@ -911,6 +1172,7 @@ function TeamEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData
 const DEFAULT_SECTION_ORDER = [
   "hero", "about", "features", "stats", "services", "process",
   "gallery", "team", "testimonials", "faq", "cta", "contact",
+  "pricing", "video", "logo_cloud", "custom_content", "banner",
 ];
 
 const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{ data: SiteData; onChange: (d: SiteData) => void }>; toggleable: boolean }> = {
@@ -928,6 +1190,11 @@ const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{
   faq: { label: "Vanliga frågor", Editor: FAQEditor, toggleable: true },
   cta: { label: "Call-to-action", Editor: CTAEditor, toggleable: true },
   contact: { label: "Kontakt", Editor: ContactEditor, toggleable: true },
+  pricing: { label: "Priser", Editor: PricingEditor, toggleable: true },
+  video: { label: "Video", Editor: VideoEditor, toggleable: true },
+  logo_cloud: { label: "Logotyper (partners)", Editor: LogoCloudEditor, toggleable: true },
+  custom_content: { label: "Eget innehåll", Editor: CustomContentEditor, toggleable: true },
+  banner: { label: "Banner", Editor: BannerEditor, toggleable: true },
 };
 
 // Non-content sections always appear first (not draggable)
@@ -1024,7 +1291,53 @@ function DraggableSectionItem({
         </div>
       </div>
       {isOpen && isEnabled && (
-        <Editor data={siteData} onChange={handleChange} />
+        <>
+          <Editor data={siteData} onChange={handleChange} />
+          {toggleable && (
+            <SectionSettingsPanel sectionKey={sectionKey} data={siteData} onChange={handleChange} />
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function SectionSettingsPanel({ sectionKey, data, onChange }: { sectionKey: string; data: SiteData; onChange: (d: SiteData) => void }) {
+  const settings = data.section_settings?.[sectionKey] || {};
+  const setField = (key: string, val: string) => {
+    const next = {
+      ...data,
+      section_settings: {
+        ...data.section_settings,
+        [sectionKey]: { ...settings, [key]: val },
+      },
+    };
+    onChange(next);
+  };
+  const hasBgColor = !!settings.background_color;
+  const selectCls = "w-full rounded-lg border border-border-light bg-white px-3 py-2 text-sm outline-none focus:border-primary";
+  return (
+    <div className="border-t border-border-light bg-gray-50/60 px-4 py-3 space-y-2">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Sektionsinställningar</span>
+      <FieldGroup label="Animation">
+        <select value={settings.animation || "fade-up"} onChange={(e) => setField("animation", e.target.value)} className={selectCls}>
+          <option value="fade-up">Fade up</option>
+          <option value="fade-in">Fade in</option>
+          <option value="slide-left">Slide left</option>
+          <option value="slide-right">Slide right</option>
+          <option value="scale">Scale</option>
+          <option value="none">Ingen</option>
+        </select>
+      </FieldGroup>
+      <ToggleSwitch label="Egen bakgrundsfärg" checked={hasBgColor} onChange={(v) => setField("background_color", v ? "#ffffff" : "")} />
+      {hasBgColor && (
+        <div className="flex justify-center">
+          <ColorPicker
+            value={settings.background_color || "#ffffff"}
+            onChange={(v) => setField("background_color", v)}
+            label="Bakgrundsfärg"
+          />
+        </div>
       )}
     </div>
   );
@@ -1207,7 +1520,6 @@ export default function SiteEditorPage() {
     if (!siteData) return;
     const next = deepClone(siteData);
     const current = (next as Record<string, unknown>)[key];
-
     if (current) {
       // Disabling — cache the current data so we can restore it
       disabledSectionsCache.current[key] = deepClone(current);
@@ -1226,14 +1538,28 @@ export default function SiteEditorPage() {
           services: { title: "Våra tjänster", subtitle: "", items: [] },
           process: { title: "Så fungerar det", subtitle: "", steps: [] },
           gallery: { title: "Galleri", subtitle: "", images: [] },
-          team: { title: "Vårt team", subtitle: "", members: [] },
+          team: { title: "Vårt team", subtitle: "", members: [{ name: "Namn", role: "Roll", bio: "", image: null }] },
           testimonials: { title: "Omdömen", subtitle: "", items: [], show_ratings: true },
           faq: { title: "Vanliga frågor", subtitle: "", items: [] },
           cta: { title: "", text: "", show_button: true },
           contact: { title: "Kontakta oss", text: "", show_form: true, show_info: true },
+          pricing: { title: "Priser", subtitle: "", tiers: [{ name: "Bas", price: "0 kr", description: "Kom igång gratis", features: ["Grundläggande funktioner"], highlighted: false, cta: { label: "Välj plan", href: "#contact" } }] },
+          video: { title: "Video", subtitle: "", video_url: "https://youtube.com/watch?v=dQw4w9WgXcQ", caption: "" },
+          logo_cloud: { title: "Våra partners", subtitle: "", logos: [] },
+          custom_content: { title: "Innehåll", subtitle: "", layout: "default", blocks: [{ type: "text", content: "Skriv ditt innehåll här..." }] },
+          banner: { text: "Välkommen! Kontakta oss idag.", button: { label: "Kontakta oss", href: "#contact" }, background_color: "" },
         };
         (next as Record<string, unknown>)[key] = defaults[key] || {};
       }
+
+      // Ensure the section is in section_order so the preview renders it
+      const order = next.section_order && Array.isArray(next.section_order) && next.section_order.length > 0
+        ? [...next.section_order]
+        : [...DEFAULT_SECTION_ORDER];
+      if (!order.includes(key)) {
+        order.push(key);
+      }
+      next.section_order = order;
     }
     handleChange(next);
   };
@@ -1403,17 +1729,30 @@ export default function SiteEditorPage() {
             </button>
           </div>
 
+          {/* Site settings */}
+          <Link
+            href={`/dashboard/pages/${siteId}/settings`}
+            className="rounded-lg p-1.5 text-text-muted hover:bg-gray-100 transition-colors"
+            title={t("settings")}
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </Link>
+
           {/* Open preview in new tab */}
           <a
             href={publicSiteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-deep"
+            className="rounded-lg p-1.5 text-text-muted hover:bg-gray-100 transition-colors"
+            title={t("openPreview")}
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            {t("openPreview")}
           </a>
         </div>
       </div>
@@ -1510,20 +1849,22 @@ export default function SiteEditorPage() {
         </div>
 
         {/* Preview panel — full remaining width */}
-        <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-gray-100/80 p-3 overflow-hidden">
+        <div className="hidden md:flex flex-1 flex-col items-center bg-gray-100/80 p-3 overflow-hidden min-h-0">
           <div
-            className={`rounded-xl border border-border-light bg-white shadow-lg overflow-hidden transition-all duration-300 origin-center ${
+            className={`rounded-xl border border-border-light bg-white shadow-lg overflow-hidden transition-all duration-300 origin-top ${
               previewMode === "mobile" ? "w-[375px]" :
               previewMode === "tablet" ? "w-[768px]" :
               "w-full"
-            } ${isDraggingSection ? "scale-[0.65] h-[140%]" : "h-full"}`}
+            } ${isDraggingSection ? "scale-[0.65] h-[140%]" : `flex-1 ${previewMode === "desktop" ? "w-full" : ""}`}`}
+            style={{ minHeight: 0 }}
           >
             <iframe
               ref={iframeRef}
               src={previewIframeUrl}
-              className="h-full w-full"
+              className="h-full w-full border-0"
               title="Site preview"
-              style={{ pointerEvents: isDraggingSection ? "none" : "auto" }}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+              style={{ pointerEvents: isDraggingSection ? "none" : "auto", minHeight: "100%" }}
             />
           </div>
         </div>

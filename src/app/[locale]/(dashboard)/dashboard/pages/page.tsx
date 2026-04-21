@@ -77,7 +77,7 @@ function SiteMenu({
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
         </svg>
       ),
-      href: `/dashboard/pages/${site.id}/code` as "/dashboard",
+      href: `/dashboard/sites/${site.id}/code` as "/dashboard",
     },
     {
       key: "customize",
@@ -87,7 +87,7 @@ function SiteMenu({
           <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
         </svg>
       ),
-      href: `/dashboard/pages/${site.id}` as "/dashboard",
+      href: `/dashboard/sites/${site.id}/editor` as "/dashboard",
     },
     {
       key: "settings",
@@ -98,7 +98,7 @@ function SiteMenu({
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       ),
-      href: `/dashboard/pages/${site.id}/settings` as "/dashboard",
+      href: `/dashboard/sites/${site.id}/settings` as "/dashboard",
     },
     "divider" as const,
     {
@@ -525,7 +525,7 @@ function SiteCard({
         {/* Actions */}
         <div className="mt-4 flex items-center gap-2">
           <Link
-            href={`/dashboard/pages/${site.id}` as "/dashboard"}
+            href={`/dashboard/sites/${site.id}` as "/dashboard"}
             className="flex-1"
           >
             <Button variant="outline" size="sm" fullWidth>
@@ -544,6 +544,44 @@ function SiteCard({
               </Button>
             </a>
           )}
+
+          {/* Pause / Unpause */}
+          {isPaused ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => { e.preventDefault(); onUnpause(site.id); }}
+              title={t("menuUnpause")}
+            >
+              <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+              </svg>
+            </Button>
+          ) : (isPublished || isDraft) ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => { e.preventDefault(); onPause(site.id); }}
+              title={t("menuPause")}
+            >
+              <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+              </svg>
+            </Button>
+          ) : null}
+
+          {/* Delete */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => { e.preventDefault(); onDelete(site); }}
+            title={t("menuDelete")}
+            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+          >
+            <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+          </Button>
 
           {isDraft && (
             <Button

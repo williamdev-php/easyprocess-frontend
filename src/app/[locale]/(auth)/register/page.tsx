@@ -14,17 +14,9 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
   const claimToken = searchParams.get("claim");
   const rawRedirect = searchParams.get("redirect") || "/dashboard";
-  let redirect = "/dashboard";
-  try {
-    if (typeof window !== "undefined") {
-      const parsed = new URL(rawRedirect, window.location.origin);
-      if (parsed.origin === window.location.origin) {
-        redirect = parsed.pathname + parsed.search + parsed.hash;
-      }
-    }
-  } catch {
-    // Invalid URL — use default
-  }
+  const redirect = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+    ? rawRedirect
+    : "/dashboard";
   const t = useTranslations("auth");
   const locale = useLocale();
 
@@ -63,10 +55,6 @@ export default function RegisterPage() {
     }
     if (form.password.length < 8) {
       setError(t("passwordTooShort"));
-      return;
-    }
-    if (!/[A-Z]/.test(form.password) || !/[a-z]/.test(form.password) || !/\d/.test(form.password)) {
-      setError(t("passwordRequirements"));
       return;
     }
     if (!agreedToTerms) {
@@ -119,13 +107,10 @@ export default function RegisterPage() {
     }
   }
 
-  const hasUpper = /[A-Z]/.test(form.password);
-  const hasLower = /[a-z]/.test(form.password);
-  const hasDigit = /\d/.test(form.password);
   const passwordStrength =
     form.password.length === 0
       ? 0
-      : form.password.length < 8 || !hasUpper || !hasLower || !hasDigit
+      : form.password.length < 8
         ? 1
         : form.password.length < 12
           ? 2
@@ -323,7 +308,18 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <Label htmlFor="companyName">{t("companyName")}</Label>
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="companyName">{t("companyName")}</Label>
+              <div className="group relative">
+                <svg className="h-4 w-4 text-text-muted cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                </svg>
+                <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg bg-primary-deep px-3 py-2 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                  {t("companyNameTooltip")}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-primary-deep" />
+                </div>
+              </div>
+            </div>
             <div className="relative mt-1.5">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -335,7 +331,18 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <Label htmlFor="orgNumber">{t("orgNumber")}</Label>
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="orgNumber">{t("orgNumber")}</Label>
+              <div className="group relative">
+                <svg className="h-4 w-4 text-text-muted cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                </svg>
+                <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg bg-primary-deep px-3 py-2 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                  {t("orgNumberTooltip")}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-primary-deep" />
+                </div>
+              </div>
+            </div>
             <div className="relative mt-1.5">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -347,7 +354,18 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <Label htmlFor="phone">{t("phone")}</Label>
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="phone">{t("phone")}</Label>
+              <div className="group relative">
+                <svg className="h-4 w-4 text-text-muted cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                </svg>
+                <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg bg-primary-deep px-3 py-2 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                  {t("phoneTooltip")}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-primary-deep" />
+                </div>
+              </div>
+            </div>
             <div className="relative mt-1.5">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -370,6 +388,16 @@ export default function RegisterPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
               </svg>
               {t("back")}
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex items-center justify-center rounded-xl border-2 border-border-theme px-5 py-3 text-sm font-semibold text-text-secondary transition hover:border-primary hover:text-primary-deep"
+            >
+              {t("skip")}
+              <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
             </button>
             <Button type="submit" disabled={loading} fullWidth size="lg">
               {loading ? (

@@ -449,3 +449,115 @@ export const DELETE_INDUSTRY = gql`
     deleteIndustry(industryId: $industryId)
   }
 `;
+
+// ---------------------------------------------------------------------------
+// Apps
+// ---------------------------------------------------------------------------
+
+export const INSTALL_APP = gql`
+  mutation InstallApp($input: InstallAppInput!) {
+    installApp(input: $input) {
+      id
+      appSlug
+      appName
+      siteId
+      isActive
+      sidebarLinks
+      installedAt
+    }
+  }
+`;
+
+export const UNINSTALL_APP = gql`
+  mutation UninstallApp($input: UninstallAppInput!) {
+    uninstallApp(input: $input)
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Blog
+// ---------------------------------------------------------------------------
+
+export const CREATE_BLOG_POST = gql`
+  mutation CreateBlogPost($input: CreateBlogPostInput!) {
+    createBlogPost(input: $input) {
+      id
+      siteId
+      title
+      slug
+      excerpt
+      content
+      featuredImage
+      authorName
+      categoryId
+      categoryName
+      status
+      publishedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_BLOG_POST = gql`
+  mutation UpdateBlogPost($input: UpdateBlogPostInput!) {
+    updateBlogPost(input: $input) {
+      id
+      siteId
+      title
+      slug
+      excerpt
+      content
+      featuredImage
+      authorName
+      categoryId
+      categoryName
+      status
+      publishedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_BLOG_POST = gql`
+  mutation DeleteBlogPost($siteId: String!, $postId: String!) {
+    deleteBlogPost(siteId: $siteId, postId: $postId)
+  }
+`;
+
+export const CREATE_BLOG_CATEGORY = gql`
+  mutation CreateBlogCategory($input: CreateBlogCategoryInput!) {
+    createBlogCategory(input: $input) {
+      id
+      siteId
+      name
+      slug
+      description
+      sortOrder
+      postCount
+      createdAt
+    }
+  }
+`;
+
+export const UPDATE_BLOG_CATEGORY = gql`
+  mutation UpdateBlogCategory($input: UpdateBlogCategoryInput!) {
+    updateBlogCategory(input: $input) {
+      id
+      siteId
+      name
+      slug
+      description
+      sortOrder
+      postCount
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_BLOG_CATEGORY = gql`
+  mutation DeleteBlogCategory($siteId: String!, $categoryId: String!) {
+    deleteBlogCategory(siteId: $siteId, categoryId: $categoryId)
+  }
+`;

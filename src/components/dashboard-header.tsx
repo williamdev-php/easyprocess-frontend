@@ -3,15 +3,54 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link, usePathname } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
+import { useQuery } from "@apollo/client/react";
+import { MY_SITES } from "@/graphql/queries";
 import NotificationBell from "@/components/notification-bell";
 
+interface SiteItem {
+  id: string;
+  subdomain: string | null;
+}
+
 export default function DashboardHeader() {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
+  const pathname = usePathname();
   const t = useTranslations("dashboardHeader");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Resolve selected site's subdomain for preview link
+  const { data: sitesData } = useQuery<{ mySites: SiteItem[] }>(MY_SITES, {
+    skip: !isAuthenticated || user?.isSuperuser === true,
+    fetchPolicy: "cache-first",
+  });
+  const sites = sitesData?.mySites ?? [];
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  useEffect(() => {
+    function resolve() {
+      if (sites.length === 0) return;
+      let siteId: string | null = null;
+      try { siteId = localStorage.getItem("selectedSiteId"); } catch {}
+      const site = sites.find((s) => s.id === siteId) ?? sites[0];
+      if (!site?.subdomain) { setPreviewUrl(null); return; }
+      const viewerUrl = process.env.NEXT_PUBLIC_VIEWER_URL ?? "";
+      if (!viewerUrl) { setPreviewUrl(null); return; }
+      try {
+        const u = new URL(viewerUrl);
+        const host = u.hostname.replace(/^www\./, "");
+        setPreviewUrl(`${u.protocol}//${site.subdomain}.${host}`);
+      } catch {
+        setPreviewUrl(`${viewerUrl}/${site.id}`);
+      }
+    }
+    resolve();
+    window.addEventListener("storage", resolve);
+    const interval = setInterval(resolve, 1000);
+    return () => { window.removeEventListener("storage", resolve); clearInterval(interval); };
+  }, [sites]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -54,7 +93,7 @@ export default function DashboardHeader() {
         <div className="flex items-center gap-1 sm:gap-2">
           {/* Help & Contact icons (mobile only) */}
           <Link
-            href="/help"
+            href={{ pathname: "/help", query: { from: pathname } }}
             className="flex h-9 w-9 items-center justify-center rounded-xl text-text-muted transition-colors hover:bg-primary-deep/5 hover:text-primary-deep sm:hidden"
             aria-label={t("helpCenter")}
           >
@@ -71,6 +110,23 @@ export default function DashboardHeader() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
             </svg>
           </Link>
+
+          {/* Preview site */}
+          {previewUrl && (
+            <a
+              href={previewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-text-muted transition-colors hover:bg-primary-deep/5 hover:text-primary-deep"
+              aria-label={t("preview")}
+              title={t("preview")}
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </a>
+          )}
 
           {/* Notification bell */}
           <NotificationBell />

@@ -7,3 +7,4 @@ export { Card, CardHeader, CardTitle, CardDescription } from "./card";
 export { Alert } from "./alert";
 export { ColorPicker } from "./color-picker";
 export type { ColorPickerProps } from "./color-picker";
+export { FontSelector } from "./font-selector";

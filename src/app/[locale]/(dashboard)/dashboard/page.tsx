@@ -421,21 +421,32 @@ function UserOverview() {
   const firstName = user?.fullName?.split(" ")[0] || "";
   const { greeting, subtitle: greetingSubtitle } = useGreeting(firstName);
 
-  // First, get user's sites to find the site ID
+  // Get user's sites
   const { data: sitesData, loading: sitesLoading } = useQuery<{ mySites: Array<SiteOption> }>(MY_SITES);
 
   const sites: SiteOption[] = useMemo(() => sitesData?.mySites ?? [], [sitesData]);
 
-  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+  // Read selected site from localStorage (set by the sidebar site selector)
+  const [siteId, setSiteId] = useState<string | null>(null);
 
-  // Auto-select first site when sites load (or if selected site disappears)
   useEffect(() => {
-    if (sites.length > 0 && (!selectedSiteId || !sites.find((s) => s.id === selectedSiteId))) {
-      setSelectedSiteId(sites[0].id);
+    function sync() {
+      try {
+        const stored = localStorage.getItem("selectedSiteId");
+        if (stored && sites.find((s) => s.id === stored)) {
+          setSiteId(stored);
+          return;
+        }
+      } catch {}
+      if (sites.length > 0) setSiteId(sites[0].id);
     }
-  }, [sites, selectedSiteId]);
-
-  const siteId = selectedSiteId;
+    sync();
+    // Listen for storage changes from other components (sidebar)
+    window.addEventListener("storage", sync);
+    // Also poll briefly since same-tab localStorage writes don't fire 'storage'
+    const interval = setInterval(sync, 500);
+    return () => { window.removeEventListener("storage", sync); clearInterval(interval); };
+  }, [sites]);
 
   // Fetch analytics for selected site
   const { data: analyticsData, loading: analyticsLoading } = useQuery<{ siteAnalytics: { totalPageViews: number; totalVisitors: number; pagesPerSession: number; performanceScore: number; visitorsChangePct: number; pagesPerSessionPrev: number; performanceScorePrev: number; daily: Array<{ date: string; visitors: number; pageViews: number }> } }>(
@@ -497,19 +508,7 @@ function UserOverview() {
           <p className="mt-1 text-text-muted">{greetingSubtitle}</p>
         </div>
 
-        {sites.length > 1 && (
-          <select
-            value={siteId ?? ""}
-            onChange={(e) => setSelectedSiteId(e.target.value)}
-            className="rounded-xl border border-border-light bg-white px-4 py-2 text-sm font-medium text-primary-deep shadow-sm transition-colors hover:border-primary/30 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            {sites.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.businessName || s.subdomain || s.id}
-              </option>
-            ))}
-          </select>
-        )}
+        {/* Site selector is in the sidebar */}
       </div>
 
       {!siteId ? (
