@@ -36,7 +36,7 @@ function randomPalette() {
 // Types
 // ---------------------------------------------------------------------------
 
-type Step = "email" | "choose" | "new-details" | "transform-url" | "auth-required" | "generating" | "done" | "failed";
+type Step = "account" | "choose" | "new-details" | "transform-url" | "generating" | "done" | "failed";
 
 interface Colors {
   primary: string;
@@ -68,18 +68,17 @@ function StepIndicator({ currentStep, mode }: { currentStep: Step; mode: "new" |
   const t = useTranslations("createSite");
 
   const steps = [
-    { key: "email", label: t("stepEmail") },
+    { key: "account", label: t("stepAccount") },
     { key: "choose", label: t("stepChoose") },
     { key: "details", label: t("stepDetails") },
     { key: "generate", label: t("stepGenerate") },
   ];
 
   const stepOrder: Record<Step, number> = {
-    email: 0,
+    account: 0,
     choose: 1,
     "new-details": 2,
     "transform-url": 2,
-    "auth-required": 2,
     generating: 3,
     done: 4,
     failed: 3,
@@ -168,7 +167,7 @@ function GeneratingAnimation({ title, subtitle }: { title: string; subtitle: str
 // ---------------------------------------------------------------------------
 
 interface CreateSiteWizardProps {
-  /** When true, skip the email step and hide login/register links (user is already authenticated) */
+  /** When true, the wizard is used inside the dashboard (user is already authenticated) */
   embedded?: boolean;
   /** Called when site creation is done and user should proceed to dashboard */
   onComplete?: () => void;
@@ -190,13 +189,8 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
   const initialMode = urlMode === "new" || urlMode === "transform" ? urlMode : null;
 
   // State
-  const [step, setStep] = useState<Step>(
-    embedded
-      ? (initialMode ? (initialMode === "new" ? "new-details" : "transform-url") : "choose")
-      : "email"
-  );
+  const [step, setStep] = useState<Step>(embedded ? (initialMode ? (initialMode === "new" ? "new-details" : "transform-url") : "choose") : "account");
   const [mode, setMode] = useState<"new" | "transform" | null>(initialMode);
-  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -272,9 +266,32 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
     }
   }, [claimToken, isAuthenticated, router, onComplete]);
 
-  // Auto-skip email step if logged in (only for non-embedded mode)
+  // Auto-skip account step when already authenticated
   useEffect(() => {
-    if (!embedded && !authLoading && isAuthenticated && step === "email") {
+    if (!authLoading && isAuthenticated && step === "account") {
+      // Restore form state from sessionStorage (after auth redirect)
+      try {
+        const saved = sessionStorage.getItem("create-site-form");
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.businessName) setBusinessName(data.businessName);
+          if (data.industry) setIndustry(data.industry);
+          if (data.industryId) setIndustryId(data.industryId);
+          if (data.context) setContext(data.context);
+          if (data.colors) setColors(data.colors);
+          if (data.font) setFont(data.font);
+          if (data.websiteUrl) setWebsiteUrl(data.websiteUrl);
+          if (data.logoUrl) setLogoUrl(data.logoUrl);
+          if (data.mode) setMode(data.mode);
+          if (data.pendingStep) {
+            setStep(data.pendingStep as Step);
+            sessionStorage.removeItem("create-site-form");
+            return;
+          }
+          sessionStorage.removeItem("create-site-form");
+        }
+      } catch {}
+
       if (initialMode === "new") {
         setStep("new-details");
       } else if (initialMode === "transform") {
@@ -283,19 +300,8 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
         setStep("choose");
       }
     }
-  }, [embedded, authLoading, isAuthenticated, step, initialMode]);
-
-  // Auto-continue generation after user authenticates from auth-required step
-  useEffect(() => {
-    if (!authLoading && isAuthenticated && step === "auth-required") {
-      if (mode === "new") {
-        startGeneration();
-      } else if (mode === "transform") {
-        startTransformGeneration();
-      }
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authLoading, isAuthenticated, step, mode]);
+  }, [authLoading, isAuthenticated, step, initialMode]);
 
   // Fetch industries when picker is shown
   useEffect(() => {
@@ -405,28 +411,29 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
     setImageFiles((prev) => prev.filter((_, i) => i !== idx));
   }
 
-  // Submit: email step
-  function handleEmailSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError("");
-    if (!email.includes("@") || !email.includes(".")) {
-      setError("Ange en giltig e-postadress");
-      return;
-    }
-    setStep("choose");
+  // Save form state to sessionStorage before auth redirect
+  function saveFormState(pendingStep: Step) {
+    try {
+      sessionStorage.setItem("create-site-form", JSON.stringify({
+        businessName,
+        industry,
+        industryId,
+        context,
+        colors,
+        font,
+        websiteUrl,
+        logoUrl,
+        mode,
+        pendingStep,
+      }));
+    } catch {}
   }
 
-  // Submit: create new site (gate on auth)
+  // Submit: create new site
   async function handleCreateNew(e: FormEvent) {
     e.preventDefault();
     setError("");
     if (!businessName.trim()) return;
-
-    if (!isAuthenticated) {
-      setStep("auth-required");
-      return;
-    }
-
     await startGeneration();
   }
 
@@ -441,7 +448,7 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
         context: context || null,
         colors,
         logo_url: logoUrl || null,
-        email: isAuthenticated ? user?.email : email,
+        email: user?.email,
         image_urls: imageFiles.length > 0 ? imageFiles.map((f) => f.preview) : null,
         font: font || null,
       });
@@ -454,17 +461,11 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
     }
   }
 
-  // Submit: transform existing site (gate on auth)
+  // Submit: transform existing site
   async function handleTransform(e: FormEvent) {
     e.preventDefault();
     setError("");
     if (!websiteUrl.trim()) return;
-
-    if (!isAuthenticated) {
-      setStep("auth-required");
-      return;
-    }
-
     await startTransformGeneration();
   }
 
@@ -525,77 +526,34 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
       <div className="rounded-2xl border border-border-theme bg-white p-6 shadow-sm sm:p-8">
         {error && step !== "generating" && <Alert className="mb-6">{error}</Alert>}
 
-        {/* Step 1: Email / Auth */}
-        {step === "email" && !authLoading && (
-          <>
-            {isAuthenticated ? (
-              <div className="text-center py-8">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-deep/10">
-                  <svg className="h-8 w-8 text-primary-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-                  </svg>
-                </div>
-                <p className="text-sm text-text-muted">{t("loggedInAs")}</p>
-                <p className="font-semibold text-primary-deep">{user?.fullName || user?.email}</p>
-                <Button className="mt-6" onClick={() => setStep("choose")}>
-                  {t("emailContinue")}
-                  <svg className="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Button>
-              </div>
-            ) : (
-              <form onSubmit={handleEmailSubmit} className="space-y-5">
-                <div>
-                  <Label htmlFor="email" required>{t("emailLabel")}</Label>
-                  <div className="relative mt-1.5">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                      <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                      </svg>
-                    </div>
-                    <Input
-                      id="email"
-                      type="email"
-                      required
-                      placeholder={t("emailPlaceholder")}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-11"
-                    />
-                  </div>
-                  <p className="mt-1.5 text-xs text-text-muted">{t("emailNote")}</p>
-                </div>
-                <Button type="submit" fullWidth size="lg">
-                  {t("emailContinue")}
-                  <svg className="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Button>
+        {/* Step 1: Account — require auth before proceeding */}
+        {step === "account" && !authLoading && !isAuthenticated && (
+          <div className="space-y-6 py-4 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-deep/10">
+              <svg className="h-8 w-8 text-primary-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-primary-deep">{t("accountTitle")}</h2>
+            <p className="text-sm text-text-muted">{t("accountSubtitle")}</p>
 
-                <div className="my-6 flex items-center gap-4">
-                  <div className="h-px flex-1 bg-border-theme" />
-                  <span className="text-xs text-text-muted">eller</span>
-                  <div className="h-px flex-1 bg-border-theme" />
-                </div>
-
-                <div className="flex gap-3">
-                  <Link
-                    href="/login"
-                    className="flex flex-1 items-center justify-center rounded-xl border-2 border-border-theme px-4 py-3 text-sm font-semibold text-primary-deep transition hover:border-primary hover:bg-primary-deep/5"
-                  >
-                    Logga in
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="flex flex-1 items-center justify-center rounded-xl border-2 border-border-theme px-4 py-3 text-sm font-semibold text-primary-deep transition hover:border-primary hover:bg-primary-deep/5"
-                  >
-                    Skapa konto
-                  </Link>
-                </div>
-              </form>
-            )}
-          </>
+            <div className="flex flex-col gap-3">
+              <Link
+                href={`/register?redirect=${encodeURIComponent("/create-site")}`}
+                onClick={() => saveFormState("choose")}
+                className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-primary to-primary-deep px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:from-primary-dark hover:to-primary-deep"
+              >
+                {t("accountRegister")}
+              </Link>
+              <Link
+                href={`/login?redirect=${encodeURIComponent("/create-site")}`}
+                onClick={() => saveFormState("choose")}
+                className="flex w-full items-center justify-center rounded-xl border-2 border-border-theme px-6 py-3 text-sm font-semibold text-primary-deep transition hover:border-primary hover:bg-primary-deep/5"
+              >
+                {t("accountLogin")}
+              </Link>
+            </div>
+          </div>
         )}
 
         {/* Step 2: Choose mode */}
@@ -665,17 +623,6 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
               </Link>
             )}
 
-            {!embedded && !isAuthenticated && (
-              <button
-                onClick={() => setStep("email")}
-                className="mt-2 flex items-center gap-1 text-sm text-text-muted hover:text-primary-deep transition"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                </svg>
-                {t("back")}
-              </button>
-            )}
           </div>
         )}
 
@@ -1001,44 +948,6 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
               </Button>
             </div>
           </form>
-        )}
-
-        {/* Step: Auth required before generation */}
-        {step === "auth-required" && (
-          <div className="space-y-6 py-4 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-deep/10">
-              <svg className="h-8 w-8 text-primary-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-              </svg>
-            </div>
-            <h2 className="text-lg font-bold text-primary-deep">{t("authRequiredTitle")}</h2>
-            <p className="text-sm text-text-muted">{t("authRequiredSubtitle")}</p>
-
-            <div className="flex flex-col gap-3">
-              <Link
-                href={`/register?redirect=${encodeURIComponent("/create-site")}`}
-                className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-primary to-primary-deep px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:from-primary-dark hover:to-primary-deep"
-              >
-                {t("authRequiredRegister")}
-              </Link>
-              <Link
-                href={`/login?redirect=${encodeURIComponent("/create-site")}`}
-                className="flex w-full items-center justify-center rounded-xl border-2 border-border-theme px-6 py-3 text-sm font-semibold text-primary-deep transition hover:border-primary hover:bg-primary-deep/5"
-              >
-                {t("authRequiredLogin")}
-              </Link>
-            </div>
-
-            <button
-              onClick={() => setStep(mode === "new" ? "new-details" : "transform-url")}
-              className="mt-2 flex items-center gap-1 text-sm text-text-muted hover:text-primary-deep transition mx-auto"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-              </svg>
-              {t("back")}
-            </button>
-          </div>
         )}
 
         {/* Step 4: Generating */}

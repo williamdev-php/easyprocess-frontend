@@ -2,23 +2,23 @@
 
 import { Suspense, useState, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { forgotPassword } from "@/lib/api";
 import { Button, Input, Label, Alert } from "@/components/ui";
+import { GoogleLoginButton } from "@/components/google-login-button";
 
 function LoginForm() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/dashboard/select-site";
-  // Only allow same-origin relative path redirects (prevent open redirect).
-  // Relative paths starting with "/" are safe; reject absolute URLs to other origins.
   const redirect = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
     ? rawRedirect
     : "/dashboard/select-site";
   const t = useTranslations("auth");
+  const locale = useLocale();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,6 +26,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [forgotPasswordStatus, setForgotPasswordStatus] = useState<
     "idle" | "loading" | "sent" | "limited"
   >("idle");
@@ -186,6 +187,29 @@ function LoginForm() {
           )}
         </Button>
       </form>
+
+      {/* Social login divider */}
+      <div className="my-6 flex items-center gap-4">
+        <div className="h-px flex-1 bg-border-theme" />
+        <span className="text-xs font-medium text-text-muted">{t("orContinueWith")}</span>
+        <div className="h-px flex-1 bg-border-theme" />
+      </div>
+
+      <GoogleLoginButton
+        loading={googleLoading}
+        onSuccess={async (code, redirectUri) => {
+          setGoogleLoading(true);
+          setError("");
+          try {
+            await loginWithGoogle(code, redirectUri, locale);
+            router.push(redirect as "/dashboard");
+          } catch (err) {
+            setError(err instanceof Error ? err.message : t("googleLoginFailed"));
+          } finally {
+            setGoogleLoading(false);
+          }
+        }}
+      />
 
       {/* Divider */}
       <div className="my-8 flex items-center gap-4">

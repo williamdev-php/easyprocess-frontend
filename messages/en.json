@@ -187,7 +187,16 @@
     "skip": "Skip",
     "companyNameTooltip": "Your company or organization name. Used for billing and displayed in your profile.",
     "orgNumberTooltip": "Your organization number (e.g. 556677-8899). Needed for business billing.",
-    "phoneTooltip": "Your phone number so we can reach you if needed. We never call without reason."
+    "phoneTooltip": "Your phone number so we can reach you if needed. We never call without reason.",
+    "brandingTagline": "Your website, live in minutes",
+    "brandingDescription": "Describe your business and our AI builds a professional, SEO-optimized website — ready to publish instantly.",
+    "featureSpeed": "Ready in under 5 minutes",
+    "featureSeo": "Built-in SEO from day one",
+    "featureDesign": "Beautiful design, every time",
+    "orContinueWith": "or continue with",
+    "continueWithGoogle": "Continue with Google",
+    "googleLoginFailed": "Google login failed. Please try again.",
+    "orRegisterWithEmail": "or register with email"
   },
   "dashboard": {
     "welcome": "Welcome, {name}",
@@ -1125,6 +1134,10 @@
     "authRequiredSubtitle": "You need an account to create and manage your website.",
     "authRequiredRegister": "Create account",
     "authRequiredLogin": "Log in",
+    "accountTitle": "Create an account or log in",
+    "accountSubtitle": "You need an account to create and manage your website.",
+    "accountRegister": "Create account",
+    "accountLogin": "Log in",
     "businessNameTooltip": "The name displayed on your website. Can be your company name or any name you prefer.",
     "industryTooltip": "Your business industry. Helps AI create relevant content for your website.",
     "contextTooltip": "Describe what your business does, your services, and what makes you unique. The more detail, the better the website.",

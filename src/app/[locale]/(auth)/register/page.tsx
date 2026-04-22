@@ -7,6 +7,7 @@ import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { getAccessToken } from "@/lib/auth-context";
 import { Button, Input, Label, Alert, Checkbox } from "@/components/ui";
+import { GoogleLoginButton } from "@/components/google-login-button";
 
 export default function RegisterPage() {
   return (
@@ -17,7 +18,7 @@ export default function RegisterPage() {
 }
 
 function RegisterPageInner() {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const claimToken = searchParams.get("claim");
@@ -42,6 +43,7 @@ function RegisterPageInner() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -138,6 +140,46 @@ function RegisterPageInner() {
           {t("registerTitle")}
         </h1>
         <p className="mt-2 text-text-muted">{t("registerSubtitle")}</p>
+      </div>
+
+      {/* Google signup */}
+      <GoogleLoginButton
+        loading={googleLoading}
+        onSuccess={async (code, redirectUri) => {
+          setGoogleLoading(true);
+          setError("");
+          try {
+            await loginWithGoogle(code, redirectUri, locale);
+
+            if (claimToken) {
+              try {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+                const token = getAccessToken();
+                await fetch(`${API_URL}/api/sites/claim/${claimToken}`, {
+                  method: "POST",
+                  credentials: "include",
+                  headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                  },
+                });
+              } catch {}
+              router.push("/dashboard/pages");
+              return;
+            }
+            router.push(redirect as "/dashboard");
+          } catch (err) {
+            setError(err instanceof Error ? err.message : t("googleLoginFailed"));
+          } finally {
+            setGoogleLoading(false);
+          }
+        }}
+      />
+
+      <div className="my-6 flex items-center gap-4">
+        <div className="h-px flex-1 bg-border-theme" />
+        <span className="text-xs font-medium text-text-muted">{t("orRegisterWithEmail")}</span>
+        <div className="h-px flex-1 bg-border-theme" />
       </div>
 
       {/* Step indicator */}

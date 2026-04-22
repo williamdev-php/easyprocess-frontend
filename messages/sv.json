@@ -187,7 +187,16 @@
     "skip": "Hoppa över",
     "companyNameTooltip": "Namnet på ditt företag eller organisation. Används för fakturering och visas i din profil.",
     "orgNumberTooltip": "Ditt organisationsnummer (t.ex. 556677-8899). Behövs för fakturering med företagskonto.",
-    "phoneTooltip": "Ditt telefonnummer så vi kan nå dig vid behov. Vi ringer aldrig utan anledning."
+    "phoneTooltip": "Ditt telefonnummer så vi kan nå dig vid behov. Vi ringer aldrig utan anledning.",
+    "brandingTagline": "Din hemsida, live på minuter",
+    "brandingDescription": "Beskriv ditt företag och vår AI bygger en professionell, SEO-optimerad hemsida — redo att publicera direkt.",
+    "featureSpeed": "Klar på under 5 minuter",
+    "orContinueWith": "eller fortsätt med",
+    "continueWithGoogle": "Fortsätt med Google",
+    "googleLoginFailed": "Google-inloggning misslyckades. Försök igen.",
+    "orRegisterWithEmail": "eller registrera med e-post",
+    "featureSeo": "Inbyggd SEO från dag ett",
+    "featureDesign": "Snygg design, varje gång"
   },
   "dashboard": {
     "welcome": "Välkommen, {name}",
@@ -1125,6 +1134,10 @@
     "authRequiredSubtitle": "Du behöver ett konto för att kunna skapa och hantera din hemsida.",
     "authRequiredRegister": "Skapa konto",
     "authRequiredLogin": "Logga in",
+    "accountTitle": "Skapa konto eller logga in",
+    "accountSubtitle": "Du behöver ett konto för att skapa och hantera din hemsida.",
+    "accountRegister": "Skapa konto",
+    "accountLogin": "Logga in",
     "businessNameTooltip": "Namnet som visas på din hemsida. Kan vara ditt företagsnamn eller valfritt namn.",
     "industryTooltip": "Vilken bransch ditt företag är inom. Hjälper AI att skapa relevant innehåll.",
     "contextTooltip": "Beskriv vad ditt företag gör, era tjänster och vad som gör er unika. Ju mer detaljer, desto bättre hemsida.",

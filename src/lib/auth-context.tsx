@@ -14,6 +14,7 @@ import {
   logoutUser,
   refreshToken,
   getMe,
+  googleAuth,
   type User,
   type LoginPayload,
   type RegisterPayload,
@@ -72,6 +73,7 @@ interface AuthContextValue {
   isLoading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
+  loginWithGoogle: (code: string, redirectUri: string, locale?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
 }
@@ -142,6 +144,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     identifyUser(me.id);
   }, []);
 
+  const loginWithGoogle = useCallback(async (code: string, redirectUri: string, locale?: string) => {
+    const data = await googleAuth(code, redirectUri, locale);
+    setAccessToken(data.accessToken);
+    const me = await getMe(data.accessToken);
+    setUser(me);
+    setSuperuserFlag(me.isSuperuser);
+    trackEvent("login");
+    identifyUser(me.id);
+  }, []);
+
   const updateUser = useCallback((updates: Partial<User>) => {
     setUser((prev) => prev ? { ...prev, ...updates } : prev);
   }, []);
@@ -160,7 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, isLoading, login, register, logout, updateUser }}
+      value={{ user, isAuthenticated, isLoading, login, register, loginWithGoogle, logout, updateUser }}
     >
       {children}
     </AuthContext.Provider>

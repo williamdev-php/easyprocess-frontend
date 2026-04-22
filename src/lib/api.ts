@@ -173,3 +173,10 @@ export function getMe(token: string): Promise<User> {
     },
   });
 }
+
+export function googleAuth(code: string, redirectUri: string, locale?: string): Promise<TokenResponse> {
+  return request<TokenResponse>("/api/auth/google", {
+    method: "POST",
+    body: JSON.stringify({ code, redirect_uri: redirectUri, locale }),
+  });
+}

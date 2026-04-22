@@ -13,7 +13,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         <input
           ref={ref}
           type="checkbox"
-          className="peer sr-only"
+          className="peer absolute inset-0 z-10 opacity-0 cursor-pointer"
           {...props}
         />
         <span
