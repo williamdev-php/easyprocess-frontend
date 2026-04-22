@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { getAccessToken } from "@/lib/auth-context";
-import { Button, Input, Label, Alert, ColorPicker, FontSelector } from "@/components/ui";
+import { Button, Input, Label, Alert, ColorPicker, FontSelector, Dropdown } from "@/components/ui";
 import Confetti from "@/components/confetti";
 import { trackEvent } from "@/lib/tracking";
 import { pickSafeDefaultFont } from "@/lib/fonts";
@@ -185,9 +185,17 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
   const searchParams = useSearchParams();
   const claimToken = searchParams.get("token");
 
+  // Read mode from URL params to allow skipping steps
+  const urlMode = searchParams.get("mode");
+  const initialMode = urlMode === "new" || urlMode === "transform" ? urlMode : null;
+
   // State
-  const [step, setStep] = useState<Step>(embedded ? "choose" : "email");
-  const [mode, setMode] = useState<"new" | "transform" | null>(null);
+  const [step, setStep] = useState<Step>(
+    embedded
+      ? (initialMode ? (initialMode === "new" ? "new-details" : "transform-url") : "choose")
+      : "email"
+  );
+  const [mode, setMode] = useState<"new" | "transform" | null>(initialMode);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -218,6 +226,26 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
   const [subdomain, setSubdomain] = useState<string | null>(null);
   const [siteClaimToken, setSiteClaimToken] = useState<string | null>(null);
 
+  // Check if authenticated user has at least one site
+  const [hasSites, setHasSites] = useState(false);
+  useEffect(() => {
+    if (!isAuthenticated) { setHasSites(false); return; }
+    const token = getAccessToken();
+    if (!token) return;
+    fetch(`${API_URL}/graphql`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ query: "{ mySites { id } }" }),
+    })
+      .then((r) => r.json())
+      .then((d) => { if (d.data?.mySites?.length > 0) setHasSites(true); })
+      .catch(() => {});
+  }, [isAuthenticated]);
+
   // If claim token in URL, handle it
   useEffect(() => {
     if (claimToken && isAuthenticated) {
@@ -247,9 +275,15 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
   // Auto-skip email step if logged in (only for non-embedded mode)
   useEffect(() => {
     if (!embedded && !authLoading && isAuthenticated && step === "email") {
-      setStep("choose");
+      if (initialMode === "new") {
+        setStep("new-details");
+      } else if (initialMode === "transform") {
+        setStep("transform-url");
+      } else {
+        setStep("choose");
+      }
     }
-  }, [embedded, authLoading, isAuthenticated, step]);
+  }, [embedded, authLoading, isAuthenticated, step, initialMode]);
 
   // Auto-continue generation after user authenticates from auth-required step
   useEffect(() => {
@@ -570,7 +604,15 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
             <h2 className="text-lg font-bold text-primary-deep">{t("chooseTitle")}</h2>
 
             <button
-              onClick={() => { setMode("new"); setStep("new-details"); }}
+              onClick={() => {
+                setMode("new");
+                setStep("new-details");
+                try {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("mode", "new");
+                  window.history.replaceState({}, "", url.toString());
+                } catch {}
+              }}
               className="group w-full rounded-xl border-2 border-border-theme p-5 text-left transition hover:border-primary hover:bg-primary-deep/5"
             >
               <div className="flex items-start gap-4">
@@ -587,7 +629,15 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
             </button>
 
             <button
-              onClick={() => { setMode("transform"); setStep("transform-url"); }}
+              onClick={() => {
+                setMode("transform");
+                setStep("transform-url");
+                try {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("mode", "transform");
+                  window.history.replaceState({}, "", url.toString());
+                } catch {}
+              }}
               className="group w-full rounded-xl border-2 border-border-theme p-5 text-left transition hover:border-primary hover:bg-primary-deep/5"
             >
               <div className="flex items-start gap-4">
@@ -602,6 +652,18 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
                 </div>
               </div>
             </button>
+
+            {isAuthenticated && hasSites && (
+              <Link
+                href="/dashboard"
+                className="mt-2 flex items-center justify-center gap-1.5 text-sm font-medium text-primary-deep/70 hover:text-primary-deep transition"
+              >
+                {t("goToDashboard")}
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            )}
 
             {!embedded && !isAuthenticated && (
               <button
@@ -668,24 +730,22 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
                   <label htmlFor="industrySelect" className="text-xs font-semibold text-primary-deep">
                     {t("industryDropdownLabel")}
                   </label>
-                  <select
-                    id="industrySelect"
-                    value={industryId || ""}
-                    onChange={(e) => {
-                      const id = e.target.value || null;
-                      setIndustryId(id);
-                      if (id) {
-                        const found = industries.find((ind) => ind.id === id);
-                        if (found) setIndustry(found.name);
-                      }
-                    }}
-                    className="mt-1 w-full rounded-lg border-2 border-border-theme bg-white px-3 py-2 text-sm text-primary-deep focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
-                  >
-                    <option value="">{t("industryDropdownPlaceholder")}</option>
-                    {industries.map((ind) => (
-                      <option key={ind.id} value={ind.id}>{ind.name}</option>
-                    ))}
-                  </select>
+                  <div className="mt-1">
+                    <Dropdown
+                      options={industries.map((ind) => ({ value: ind.id, label: ind.name }))}
+                      value={industryId || undefined}
+                      onChange={(id) => {
+                        setIndustryId(id || null);
+                        if (id) {
+                          const found = industries.find((ind) => ind.id === id);
+                          if (found) setIndustry(found.name);
+                        }
+                      }}
+                      placeholder={t("industryDropdownPlaceholder")}
+                      fullWidth
+                      size="sm"
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={() => { setShowIndustryPicker(false); setIndustryId(null); }}

@@ -418,7 +418,7 @@ export default function CodeEditorPage() {
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/10 px-4">
         <div className="flex items-center gap-3">
           <Link
-            href={`/dashboard/pages/${siteId}` as "/dashboard"}
+            href={`/dashboard/sites/${siteId}/general` as "/dashboard"}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white transition-colors"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

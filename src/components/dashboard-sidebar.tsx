@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/routing";
+import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@apollo/client/react";
 import { MY_SITES, GET_SITE_APPS } from "@/graphql/queries";
+import { Dropdown } from "@/components/ui";
 
 // ---------------------------------------------------------------------------
 // Icons (SVG paths)
@@ -52,9 +53,9 @@ function Icon({ d, className = "h-5 w-5" }: { d: string; className?: string }) {
 // Helper: sidebar link
 // ---------------------------------------------------------------------------
 function SidebarLink({
-  href, icon, label, active, indent = false,
+  href, icon, label, active, indent = false, badge,
 }: {
-  href: string; icon: string; label: string; active: boolean; indent?: boolean;
+  href: string; icon: string; label: string; active: boolean; indent?: boolean; badge?: number;
 }) {
   return (
     <Link
@@ -68,7 +69,18 @@ function SidebarLink({
       }`}
     >
       <Icon d={icon} className={`h-5 w-5 ${active ? "text-accent" : ""}`} />
-      <span>{label}</span>
+      <span className="flex-1">{label}</span>
+      {badge !== undefined && badge > 0 && (
+        <span
+          className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold leading-none ${
+            active
+              ? "bg-white/20 text-white"
+              : "bg-primary-deep/10 text-primary-deep"
+          }`}
+        >
+          {badge}
+        </span>
+      )}
     </Link>
   );
 }
@@ -114,6 +126,7 @@ const adminNav = [
 export default function DashboardSidebar() {
   const { user } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations("dashboardNav");
   const isSuperuser = user?.isSuperuser === true;
 
@@ -169,6 +182,17 @@ export default function DashboardSidebar() {
   function handleSiteChange(newId: string) {
     setSelectedSiteId(newId);
     try { localStorage.setItem("selectedSiteId", newId); } catch {}
+
+    // Navigate to the equivalent page for the new site so the URL-based
+    // useEffect doesn't immediately revert the selection.
+    if (selectedSiteId && selectedSiteId !== newId) {
+      const newPath = pathname
+        .replace(`/sites/${selectedSiteId}`, `/sites/${newId}`)
+        .replace(`/pages/${selectedSiteId}`, `/pages/${newId}`);
+      if (newPath !== pathname) {
+        router.push(newPath as "/dashboard");
+      }
+    }
   }
 
   function isActive(href: string) {
@@ -181,7 +205,7 @@ export default function DashboardSidebar() {
     return (
       <>
         <aside className="hidden lg:block">
-          <div className="sticky top-24 space-y-3">
+          <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col overflow-y-auto space-y-3 scrollbar-thin">
             <div className="w-52 rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur-sm">
               <nav className="flex flex-col gap-1 p-2">
                 {adminNav.map((item) => (
@@ -204,6 +228,13 @@ export default function DashboardSidebar() {
 
   // ----- USER SIDEBAR -----
   const sid = selectedSiteId;
+  const hasMultipleSites = sites.length > 1;
+
+  // Site options for dropdown
+  const siteOptions = sites.map((s) => ({
+    value: s.id,
+    label: getSiteName(s),
+  }));
 
   // "Customize" section is open when viewing general, editor, settings, code or navigation pages
   const customizeActive = sid
@@ -220,26 +251,25 @@ export default function DashboardSidebar() {
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:block">
-        <div className="sticky top-24 space-y-3">
-          {/* Site selector */}
-          {sites.length > 0 && (
-            <div className="w-52 rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur-sm">
+        <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col space-y-3 overflow-y-auto scrollbar-thin">
+          {/* Site selector — only show if multiple sites */}
+          {hasMultipleSites && (
+            <div className="w-52 shrink-0 rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur-sm">
               <div className="p-2">
-                <select
-                  value={sid ?? ""}
-                  onChange={(e) => handleSiteChange(e.target.value)}
-                  className="w-full rounded-xl border border-border-light bg-white px-3 py-2.5 text-sm font-medium text-text-primary outline-none focus:border-primary-deep transition truncate"
-                >
-                  {sites.map((s) => (
-                    <option key={s.id} value={s.id}>{getSiteName(s)}</option>
-                  ))}
-                </select>
+                <Dropdown
+                  options={siteOptions}
+                  value={sid ?? undefined}
+                  onChange={handleSiteChange}
+                  placeholder={t("selectSite")}
+                  fullWidth
+                  size="sm"
+                />
               </div>
             </div>
           )}
 
           {/* Site navigation */}
-          <div className="w-52 rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur-sm">
+          <div className="w-52 shrink-0 rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur-sm">
             <nav className="flex flex-col gap-1 p-2">
               <SidebarLink
                 href="/dashboard"
@@ -312,18 +342,18 @@ export default function DashboardSidebar() {
                     </div>
                   )}
 
-                  {/* Apps */}
+                  {/* Apps — with badge */}
                   <SidebarLink
                     href={`/dashboard/sites/${sid}/apps`}
                     icon={ICONS.apps}
                     label={t("apps")}
                     active={pathname.startsWith(`/dashboard/sites/${sid}/apps`)}
+                    badge={installedApps.length}
                   />
 
                   {/* Installed app sub-links */}
                   {installedApps.map((app) => {
                     const appBase = `/dashboard/sites/${sid}/apps/${app.appSlug}`;
-                    const appActive = pathname.startsWith(appBase);
                     return (
                       <div key={app.appSlug}>
                         {app.sidebarLinks?.map((link) => (
@@ -345,7 +375,7 @@ export default function DashboardSidebar() {
           </div>
 
           {/* Account & settings */}
-          <div className="w-52 rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur-sm">
+          <div className="w-52 shrink-0 rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur-sm">
             <nav className="flex flex-col gap-1 p-2">
               <SidebarLink href="/dashboard/domain" icon={ICONS.domain} label={t("domain")} active={isActive("/dashboard/domain")} />
               <SidebarLink href="/dashboard/billing" icon={ICONS.billing} label={t("billing")} active={isActive("/dashboard/billing")} />
@@ -355,6 +385,12 @@ export default function DashboardSidebar() {
                 icon={ICONS.contact}
                 label={t("contactUs")}
                 active={pathname.startsWith("/dashboard/contact")}
+              />
+              <SidebarLink
+                href="/help"
+                icon={ICONS.help}
+                label={t("helpCenter")}
+                active={pathname.startsWith("/help")}
               />
             </nav>
           </div>

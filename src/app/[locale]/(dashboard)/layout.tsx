@@ -115,6 +115,20 @@ export default function DashboardLayout({
     );
   }
 
+  // Full-screen pages without sidebar
+  const isFullscreenPage = pathname === "/dashboard/select-site";
+
+  if (isFullscreenPage) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MinimalHeader />
+        <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />

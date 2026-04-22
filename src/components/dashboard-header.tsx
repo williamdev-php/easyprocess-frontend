@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@apollo/client/react";
 import { MY_SITES } from "@/graphql/queries";
 import NotificationBell from "@/components/notification-bell";
+import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui";
 
 interface SiteItem {
   id: string;
@@ -128,6 +129,11 @@ export default function DashboardHeader() {
             </a>
           )}
 
+          {/* Create new site button (+) */}
+          {!user?.isSuperuser && (
+            <CreateButton />
+          )}
+
           {/* Notification bell */}
           <NotificationBell />
 
@@ -206,5 +212,64 @@ export default function DashboardHeader() {
         </div>
       </div>
     </header>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Create button with dropdown
+// ---------------------------------------------------------------------------
+
+function CreateButton() {
+  const t = useTranslations("dashboardHeader");
+
+  return (
+    <DropdownMenu
+      trigger={
+        <button
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-primary-deep/20 text-primary-deep transition-all hover:border-primary-deep/40 hover:bg-primary-deep/10"
+          aria-label={t("createNew")}
+          title={t("createNew")}
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
+      }
+      align="right"
+    >
+      <div className="px-4 py-2 border-b border-border-light">
+        <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t("createNew")}</p>
+      </div>
+      <DropdownMenuItem
+        onClick={() => {
+          window.location.href = `/create-site?mode=new`;
+        }}
+        icon={
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-deep/10">
+            <svg className="h-4 w-4 text-primary-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          </div>
+        }
+        description={t("createNewSiteDesc")}
+      >
+        <span className="text-primary-deep">{t("createNewSite")}</span>
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        onClick={() => {
+          window.location.href = `/create-site?mode=transform`;
+        }}
+        icon={
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-deep/10">
+            <svg className="h-4 w-4 text-primary-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+            </svg>
+          </div>
+        }
+        description={t("transformSiteDesc")}
+      >
+        <span className="text-primary-deep">{t("transformSite")}</span>
+      </DropdownMenuItem>
+    </DropdownMenu>
   );
 }

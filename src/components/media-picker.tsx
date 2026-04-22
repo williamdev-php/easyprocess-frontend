@@ -114,7 +114,7 @@ export function MediaPickerField({
 // MediaPickerDialog — fullscreen modal with media library
 // ---------------------------------------------------------------------------
 
-function MediaPickerDialog({
+export function MediaPickerDialog({
   onSelect,
   onClose,
   accept,

@@ -1622,7 +1622,7 @@ export default function SiteEditorPage() {
       <div className="rounded-2xl border border-border-light bg-white p-12 text-center">
         <h3 className="text-lg font-semibold text-primary-deep">{t("notFound")}</h3>
         <p className="mt-2 text-sm text-text-muted">{t("notFoundDesc")}</p>
-        <Link href="/dashboard/pages" className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
+        <Link href={`/dashboard/sites/${siteId}/general` as "/dashboard"} className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
           &larr; {t("backToPages")}
         </Link>
       </div>
@@ -1638,7 +1638,7 @@ export default function SiteEditorPage() {
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-border-light bg-white px-4 py-2.5 shrink-0">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard/pages" className="rounded-lg p-1.5 text-text-muted hover:bg-gray-100 transition-colors">
+          <Link href={`/dashboard/sites/${siteId}/general` as "/dashboard"} className="rounded-lg p-1.5 text-text-muted hover:bg-gray-100 transition-colors">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>

@@ -3,9 +3,10 @@
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@apollo/client/react";
-import { MY_SITES, GET_SITE_ANALYTICS, GET_DASHBOARD_STATS, GET_OUTREACH_STATS, GET_ADMIN_USER_STATS } from "@/graphql/queries";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { MY_SITES, GET_SITE_ANALYTICS, GET_DASHBOARD_STATS, GET_OUTREACH_STATS, GET_ADMIN_USER_STATS, MY_SUBSCRIPTION, MY_DOMAINS, GET_SITE_APPS } from "@/graphql/queries";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useGreeting } from "@/hooks/use-greeting";
+import Link from "next/link";
 
 /* ──────────────── Skeleton shimmer ──────────────── */
 
@@ -407,6 +408,264 @@ function AdminOverview() {
   );
 }
 
+/* ──────────────── Onboarding Checklist ──────────────── */
+
+interface ChecklistItem {
+  key: string;
+  completed: boolean;
+  href: string;
+}
+
+function OnboardingChecklist({
+  siteId,
+  locale,
+}: {
+  siteId: string | null;
+  locale: string;
+}) {
+  const { user } = useAuth();
+  const t = useTranslations("dashboardOverview.checklist");
+
+  const { data: subData } = useQuery<{
+    mySubscription: { id: string; status: string } | null;
+  }>(MY_SUBSCRIPTION, { fetchPolicy: "cache-and-network" });
+
+  const { data: domainsData } = useQuery<{
+    myDomains: Array<{ id: string; status: string; verifiedAt: string | null }>;
+  }>(MY_DOMAINS, { fetchPolicy: "cache-and-network" });
+
+  const { data: sitesData } = useQuery<{
+    mySites: Array<{ id: string; status: string }>;
+  }>(MY_SITES, { fetchPolicy: "cache-and-network" });
+
+  const { data: appsData } = useQuery<{
+    siteApps: Array<{ id: string; isActive: boolean }>;
+  }>(GET_SITE_APPS, {
+    variables: { siteId },
+    skip: !siteId,
+    fetchPolicy: "cache-and-network",
+  });
+
+  // Manual completion state stored in localStorage
+  const storageKey = "onboarding_checklist_manual";
+  const [manual, setManual] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) setManual(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  const toggleManual = useCallback((key: string) => {
+    setManual((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  // Auto-detect completion
+  const hasCompanyInfo = !!(user?.companyName && user.companyName.trim().length > 0);
+  const hasPlan = !!(
+    subData?.mySubscription &&
+    ["active", "trialing"].includes(subData.mySubscription.status)
+  );
+  const isPublished = !!(
+    siteId && sitesData?.mySites?.find((s) => s.id === siteId)?.status === "PUBLISHED"
+  );
+  const hasVerifiedDomain = !!(
+    domainsData?.myDomains?.some((d) => d.verifiedAt)
+  );
+  const hasApps = !!(appsData?.siteApps && appsData.siteApps.length > 0);
+
+  const prefix = `/${locale}/dashboard`;
+
+  const items: ChecklistItem[] = [
+    { key: "companyInfo", completed: hasCompanyInfo, href: `${prefix}/account` },
+    { key: "choosePlan", completed: hasPlan, href: `${prefix}/billing` },
+    { key: "publishSite", completed: isPublished, href: siteId ? `${prefix}/sites/${siteId}` : `${prefix}/sites` },
+    { key: "customDomain", completed: hasVerifiedDomain, href: `${prefix}/domain` },
+    { key: "searchConsole", completed: !!manual["searchConsole"], href: "#" },
+    { key: "installApps", completed: hasApps, href: siteId ? `${prefix}/sites/${siteId}/apps` : `${prefix}/sites` },
+  ];
+
+  const completedCount = items.filter((i) => i.completed).length;
+  const totalCount = items.length;
+  const allDone = completedCount === totalCount;
+
+  // Expanded item state
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  const toggleItem = useCallback((key: string) => {
+    setExpandedItem((prev) => (prev === key ? null : key));
+  }, []);
+
+  // Collapsed state
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("onboarding_checklist_collapsed");
+      if (stored === "true") setCollapsed(true);
+    } catch {}
+  }, []);
+
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      localStorage.setItem("onboarding_checklist_collapsed", String(!prev));
+      return !prev;
+    });
+  }, []);
+
+  return (
+    <div className="rounded-2xl border border-border-light bg-white overflow-hidden">
+      {/* Header */}
+      <button
+        onClick={toggleCollapsed}
+        className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-primary-deep/[0.02]"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-deep/5">
+            <svg className="h-[18px] w-[18px] text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-primary-deep">{t("title")}</h3>
+            <p className="text-xs text-text-muted">
+              {t("progress", { completed: completedCount, total: totalCount })}
+            </p>
+          </div>
+        </div>
+        <svg
+          className={`h-5 w-5 text-text-muted transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.5}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
+
+      {/* Progress bar */}
+      <div className="px-5">
+        <div className="h-1.5 w-full rounded-full bg-border-light overflow-hidden">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary-deep to-primary transition-all duration-700 ease-out"
+            style={{ width: `${(completedCount / totalCount) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Items */}
+      {!collapsed && (
+        <div className="px-5 pb-5 pt-4 space-y-1">
+          {items.map((item) => {
+            const isManualOnly = item.key === "searchConsole";
+            const isExpanded = expandedItem === item.key;
+            return (
+              <div
+                key={item.key}
+                className={`rounded-xl transition-all duration-300 ${
+                  item.completed
+                    ? "bg-primary-deep/5"
+                    : isExpanded
+                    ? "bg-primary-deep/[0.03]"
+                    : "hover:bg-primary-deep/[0.03]"
+                }`}
+              >
+                {/* Row */}
+                <button
+                  onClick={() => toggleItem(item.key)}
+                  className="group flex w-full items-center gap-3 px-3 py-2.5 text-left"
+                >
+                  {/* Checkbox */}
+                  <span
+                    onClick={(e) => {
+                      if (isManualOnly) {
+                        e.stopPropagation();
+                        toggleManual(item.key);
+                      }
+                    }}
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-200 ${
+                      item.completed
+                        ? "border-primary bg-primary"
+                        : isManualOnly
+                        ? "border-border-light hover:border-primary cursor-pointer"
+                        : "border-border-light"
+                    }`}
+                  >
+                    {item.completed && (
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    )}
+                  </span>
+
+                  {/* Label */}
+                  <span
+                    className={`flex-1 text-sm transition-colors ${
+                      item.completed
+                        ? "text-primary line-through decoration-primary/30"
+                        : "text-primary-deep"
+                    }`}
+                  >
+                    {t(item.key)}
+                  </span>
+
+                  {/* Completed badge */}
+                  {item.completed && (
+                    <span className="text-[10px] font-medium text-primary">{t("done")}</span>
+                  )}
+
+                  {/* Chevron */}
+                  <svg
+                    className={`h-4 w-4 shrink-0 text-text-muted transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </button>
+
+                {/* Expanded content */}
+                {isExpanded && (
+                  <div className="px-3 pb-3 pl-11 animate-tooltip-in">
+                    <p className="text-sm text-text-muted leading-relaxed">
+                      {t(`${item.key}Desc`)}
+                    </p>
+                    {!item.completed && item.href !== "#" && (
+                      <Link
+                        href={item.href}
+                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary-deep transition-colors"
+                      >
+                        {t("goTo")}
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {allDone && (
+            <div className="mt-3 rounded-xl bg-primary-deep/5 px-4 py-3 text-center">
+              <p className="text-sm font-medium text-primary-deep">{t("allDone")}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ──────────────── User Overview (real data) ──────────────── */
 
 interface SiteOption {
@@ -559,6 +818,8 @@ function UserOverview() {
           )}
         </>
       )}
+
+      <OnboardingChecklist siteId={siteId} locale={locale} />
 
       <div>
         <h3 className="mb-4 text-sm font-semibold text-primary-deep">

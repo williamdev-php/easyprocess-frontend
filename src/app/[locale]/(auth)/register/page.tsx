@@ -6,7 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { getAccessToken } from "@/lib/auth-context";
-import { Button, Input, Label, Alert } from "@/components/ui";
+import { Button, Input, Label, Alert, Checkbox } from "@/components/ui";
 
 export default function RegisterPage() {
   return (
@@ -274,12 +274,11 @@ function RegisterPageInner() {
           </div>
 
           <div className="flex items-start gap-3">
-            <input
+            <Checkbox
               id="terms"
-              type="checkbox"
               checked={agreedToTerms}
               onChange={(e) => setAgreedToTerms(e.target.checked)}
-              className="mt-1 h-4 w-4 shrink-0 rounded border-border-theme text-primary focus:ring-primary"
+              className="mt-0.5 shrink-0"
             />
             <label htmlFor="terms" className="text-sm text-text-muted leading-snug">
               {t("agreeToTermsPrefix")}{" "}

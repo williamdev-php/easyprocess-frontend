@@ -475,6 +475,33 @@ export const UNINSTALL_APP = gql`
 `;
 
 // ---------------------------------------------------------------------------
+// App Reviews
+// ---------------------------------------------------------------------------
+
+export const CREATE_APP_REVIEW = gql`
+  mutation CreateAppReview($input: CreateAppReviewInput!) {
+    createAppReview(input: $input) {
+      id
+      appId
+      userId
+      userName
+      siteId
+      rating
+      title
+      body
+      locale
+      createdAt
+    }
+  }
+`;
+
+export const DELETE_APP_REVIEW = gql`
+  mutation DeleteAppReview($input: DeleteAppReviewInput!) {
+    deleteAppReview(input: $input)
+  }
+`;
+
+// ---------------------------------------------------------------------------
 // Blog
 // ---------------------------------------------------------------------------
 
@@ -559,5 +586,34 @@ export const UPDATE_BLOG_CATEGORY = gql`
 export const DELETE_BLOG_CATEGORY = gql`
   mutation DeleteBlogCategory($siteId: String!, $categoryId: String!) {
     deleteBlogCategory(siteId: $siteId, categoryId: $categoryId)
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Chat
+// ---------------------------------------------------------------------------
+
+export const SEND_CHAT_REPLY = gql`
+  mutation SendChatReply($input: SendChatReplyInput!) {
+    sendChatReply(input: $input) {
+      id
+      conversationId
+      senderType
+      senderName
+      content
+      createdAt
+    }
+  }
+`;
+
+export const CLOSE_CHAT_CONVERSATION = gql`
+  mutation CloseChatConversation($siteId: String!, $conversationId: String!) {
+    closeChatConversation(siteId: $siteId, conversationId: $conversationId)
+  }
+`;
+
+export const REOPEN_CHAT_CONVERSATION = gql`
+  mutation ReopenChatConversation($siteId: String!, $conversationId: String!) {
+    reopenChatConversation(siteId: $siteId, conversationId: $conversationId)
   }
 `;

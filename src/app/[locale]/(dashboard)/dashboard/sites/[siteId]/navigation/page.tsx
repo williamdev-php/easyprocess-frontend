@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { MY_SITE } from "@/graphql/queries";
 import { SAVE_DRAFT, LOAD_DRAFT, PUBLISH_SITE_DATA, DISCARD_DRAFT } from "@/graphql/mutations";
 import { useSiteContext } from "@/lib/site-context";
+import { Dropdown } from "@/components/ui";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -142,35 +143,39 @@ function NavItemRow({
           className="min-w-0 flex-1 rounded-lg border border-border-light bg-white px-3 py-2 text-sm text-text-primary outline-none transition focus:border-primary-deep focus:ring-2 focus:ring-primary-deep/20"
         />
       ) : (
-        <select
-          value={item.href}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (val === "__custom__") {
-              setCustomHref(true);
-              onUpdate(index, "href", "");
-            } else {
-              onUpdate(index, "href", val);
-              // Auto-set label if empty
-              if (!item.label) {
-                const page = pages.find((p) => p.href === val);
-                if (page) onUpdate(index, "label", page.label);
+        <div className="min-w-0 flex-1">
+          <Dropdown
+            options={[
+              { value: "", label: "-- Välj sida --" },
+              ...pages.filter((p) => p.available).map((p) => ({
+                value: p.href,
+                label: p.label,
+              })),
+              ...pages.filter((p) => !p.available).map((p) => ({
+                value: p.href,
+                label: p.label,
+                group: "Ej aktiva sektioner",
+              })),
+              { value: "__custom__", label: "Anpassad URL..." },
+            ]}
+            value={item.href}
+            onChange={(val) => {
+              if (val === "__custom__") {
+                setCustomHref(true);
+                onUpdate(index, "href", "");
+              } else {
+                onUpdate(index, "href", val);
+                if (!item.label) {
+                  const page = pages.find((p) => p.href === val);
+                  if (page) onUpdate(index, "label", page.label);
+                }
               }
-            }
-          }}
-          className="min-w-0 flex-1 rounded-lg border border-border-light bg-white px-3 py-2 text-sm text-text-primary outline-none transition focus:border-primary-deep focus:ring-2 focus:ring-primary-deep/20"
-        >
-          <option value="">-- Välj sida --</option>
-          {pages.filter((p) => p.available).map((p) => (
-            <option key={p.key} value={p.href}>{p.label}</option>
-          ))}
-          <optgroup label="Ej aktiva sektioner">
-            {pages.filter((p) => !p.available).map((p) => (
-              <option key={p.key} value={p.href} className="text-text-muted">{p.label}</option>
-            ))}
-          </optgroup>
-          <option value="__custom__">Anpassad URL...</option>
-        </select>
+            }}
+            placeholder="-- Välj sida --"
+            fullWidth
+            size="sm"
+          />
+        </div>
       )}
 
       {/* Toggle between custom and select */}

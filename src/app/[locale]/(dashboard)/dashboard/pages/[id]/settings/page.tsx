@@ -9,7 +9,15 @@ import { UPDATE_SITE_SETTINGS } from "@/graphql/mutations";
 import { Link } from "@/i18n/routing";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { MediaPickerField } from "@/components/media-picker";
+
+interface OpeningHoursDay {
+  day: string;
+  open: string;
+  close: string;
+  closed: boolean;
+}
 
 interface SiteData {
   meta?: {
@@ -27,11 +35,36 @@ interface SiteData {
     phone?: string | null;
     address?: string | null;
     org_number?: string | null;
+    opening_hours_enabled?: boolean;
+    opening_hours?: OpeningHoursDay[];
   };
   seo?: {
     robots?: string;
     structured_data?: Record<string, unknown>;
   };
+}
+
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+
+const DEFAULT_HOURS: OpeningHoursDay[] = DAYS.map((day) => ({
+  day,
+  open: day === "Saturday" || day === "Sunday" ? "" : "09:00",
+  close: day === "Saturday" || day === "Sunday" ? "" : "17:00",
+  closed: day === "Saturday" || day === "Sunday",
+}));
+
+function Tooltip({ text }: { text: string }) {
+  return (
+    <div className="group relative inline-flex ml-1">
+      <svg className="h-4 w-4 text-text-muted cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+      </svg>
+      <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg bg-primary-deep px-3 py-2 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+        {text}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-primary-deep" />
+      </div>
+    </div>
+  );
 }
 
 function Skeleton({ className = "" }: { className?: string }) {
@@ -66,16 +99,16 @@ export default function SiteSettingsPage() {
   const [businessAddress, setBusinessAddress] = useState("");
   const [businessOrgNumber, setBusinessOrgNumber] = useState("");
 
+  // Opening hours
+  const [openingHoursEnabled, setOpeningHoursEnabled] = useState(false);
+  const [openingHours, setOpeningHours] = useState<OpeningHoursDay[]>(DEFAULT_HOURS);
+
   // Structured data
   const [structuredData, setStructuredData] = useState("");
   const [structuredDataError, setStructuredDataError] = useState<string | null>(null);
 
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Initialize form state from server data only once (on first load).
-  // Subsequent Apollo cache updates (e.g. after mutation) must NOT
-  // overwrite in-flight user edits — that caused media selections to
-  // vanish from the preview after saving.
   const initialized = useRef(false);
   useEffect(() => {
     if (initialized.current || !data?.mySite?.siteData) return;
@@ -96,10 +129,19 @@ export default function SiteSettingsPage() {
     setBusinessAddress(sd.business?.address || "");
     setBusinessOrgNumber(sd.business?.org_number || "");
 
+    setOpeningHoursEnabled(sd.business?.opening_hours_enabled || false);
+    if (sd.business?.opening_hours && sd.business.opening_hours.length > 0) {
+      setOpeningHours(sd.business.opening_hours);
+    }
+
     if (sd.seo?.structured_data && Object.keys(sd.seo.structured_data).length > 0) {
       setStructuredData(JSON.stringify(sd.seo.structured_data, null, 2));
     }
   }, [data]);
+
+  const updateDay = useCallback((index: number, field: keyof OpeningHoursDay, value: string | boolean) => {
+    setOpeningHours((prev) => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
+  }, []);
 
   const handleSave = useCallback(async () => {
     try {
@@ -118,6 +160,8 @@ export default function SiteSettingsPage() {
           phone: businessPhone || null,
           address: businessAddress || null,
           org_number: businessOrgNumber || null,
+          opening_hours_enabled: openingHoursEnabled,
+          opening_hours: openingHours,
         },
         seo: {
           robots,
@@ -137,8 +181,16 @@ export default function SiteSettingsPage() {
   }, [
     siteId, metaTitle, metaDescription, metaKeywords, ogImage, faviconUrl,
     language, businessName, businessEmail, businessPhone, businessAddress,
-    businessOrgNumber, robots, structuredData, updateSettings, t,
+    businessOrgNumber, openingHoursEnabled, openingHours, robots, structuredData, updateSettings, t,
   ]);
+
+  const dayTranslationKey = (day: string) => {
+    const map: Record<string, string> = {
+      Monday: "monday", Tuesday: "tuesday", Wednesday: "wednesday",
+      Thursday: "thursday", Friday: "friday", Saturday: "saturday", Sunday: "sunday",
+    };
+    return map[day] || day;
+  };
 
   if (loading) {
     return (
@@ -156,7 +208,7 @@ export default function SiteSettingsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
-            href={`/dashboard/pages` as "/dashboard"}
+            href={`/dashboard/sites/${siteId}/general` as "/dashboard"}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:bg-primary/5 hover:text-primary-deep transition-colors"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -189,12 +241,18 @@ export default function SiteSettingsPage() {
         <h3 className="mb-5 text-sm font-semibold text-primary-deep">{t("seoTitle")}</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("metaTitle")}</label>
+            <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("metaTitle")}
+              <Tooltip text={t("tipMetaTitle")} />
+            </label>
             <Input value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} />
             <p className="mt-1 text-xs text-text-muted">{metaTitle.length}/60 {t("characters")}</p>
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("metaDescription")}</label>
+            <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("metaDescription")}
+              <Tooltip text={t("tipMetaDescription")} />
+            </label>
             <textarea
               value={metaDescription}
               onChange={(e) => setMetaDescription(e.target.value)}
@@ -204,7 +262,10 @@ export default function SiteSettingsPage() {
             <p className="mt-1 text-xs text-text-muted">{metaDescription.length}/160 {t("characters")}</p>
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("metaKeywords")}</label>
+            <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("metaKeywords")}
+              <Tooltip text={t("tipMetaKeywords")} />
+            </label>
             <Input
               value={metaKeywords}
               onChange={(e) => setMetaKeywords(e.target.value)}
@@ -212,23 +273,34 @@ export default function SiteSettingsPage() {
             />
           </div>
           <div>
+            <div className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("ogImage")}
+              <Tooltip text={t("tipOgImage")} />
+            </div>
             <MediaPickerField
               value={ogImage}
               onChange={(url) => setOgImage(url)}
-              label={t("ogImage")}
+              label=""
               folder="seo"
             />
           </div>
           <div>
+            <div className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("favicon")}
+              <Tooltip text={t("tipFavicon")} />
+            </div>
             <MediaPickerField
               value={faviconUrl}
               onChange={(url) => setFaviconUrl(url)}
-              label={t("favicon")}
+              label=""
               folder="branding"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("robots")}</label>
+            <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("robots")}
+              <Tooltip text={t("tipRobots")} />
+            </label>
             <select
               value={robots}
               onChange={(e) => setRobots(e.target.value)}
@@ -273,7 +345,10 @@ export default function SiteSettingsPage() {
       <div className="rounded-2xl border border-border-light bg-white p-6">
         <h3 className="mb-5 text-sm font-semibold text-primary-deep">{t("languageTitle")}</h3>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("siteLanguage")}</label>
+          <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+            {t("siteLanguage")}
+            <Tooltip text={t("tipLanguage")} />
+          </label>
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
@@ -296,11 +371,17 @@ export default function SiteSettingsPage() {
         <h3 className="mb-5 text-sm font-semibold text-primary-deep">{t("ownerTitle")}</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("businessName")}</label>
+            <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("businessName")}
+              <Tooltip text={t("tipBusinessName")} />
+            </label>
             <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("businessEmail")}</label>
+            <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("businessEmail")}
+              <Tooltip text={t("tipBusinessEmail")} />
+            </label>
             <Input
               value={businessEmail}
               onChange={(e) => setBusinessEmail(e.target.value)}
@@ -312,18 +393,91 @@ export default function SiteSettingsPage() {
             )}
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("businessPhone")}</label>
+            <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("businessPhone")}
+              <Tooltip text={t("tipBusinessPhone")} />
+            </label>
             <Input value={businessPhone} onChange={(e) => setBusinessPhone(e.target.value)} />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("businessOrgNumber")}</label>
+            <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("businessOrgNumber")}
+              <Tooltip text={t("tipBusinessOrgNumber")} />
+            </label>
             <Input value={businessOrgNumber} onChange={(e) => setBusinessOrgNumber(e.target.value)} />
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1.5 block text-xs font-medium text-text-secondary">{t("businessAddress")}</label>
+            <label className="mb-1.5 flex items-center text-xs font-medium text-text-secondary">
+              {t("businessAddress")}
+              <Tooltip text={t("tipBusinessAddress")} />
+            </label>
             <Input value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} />
           </div>
         </div>
+      </div>
+
+      {/* Opening Hours Section */}
+      <div className="rounded-2xl border border-border-light bg-white p-6">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <h3 className="flex items-center text-sm font-semibold text-primary-deep">
+              {t("openingHoursTitle")}
+              <Tooltip text={t("tipOpeningHours")} />
+            </h3>
+            <p className="mt-0.5 text-xs text-text-muted">{t("openingHoursDescription")}</p>
+          </div>
+        </div>
+
+        <label className="mt-3 mb-4 flex items-center gap-2.5 cursor-pointer">
+          <Checkbox
+            checked={openingHoursEnabled}
+            onChange={(e) => setOpeningHoursEnabled(e.target.checked)}
+          />
+          <span className="text-sm text-text-secondary">{t("openingHoursEnable")}</span>
+        </label>
+
+        {openingHoursEnabled && (
+          <div className="space-y-2">
+            {openingHours.map((day, i) => (
+              <div key={day.day} className="flex items-center gap-3 rounded-xl border border-border-light bg-gray-50/50 px-4 py-2.5">
+                <span className="w-24 text-sm font-medium text-primary-deep shrink-0">
+                  {t(dayTranslationKey(day.day))}
+                </span>
+
+                <label className="flex items-center gap-1.5 shrink-0">
+                  <Checkbox
+                    size="sm"
+                    checked={day.closed}
+                    onChange={(e) => updateDay(i, "closed", e.target.checked)}
+                  />
+                  <span className="text-xs text-text-muted">{t("closed")}</span>
+                </label>
+
+                {!day.closed && (
+                  <div className="flex items-center gap-2 ml-auto">
+                    <input
+                      type="time"
+                      value={day.open}
+                      onChange={(e) => updateDay(i, "open", e.target.value)}
+                      className="rounded-lg border border-border-light bg-white px-2.5 py-1.5 text-sm text-primary-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
+                    />
+                    <span className="text-xs text-text-muted">&ndash;</span>
+                    <input
+                      type="time"
+                      value={day.close}
+                      onChange={(e) => updateDay(i, "close", e.target.value)}
+                      className="rounded-lg border border-border-light bg-white px-2.5 py-1.5 text-sm text-primary-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
+                    />
+                  </div>
+                )}
+
+                {day.closed && (
+                  <span className="ml-auto text-xs text-text-muted italic">{t("closed")}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Structured Data (JSON-LD) */}

@@ -1,6 +1,8 @@
 export { Button } from "./button";
 export type { ButtonProps, ButtonVariant, ButtonSize } from "./button";
 export { Input } from "./input";
+export { Checkbox } from "./checkbox";
+export type { CheckboxProps } from "./checkbox";
 export { Label } from "./label";
 export { Badge } from "./badge";
 export { Card, CardHeader, CardTitle, CardDescription } from "./card";
@@ -8,3 +10,5 @@ export { Alert } from "./alert";
 export { ColorPicker } from "./color-picker";
 export type { ColorPickerProps } from "./color-picker";
 export { FontSelector } from "./font-selector";
+export { Dropdown, DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from "./dropdown";
+export type { DropdownProps, DropdownOption, DropdownMenuProps } from "./dropdown";

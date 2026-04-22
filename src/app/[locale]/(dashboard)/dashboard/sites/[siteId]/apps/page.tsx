@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { Link } from "@/i18n/routing";
 import { useSiteContext } from "@/lib/site-context";
 import { GET_APPS, GET_SITE_APPS } from "@/graphql/queries";
 import { INSTALL_APP, UNINSTALL_APP } from "@/graphql/mutations";
+import { localizedText } from "@/lib/i18n-utils";
 
 interface AppItem {
   id: string;
   slug: string;
   name: string;
-  description: string | null;
+  description: Record<string, string> | string | null;
   iconUrl: string | null;
   version: string;
   scopes: string[] | null;
@@ -21,6 +22,7 @@ interface AppItem {
 export default function AppsPage() {
   const { siteId, installedApps } = useSiteContext();
   const t = useTranslations("apps");
+  const locale = useLocale();
   const [confirmSlug, setConfirmSlug] = useState<string | null>(null);
 
   const { data: appsData, loading, error } = useQuery<{ apps: AppItem[] }>(GET_APPS, {
@@ -68,7 +70,7 @@ export default function AppsPage() {
   if (error) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
-        <p className="text-sm text-amber-700">Appbiblioteket kunde inte laddas. Kontrollera att backend kör med senaste ändringarna.</p>
+        <p className="text-sm text-amber-700">{t("loadError")}</p>
       </div>
     );
   }
@@ -77,6 +79,15 @@ export default function AppsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-text-primary">{t("library")}</h2>
+        <Link
+          href="/apps"
+          className="flex items-center gap-2 rounded-lg bg-primary-deep/5 px-4 py-2 text-sm font-medium text-primary-deep transition hover:bg-primary-deep/10"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016A3.001 3.001 0 0021 9.349m-18 0a2.999 2.999 0 00.97-1.599L5.49 3h13.02l1.52 4.75A3 3 0 0021 9.349" />
+          </svg>
+          {t("browseLibrary")}
+        </Link>
       </div>
 
       {apps.length === 0 ? (
@@ -98,7 +109,7 @@ export default function AppsPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-text-primary">{app.name}</h3>
-                    <p className="mt-1 text-sm text-text-muted">{app.description}</p>
+                    <p className="mt-1 text-sm text-text-muted">{localizedText(app.description, locale)}</p>
                     <p className="mt-1 text-xs text-text-muted">v{app.version}</p>
                   </div>
                 </div>
@@ -110,7 +121,7 @@ export default function AppsPage() {
                         href={`/dashboard/sites/${siteId}/apps/${app.slug}` as "/dashboard"}
                         className="flex-1 rounded-lg bg-primary-deep px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-primary-deep/90"
                       >
-                        Öppna
+                        {t("open")}
                       </Link>
                       <button
                         onClick={() => handleUninstall(app.slug)}
@@ -135,7 +146,7 @@ export default function AppsPage() {
                           onClick={() => setConfirmSlug(null)}
                           className="rounded-lg border border-border-light px-3 py-2 text-sm text-text-muted transition hover:bg-gray-50"
                         >
-                          Avbryt
+                          {t("cancel")}
                         </button>
                       </div>
                     </div>

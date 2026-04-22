@@ -8,6 +8,7 @@ import { useRouter, Link } from "@/i18n/routing";
 import { CREATE_BLOG_POST } from "@/graphql/mutations";
 import { GET_BLOG_CATEGORIES } from "@/graphql/queries";
 import { MediaPickerField } from "@/components/media-picker";
+import RichTextEditor from "@/components/rich-text-editor";
 
 export default function NewBlogPostPage() {
   const params = useParams();
@@ -156,12 +157,10 @@ export default function NewBlogPostPage() {
         {/* Content */}
         <div>
           <label className="mb-1 block text-sm font-medium text-text-secondary">{t("content")}</label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={16}
-            className="w-full resize-y rounded-lg border border-border-light bg-white px-3 py-2 text-sm font-mono outline-none focus:border-primary-deep"
-            placeholder="Skriv ditt blogginlägg här... (Markdown stöds)"
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
+            placeholder="Skriv ditt blogginlägg här..."
           />
         </div>
 

@@ -9,6 +9,7 @@ import { GET_ADMIN_USER } from "@/graphql/queries";
 import { ADMIN_UPDATE_USER } from "@/graphql/mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -175,11 +176,9 @@ function EditForm({ user, onSave, saving }: { user: any; onSave: (data: any) => 
             { key: "isSuperuser", label: t("superuser"), color: "accent-purple-600" },
           ].map(({ key, label }) => (
             <label key={key} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={form[key as keyof typeof form] as boolean}
                 onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
-                className="h-4 w-4 rounded border-border-theme text-primary-deep focus:ring-primary/20"
               />
               <span className="text-sm text-text-secondary">{label}</span>
             </label>

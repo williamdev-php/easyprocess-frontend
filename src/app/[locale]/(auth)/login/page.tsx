@@ -12,12 +12,12 @@ function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const rawRedirect = searchParams.get("redirect") || "/dashboard";
+  const rawRedirect = searchParams.get("redirect") || "/dashboard/select-site";
   // Only allow same-origin relative path redirects (prevent open redirect).
   // Relative paths starting with "/" are safe; reject absolute URLs to other origins.
   const redirect = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
     ? rawRedirect
-    : "/dashboard";
+    : "/dashboard/select-site";
   const t = useTranslations("auth");
 
   const [email, setEmail] = useState("");

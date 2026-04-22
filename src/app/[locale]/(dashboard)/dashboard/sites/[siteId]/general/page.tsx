@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useSiteContext } from "@/lib/site-context";
 import { MY_SITE, MY_SUBSCRIPTION, GET_SITE_ANALYTICS } from "@/graphql/queries";
 import { PUBLISH_SITE, PAUSE_SITE, UNPAUSE_SITE } from "@/graphql/mutations";
+
+import JSZip from "jszip";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+const SECTION_FILES = [
+  "meta", "branding", "business", "hero", "about", "features", "stats",
+  "services", "process", "gallery", "team", "testimonials", "faq", "cta",
+  "contact", "pricing", "video", "logo_cloud", "custom_content", "banner",
+  "section_settings", "seo", "section_order",
+];
 
 // ---------------------------------------------------------------------------
 // Skeleton
@@ -41,6 +52,130 @@ function StatusBadge({ status }: { status: string }) {
       <span className={`h-2 w-2 rounded-full ${c.dot}`} />
       {c.label}
     </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Device preview frame
+// ---------------------------------------------------------------------------
+
+function DevicePreview({
+  siteId,
+  siteName,
+  primaryColor,
+  previewImage,
+}: {
+  siteId: string;
+  siteName: string;
+  primaryColor: string;
+  previewImage: string | null;
+}) {
+  const t = useTranslations("siteOverview");
+  const [desktopUrl, setDesktopUrl] = useState<string | null>(null);
+  const [mobileUrl, setMobileUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchPreviews() {
+      setLoading(true);
+      try {
+        const [desktopRes, mobileRes] = await Promise.all([
+          fetch(`${API_URL}/api/sites/${siteId}/preview-image?device=desktop`),
+          fetch(`${API_URL}/api/sites/${siteId}/preview-image?device=mobile`),
+        ]);
+
+        if (!cancelled) {
+          const desktopData = desktopRes.ok ? await desktopRes.json() : null;
+          const mobileData = mobileRes.ok ? await mobileRes.json() : null;
+          setDesktopUrl(desktopData?.url || null);
+          setMobileUrl(mobileData?.url || null);
+        }
+      } catch {
+        // Fall back to preview image
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchPreviews();
+    return () => { cancelled = true; };
+  }, [siteId]);
+
+  const desktopSrc = desktopUrl || previewImage;
+  const mobileSrc = mobileUrl || previewImage;
+
+  return (
+    <div className="relative flex items-end justify-center gap-6 p-6 pb-4">
+      {/* Desktop frame */}
+      <div className="relative flex-1 max-w-[480px]">
+        {/* Monitor */}
+        <div className="rounded-t-xl border-2 border-gray-300 bg-gray-800 p-1">
+          {/* Screen */}
+          <div className="relative aspect-[16/10] overflow-hidden rounded-t-lg bg-white">
+            {loading ? (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-deep/5 to-primary/5">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-light border-t-primary-deep" />
+              </div>
+            ) : desktopSrc ? (
+              <img
+                src={desktopSrc}
+                alt={`${siteName} - Desktop`}
+                className="h-full w-full object-cover object-top"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-deep/5 to-primary/5">
+                <p className="text-xs text-text-muted">{t("noPreview")}</p>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Monitor stand */}
+        <div className="mx-auto h-4 w-24 rounded-b-lg bg-gray-300" />
+        <div className="mx-auto h-1.5 w-36 rounded-b-lg bg-gray-200" />
+        {/* Label */}
+        <p className="mt-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-muted">
+          {t("desktop")}
+        </p>
+      </div>
+
+      {/* Mobile frame */}
+      <div className="relative w-[100px] shrink-0">
+        {/* Phone body */}
+        <div className="rounded-[16px] border-2 border-gray-300 bg-gray-800 p-1">
+          {/* Notch */}
+          <div className="mx-auto mb-0.5 h-1 w-8 rounded-full bg-gray-600" />
+          {/* Screen */}
+          <div className="relative aspect-[9/19] overflow-hidden rounded-[12px] bg-white">
+            {loading ? (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-deep/5 to-primary/5">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-border-light border-t-primary-deep" />
+              </div>
+            ) : mobileSrc ? (
+              <img
+                src={mobileSrc}
+                alt={`${siteName} - Mobile`}
+                className="h-full w-full object-cover object-top"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-deep/5 to-primary/5">
+                <p className="text-[8px] text-text-muted">{t("noPreview")}</p>
+              </div>
+            )}
+          </div>
+          {/* Home indicator */}
+          <div className="mx-auto mt-0.5 h-1 w-6 rounded-full bg-gray-600" />
+        </div>
+        {/* Label */}
+        <p className="mt-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-muted">
+          {t("mobile")}
+        </p>
+      </div>
+
+      {/* Color accent line */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl" style={{ backgroundColor: primaryColor }} />
+    </div>
   );
 }
 
@@ -122,6 +257,7 @@ export default function SiteGeneralPage() {
   });
 
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   const detail = siteDetail?.mySite;
   const analytics = analyticsData?.siteAnalytics;
@@ -143,8 +279,6 @@ export default function SiteGeneralPage() {
 
   const primaryColor = siteData.branding?.colors?.primary || "#326586";
   const siteUrl = subdomain ? `https://${subdomain}.qvickosite.com` : null;
-  const viewerUrl = process.env.NEXT_PUBLIC_VIEWER_URL ?? "";
-  const previewIframeUrl = viewerUrl ? `${viewerUrl}/preview/${siteId}` : null;
   const previewImage =
     siteData.meta?.og_image ||
     siteData.hero?.background_image ||
@@ -162,6 +296,8 @@ export default function SiteGeneralPage() {
   async function handlePublish() {
     try {
       await publishSite({ variables: { siteId } });
+      // Invalidate preview cache after publish
+      fetch(`${API_URL}/api/sites/${siteId}/preview-image`, { method: "DELETE" }).catch(() => {});
       showMsg("success", t("publishSuccess"));
     } catch (err: unknown) {
       showMsg("error", err instanceof Error ? err.message : "Error");
@@ -185,6 +321,32 @@ export default function SiteGeneralPage() {
       showMsg("error", err instanceof Error ? err.message : "Error");
     }
   }
+
+  const handleDownloadZip = useCallback(async () => {
+    const data = detail?.siteData || site?.siteData;
+    if (!data || typeof data !== "object") return;
+
+    setDownloading(true);
+    try {
+      const zip = new JSZip();
+      for (const key of SECTION_FILES) {
+        if (key in (data as Record<string, unknown>)) {
+          zip.file(`${key}.json`, JSON.stringify((data as Record<string, unknown>)[key], null, 2));
+        }
+      }
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${siteName || "site"}-data.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      showMsg("error", t("downloadError"));
+    } finally {
+      setDownloading(false);
+    }
+  }, [detail?.siteData, site?.siteData, siteName, t]);
 
   // Loading
   if (ctxLoading || !site) {
@@ -266,29 +428,14 @@ export default function SiteGeneralPage() {
 
       {/* Preview + Status card */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Preview */}
-        <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-border-light bg-white shadow-sm">
-          <div className="relative aspect-[16/9] bg-gradient-to-br from-primary-deep/5 to-primary/5 overflow-hidden">
-            {previewIframeUrl ? (
-              <iframe
-                src={previewIframeUrl}
-                title="Preview"
-                className="h-full w-full origin-top-left border-0"
-                style={{ transform: "scale(0.5)", width: "200%", height: "200%" }}
-                loading="lazy"
-                sandbox="allow-scripts allow-same-origin"
-              />
-            ) : previewImage ? (
-              <img src={previewImage} alt={siteName} className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <p className="text-sm text-text-muted">{t("noPreview")}</p>
-              </div>
-            )}
-
-            {/* Color accent */}
-            <div className="absolute bottom-0 left-0 right-0 h-1" style={{ backgroundColor: primaryColor }} />
-          </div>
+        {/* Device preview infographic */}
+        <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-border-light bg-gradient-to-br from-gray-50 to-white shadow-sm">
+          <DevicePreview
+            siteId={siteId}
+            siteName={siteName}
+            primaryColor={primaryColor}
+            previewImage={previewImage}
+          />
         </div>
 
         {/* Status & info panel */}
@@ -345,6 +492,17 @@ export default function SiteGeneralPage() {
                   </a>
                 </div>
               )}
+
+              <button
+                onClick={handleDownloadZip}
+                disabled={downloading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border-light px-4 py-2.5 text-sm font-medium text-primary-deep transition hover:bg-primary-deep/5 disabled:opacity-50"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                {downloading ? t("downloading") : t("downloadZip")}
+              </button>
             </div>
           </div>
 

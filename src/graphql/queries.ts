@@ -943,3 +943,57 @@ export const GET_BLOG_CATEGORIES = gql`
     }
   }
 `;
+
+// ---------------------------------------------------------------------------
+// Chat
+// ---------------------------------------------------------------------------
+
+export const GET_CHAT_CONVERSATIONS = gql`
+  query GetChatConversations($siteId: String!, $filter: ChatConversationFilterInput) {
+    chatConversations(siteId: $siteId, filter: $filter) {
+      items {
+        id
+        siteId
+        visitorEmail
+        visitorName
+        status
+        subject
+        lastMessageAt
+        messageCount
+        lastMessagePreview
+        createdAt
+        updatedAt
+      }
+      total
+      page
+      pageSize
+    }
+  }
+`;
+
+export const GET_CHAT_CONVERSATION = gql`
+  query GetChatConversation($siteId: String!, $conversationId: String!) {
+    chatConversation(siteId: $siteId, conversationId: $conversationId) {
+      conversation {
+        id
+        siteId
+        visitorEmail
+        visitorName
+        status
+        subject
+        lastMessageAt
+        messageCount
+        createdAt
+        updatedAt
+      }
+      messages {
+        id
+        conversationId
+        senderType
+        senderName
+        content
+        createdAt
+      }
+    }
+  }
+`;

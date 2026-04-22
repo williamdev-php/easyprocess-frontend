@@ -8,6 +8,7 @@ import { useRouter, Link } from "@/i18n/routing";
 import { GET_BLOG_POST, GET_BLOG_CATEGORIES } from "@/graphql/queries";
 import { UPDATE_BLOG_POST, DELETE_BLOG_POST } from "@/graphql/mutations";
 import { MediaPickerField } from "@/components/media-picker";
+import RichTextEditor from "@/components/rich-text-editor";
 
 interface BlogPostData {
   id: string;
@@ -189,12 +190,9 @@ export default function EditBlogPostPage() {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-text-secondary">{t("content")}</label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={16}
-            className="w-full resize-y rounded-lg border border-border-light bg-white px-3 py-2 text-sm font-mono outline-none focus:border-primary-deep"
-            placeholder="Markdown stöds"
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
           />
         </div>
 
