@@ -24,6 +24,7 @@ const ICONS = {
   contact: "M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75",
   customize: "M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42",
   navigation: "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12",
+  seo: "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z",
   chevronDown: "M19.5 8.25l-7.5 7.5-7.5-7.5",
   blogPost: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z",
   category: "M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z",
@@ -238,7 +239,7 @@ export default function DashboardSidebar() {
 
   // "Customize" section is open when viewing general, editor, settings, code or navigation pages
   const customizeActive = sid
-    ? pathname.startsWith(`/dashboard/sites/${sid}/general`) || pathname.startsWith(`/dashboard/pages/${sid}`) || pathname.startsWith(`/dashboard/sites/${sid}/editor`) || pathname.startsWith(`/dashboard/sites/${sid}/settings`) || pathname.startsWith(`/dashboard/sites/${sid}/code`) || pathname.startsWith(`/dashboard/sites/${sid}/navigation`)
+    ? pathname.startsWith(`/dashboard/sites/${sid}/general`) || pathname.startsWith(`/dashboard/pages/${sid}`) || pathname.startsWith(`/dashboard/sites/${sid}/editor`) || pathname.startsWith(`/dashboard/sites/${sid}/settings`) || pathname.startsWith(`/dashboard/sites/${sid}/code`) || pathname.startsWith(`/dashboard/sites/${sid}/navigation`) || pathname.startsWith(`/dashboard/sites/${sid}/seo`)
     : false;
   const [customizeOpen, setCustomizeOpen] = useState(customizeActive);
 
@@ -337,6 +338,13 @@ export default function DashboardSidebar() {
                         icon={ICONS.navigation}
                         label={t("navigation")}
                         active={pathname.startsWith(`/dashboard/sites/${sid}/navigation`)}
+                        indent
+                      />
+                      <SidebarLink
+                        href={`/dashboard/sites/${sid}/seo`}
+                        icon={ICONS.seo}
+                        label={t("seo")}
+                        active={pathname.startsWith(`/dashboard/sites/${sid}/seo`)}
                         indent
                       />
                     </div>

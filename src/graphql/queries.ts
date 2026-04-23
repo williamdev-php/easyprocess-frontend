@@ -311,6 +311,18 @@ export const MY_DOMAINS = gql`
   }
 `;
 
+export const MY_GSC_CONNECTION = gql`
+  query MyGscConnection {
+    myGscConnection {
+      connected
+      googleEmail
+      indexedDomain
+      indexedAt
+      status
+    }
+  }
+`;
+
 export const SUBDOMAIN_INFO = gql`
   query SubdomainInfo($siteId: String!) {
     subdomainInfo(siteId: $siteId) {

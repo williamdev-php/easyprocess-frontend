@@ -180,3 +180,49 @@ export function googleAuth(code: string, redirectUri: string, locale?: string): 
     body: JSON.stringify({ code, redirect_uri: redirectUri, locale }),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Google Search Console API
+// ---------------------------------------------------------------------------
+
+export interface GscConnectionResponse {
+  connected: boolean;
+  googleEmail?: string;
+  indexedDomain?: string;
+  indexedAt?: string;
+  status?: string;
+}
+
+export interface GscIndexResponse {
+  siteAdded: boolean;
+  sitemapSubmitted: boolean;
+  domain: string;
+}
+
+export function connectGsc(code: string, redirectUri: string, token: string): Promise<GscConnectionResponse> {
+  return request<GscConnectionResponse>("/api/gsc/connect", {
+    method: "POST",
+    body: JSON.stringify({ code, redirect_uri: redirectUri }),
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function getGscStatus(token: string): Promise<GscConnectionResponse> {
+  return request<GscConnectionResponse>("/api/gsc/status", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function disconnectGsc(token: string): Promise<{ disconnected: boolean }> {
+  return request<{ disconnected: boolean }>("/api/gsc/disconnect", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function triggerGscIndex(token: string): Promise<GscIndexResponse> {
+  return request<GscIndexResponse>("/api/gsc/index", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}

@@ -154,7 +154,10 @@ function validateSection(key: string, value: unknown): string | null {
   if (key === "section_order") {
     if (!Array.isArray(value)) return "section_order must be an array";
     for (const item of value) {
-      if (typeof item !== "string" || !VALID_SECTION_KEYS.includes(item)) {
+      if (typeof item !== "string") return `Invalid section in section_order: "${item}"`;
+      // Allow duplicate keys (e.g. "about__dup_1700000000")
+      const baseKey = item.includes("__dup_") ? item.split("__dup_")[0] : item;
+      if (!VALID_SECTION_KEYS.includes(baseKey)) {
         return `Invalid section in section_order: "${item}". Valid: ${VALID_SECTION_KEYS.join(", ")}`;
       }
     }
