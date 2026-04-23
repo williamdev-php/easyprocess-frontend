@@ -1674,27 +1674,14 @@ export default function SiteEditorPage() {
     handleChange({ ...current, section_order: order });
   }, [handleChange]);
 
-  const [viewerUrl] = useState(() => {
-    const env = process.env.NEXT_PUBLIC_VIEWER_URL;
-    const isLocalhost =
-      typeof window !== "undefined" && window.location.hostname === "localhost";
-
-    // In production, ignore env vars pointing to localhost — they are
-    // leftover dev values baked in at build time.
-    if (env && !(env.includes("localhost") && !isLocalhost)) return env;
-
-    if (isLocalhost) return "http://localhost:3001";
-    return "https://qvickosite.com";
-  });
+  const viewerUrl = "https://qvickosite.com";
   const subdomain = data?.mySite?.subdomain;
-  const isDev = process.env.NODE_ENV === "development";
 
-  // Editor iframe always uses /preview/{siteId} — no caching, no layout
   const previewIframeUrl = `${viewerUrl}/preview/${siteId}`;
 
   // "Open preview" link uses the public site URL
   const publicSiteUrl = (() => {
-    if (subdomain && viewerUrl && !isDev) {
+    if (subdomain && viewerUrl) {
       try {
         const u = new URL(viewerUrl);
         const host = u.hostname.replace(/^www\./, "");
