@@ -1667,18 +1667,14 @@ export default function SiteEditorPage() {
     handleChange({ ...current, section_order: order });
   }, [handleChange]);
 
-  const viewerUrl = useMemo(() => {
-    const envUrl = process.env.NEXT_PUBLIC_VIEWER_URL;
-    if (envUrl) return envUrl;
-    // Runtime fallback when env var is not baked into the client bundle
-    if (typeof window !== "undefined") {
+  const [viewerUrl, setViewerUrl] = useState(process.env.NEXT_PUBLIC_VIEWER_URL || "");
+  useEffect(() => {
+    if (!viewerUrl) {
       const h = window.location.hostname;
-      if (h === "localhost") return "http://localhost:3001";
-      // Editor domain → viewer domain (qvicko.com → qvickosite.com)
-      return `${window.location.protocol}//qvickosite.com`;
+      if (h === "localhost") setViewerUrl("http://localhost:3001");
+      else setViewerUrl(`${window.location.protocol}//qvickosite.com`);
     }
-    return "";
-  }, []);
+  }, [viewerUrl]);
   const subdomain = data?.mySite?.subdomain;
   const isDev = process.env.NODE_ENV === "development";
 
