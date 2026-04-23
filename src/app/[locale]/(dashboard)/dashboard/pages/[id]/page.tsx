@@ -1674,15 +1674,16 @@ export default function SiteEditorPage() {
     handleChange({ ...current, section_order: order });
   }, [handleChange]);
 
-  const [viewerUrl, setViewerUrl] = useState(() => {
+  const [viewerUrl] = useState(() => {
     const env = process.env.NEXT_PUBLIC_VIEWER_URL;
-    if (env) return env;
-    // Resolve immediately so the iframe never gets a relative URL
-    if (typeof window !== "undefined") {
-      const h = window.location.hostname;
-      if (h === "localhost") return "http://localhost:3001";
-      return `${window.location.protocol}//qvickosite.com`;
-    }
+    const isLocalhost =
+      typeof window !== "undefined" && window.location.hostname === "localhost";
+
+    // In production, ignore env vars pointing to localhost — they are
+    // leftover dev values baked in at build time.
+    if (env && !(env.includes("localhost") && !isLocalhost)) return env;
+
+    if (isLocalhost) return "http://localhost:3001";
     return "https://qvickosite.com";
   });
   const subdomain = data?.mySite?.subdomain;
