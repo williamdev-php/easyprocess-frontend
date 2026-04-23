@@ -10,15 +10,7 @@ import { PUBLISH_SITE, PAUSE_SITE, UNPAUSE_SITE } from "@/graphql/mutations";
 
 import JSZip from "jszip";
 
-const API_URL = (() => {
-  const env = process.env.NEXT_PUBLIC_API_URL;
-  if (env && env.includes("localhost") && typeof window !== "undefined" && window.location.hostname !== "localhost") {
-    // Build-time env var still points to localhost but we're in production —
-    // fall back to same-origin API calls (assumes a reverse proxy).
-    return "";
-  }
-  return env ?? "http://localhost:8000";
-})();
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const SECTION_FILES = [
   "meta", "branding", "business", "hero", "about", "features", "stats",
