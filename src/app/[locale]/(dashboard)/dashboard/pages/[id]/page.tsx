@@ -1674,14 +1674,17 @@ export default function SiteEditorPage() {
     handleChange({ ...current, section_order: order });
   }, [handleChange]);
 
-  const [viewerUrl, setViewerUrl] = useState(process.env.NEXT_PUBLIC_VIEWER_URL || "");
-  useEffect(() => {
-    if (!viewerUrl) {
+  const [viewerUrl, setViewerUrl] = useState(() => {
+    const env = process.env.NEXT_PUBLIC_VIEWER_URL;
+    if (env) return env;
+    // Resolve immediately so the iframe never gets a relative URL
+    if (typeof window !== "undefined") {
       const h = window.location.hostname;
-      if (h === "localhost") setViewerUrl("http://localhost:3001");
-      else setViewerUrl(`${window.location.protocol}//qvickosite.com`);
+      if (h === "localhost") return "http://localhost:3001";
+      return `${window.location.protocol}//qvickosite.com`;
     }
-  }, [viewerUrl]);
+    return "https://qvickosite.com";
+  });
   const subdomain = data?.mySite?.subdomain;
   const isDev = process.env.NODE_ENV === "development";
 
