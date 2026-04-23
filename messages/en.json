@@ -196,7 +196,9 @@
     "orContinueWith": "or continue with",
     "continueWithGoogle": "Continue with Google",
     "googleLoginFailed": "Google login failed. Please try again.",
-    "orRegisterWithEmail": "or register with email"
+    "orRegisterWithEmail": "or register with email",
+    "loginWithEmail": "Log in with email",
+    "enterPassword": "Enter your password"
   },
   "dashboard": {
     "welcome": "Welcome, {name}",
@@ -1073,7 +1075,7 @@
   "createSite": {
     "pageTitle": "Create your website",
     "pageSubtitle": "Get a professional website in minutes — completely free to start.",
-    "stepEmail": "Account",
+    "stepAccount": "Account",
     "stepChoose": "Choose type",
     "stepDetails": "Details",
     "stepGenerate": "Create",
@@ -1155,7 +1157,11 @@
     "industrySpecificHint": "Choose an industry to get a page optimized for your business type.",
     "industryDropdownLabel": "Choose industry",
     "industryDropdownPlaceholder": "Select an industry...",
-    "industryLoadingError": "Could not load industries"
+    "industryLoadingError": "Could not load industries",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "errorLogoTooLarge": "Logo file must be under 5 MB.",
+    "errorRateLimit": "You've created too many websites today. Try again tomorrow.",
+    "errorInvalidUrl": "Invalid web address. Please check the URL and try again."
   },
   "analytics": {
     "title": "Analytics",

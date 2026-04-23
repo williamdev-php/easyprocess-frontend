@@ -32,7 +32,7 @@ interface SiteData {
     name?: string; tagline?: string; email?: string | null; phone?: string | null;
     address?: string | null; org_number?: string | null; social_links?: Record<string, string>;
   };
-  hero?: { headline: string; subtitle?: string; cta?: { label: string; href: string } | null; background_image?: string | null; show_cta?: boolean } | null;
+  hero?: { headline: string; subtitle?: string; cta?: { label: string; href: string } | null; background_image?: string | null; show_cta?: boolean; fullscreen?: boolean; show_gradient?: boolean } | null;
   about?: { title?: string; text?: string; image?: string | null; highlights?: { label: string; value: string }[] | null; show_highlights?: boolean } | null;
   features?: { title?: string; subtitle?: string; items?: { title: string; description: string; icon?: string }[] } | null;
   stats?: { title?: string; items?: { value: string; label: string }[] } | null;
@@ -49,7 +49,8 @@ interface SiteData {
   logo_cloud?: { title?: string; subtitle?: string; logos?: { name: string; image_url?: string }[] } | null;
   custom_content?: { title?: string; subtitle?: string; layout?: string; blocks?: { type: string; content?: string; url?: string; alt?: string; label?: string; href?: string }[] } | null;
   banner?: { text?: string; button?: { label: string; href: string } | null; background_color?: string } | null;
-  section_settings?: Record<string, { animation?: string; background_color?: string }>;
+  ranking?: { title?: string; subtitle?: string; items?: { rank?: number; title: string; description?: string; image?: string | null; link?: { label: string; href: string } | null }[] } | null;
+  section_settings?: Record<string, { animation?: string; background_color?: string; show_gradient?: boolean }>;
   seo?: { structured_data?: Record<string, unknown>; robots?: string };
 }
 
@@ -518,6 +519,10 @@ function HeroEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData
             <FieldGroup label="CTA-knapp länk"><TextInput value={hero.cta?.href || ""} onChange={(v) => set("cta", { ...hero.cta, label: hero.cta?.label || "", href: v })} /></FieldGroup>
           </>
         )}
+      </div>
+      <div className="rounded-lg border border-border-light bg-gray-50/80 p-3 space-y-2">
+        <ToggleSwitch label="Fullskärm" checked={hero.fullscreen !== false} onChange={(v) => set("fullscreen", v)} />
+        <ToggleSwitch label="Visa gradient-effekt" checked={hero.show_gradient !== false} onChange={(v) => set("show_gradient", v)} />
       </div>
     </div>
   );
@@ -1165,6 +1170,76 @@ function TeamEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData
   );
 }
 
+function RankingEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
+  const ranking = data.ranking || { title: "Topplista", subtitle: "", items: [] };
+  const items = ranking.items || [];
+  const set = (key: string, val: unknown) => {
+    onChange({ ...data, ranking: { ...ranking, [key]: val } });
+  };
+  const updateItem = (idx: number, key: string, val: unknown) => {
+    const next = deepClone(items);
+    (next[idx] as Record<string, unknown>)[key] = val;
+    set("items", next);
+  };
+  const removeItem = (idx: number) => {
+    set("items", items.filter((_: unknown, i: number) => i !== idx));
+  };
+  const addItem = () => {
+    set("items", [...items, { rank: items.length + 1, title: "", description: "", image: null, link: null }]);
+  };
+  return (
+    <div className="space-y-3 p-4">
+      <FieldGroup label="Rubrik"><TextInput value={ranking.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
+      <FieldGroup label="Underrubrik"><TextInput value={ranking.subtitle || ""} onChange={(v) => set("subtitle", v)} /></FieldGroup>
+      <FieldGroup label="Rankade objekt">
+        <div className="space-y-2">
+          {items.map((item: NonNullable<NonNullable<SiteData["ranking"]>["items"]>[number], idx: number) => (
+            <div key={idx} className="rounded-lg border border-border-light bg-gray-50/50 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-medium text-primary-deep">#{item.rank || idx + 1} {item.title || `Objekt #${idx + 1}`}</span>
+                <button type="button" onClick={() => removeItem(idx)}
+                  className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 shrink-0">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <FieldGroup label="Rankning"><TextInput value={String(item.rank || idx + 1)} onChange={(v) => updateItem(idx, "rank", parseInt(v) || idx + 1)} /></FieldGroup>
+              <FieldGroup label="Titel"><TextInput value={item.title || ""} onChange={(v) => updateItem(idx, "title", v)} /></FieldGroup>
+              <FieldGroup label="Beskrivning"><TextArea value={item.description || ""} onChange={(v) => updateItem(idx, "description", v)} rows={2} /></FieldGroup>
+              <MediaPickerField
+                value={item.image || ""}
+                onChange={(url) => updateItem(idx, "image", url || null)}
+                label="Bild"
+                folder="ranking"
+              />
+              <div className="rounded-lg border border-border-light bg-white p-2 space-y-2">
+                <ToggleSwitch label="Extern länk" checked={!!item.link} onChange={(v) => updateItem(idx, "link", v ? { label: "Besök", href: "" } : null)} />
+                {item.link && (
+                  <>
+                    <FieldGroup label="Knapptext"><TextInput value={item.link.label || ""} onChange={(v) => updateItem(idx, "link", { ...item.link, label: v, href: item.link?.href || "" })} /></FieldGroup>
+                    <FieldGroup label="URL"><TextInput value={item.link.href || ""} onChange={(v) => updateItem(idx, "link", { ...item.link, label: item.link?.label || "", href: v })} /></FieldGroup>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addItem}
+            className="flex items-center gap-1.5 rounded-lg border border-dashed border-border-light px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:border-primary hover:text-primary"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Lägg till objekt
+          </button>
+        </div>
+      </FieldGroup>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Section config
 // ---------------------------------------------------------------------------
@@ -1173,6 +1248,7 @@ const DEFAULT_SECTION_ORDER = [
   "hero", "about", "features", "stats", "services", "process",
   "gallery", "team", "testimonials", "faq", "cta", "contact",
   "pricing", "video", "logo_cloud", "custom_content", "banner",
+  "ranking",
 ];
 
 const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{ data: SiteData; onChange: (d: SiteData) => void }>; toggleable: boolean }> = {
@@ -1195,6 +1271,7 @@ const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{
   logo_cloud: { label: "Logotyper (partners)", Editor: LogoCloudEditor, toggleable: true },
   custom_content: { label: "Eget innehåll", Editor: CustomContentEditor, toggleable: true },
   banner: { label: "Banner", Editor: BannerEditor, toggleable: true },
+  ranking: { label: "Topplista", Editor: RankingEditor, toggleable: true },
 };
 
 // Non-content sections always appear first (not draggable)
@@ -1304,7 +1381,7 @@ function DraggableSectionItem({
 
 function SectionSettingsPanel({ sectionKey, data, onChange }: { sectionKey: string; data: SiteData; onChange: (d: SiteData) => void }) {
   const settings = data.section_settings?.[sectionKey] || {};
-  const setField = (key: string, val: string) => {
+  const setField = (key: string, val: unknown) => {
     const next = {
       ...data,
       section_settings: {
@@ -1315,6 +1392,7 @@ function SectionSettingsPanel({ sectionKey, data, onChange }: { sectionKey: stri
     onChange(next);
   };
   const hasBgColor = !!settings.background_color;
+  const showGradient = settings.show_gradient !== false;
   const selectCls = "w-full rounded-lg border border-border-light bg-white px-3 py-2 text-sm outline-none focus:border-primary";
   return (
     <div className="border-t border-border-light bg-gray-50/60 px-4 py-3 space-y-2">
@@ -1329,6 +1407,7 @@ function SectionSettingsPanel({ sectionKey, data, onChange }: { sectionKey: stri
           <option value="none">Ingen</option>
         </select>
       </FieldGroup>
+      <ToggleSwitch label="Visa gradient-effekt" checked={showGradient} onChange={(v) => setField("show_gradient", v)} />
       <ToggleSwitch label="Egen bakgrundsfärg" checked={hasBgColor} onChange={(v) => setField("background_color", v ? "#ffffff" : "")} />
       {hasBgColor && (
         <div className="flex justify-center">

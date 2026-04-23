@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback, FormEvent, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
 import { getAccessToken } from "@/lib/auth-context";
 import { Button, Input, Label, Alert, ColorPicker, FontSelector, Dropdown } from "@/components/ui";
 import Confetti from "@/components/confetti";
+import { GoogleLoginButton } from "@/components/google-login-button";
 import { trackEvent } from "@/lib/tracking";
 import { pickSafeDefaultFont } from "@/lib/fonts";
 
@@ -179,7 +180,9 @@ interface CreateSiteWizardProps {
 
 export default function CreateSiteWizard({ embedded = false, onComplete }: CreateSiteWizardProps) {
   const t = useTranslations("createSite");
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const tAuth = useTranslations("auth");
+  const locale = useLocale();
+  const { user, isAuthenticated, isLoading: authLoading, loginWithGoogle } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const claimToken = searchParams.get("token");
@@ -193,6 +196,7 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
   const [mode, setMode] = useState<"new" | "transform" | null>(initialMode);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // New site form
   const [businessName, setBusinessName] = useState("");
@@ -257,6 +261,8 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
           if (data.ok) {
             if (onComplete) {
               onComplete();
+            } else if (data.site_id) {
+              router.push(`/dashboard/sites/${data.site_id}/general`);
             } else {
               router.push("/dashboard/pages");
             }
@@ -363,11 +369,21 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.detail || "Request failed");
+        // FastAPI returns detail as string or array of validation errors
+        let message = "";
+        if (typeof data.detail === "string") {
+          message = data.detail;
+        } else if (Array.isArray(data.detail)) {
+          message = data.detail
+            .map((e: { msg?: string; loc?: string[] }) => e.msg || "")
+            .filter(Boolean)
+            .join(", ");
+        }
+        throw new Error(message || t("errorGeneric"));
       }
       return res.json();
     },
-    [],
+    [t],
   );
 
   // Handle logo file upload
@@ -375,7 +391,7 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      setError("Logo file must be under 5MB");
+      setError(t("errorLogoTooLarge"));
       return;
     }
     const reader = new FileReader();
@@ -455,7 +471,7 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
       setLeadId(data.lead_id);
       setStep("generating");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("errorGeneric"));
     } finally {
       setLoading(false);
     }
@@ -478,7 +494,7 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
       setLeadId(data.lead_id);
       setStep("generating");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("errorGeneric"));
     } finally {
       setLoading(false);
     }
@@ -500,6 +516,8 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
   function handleGoToDashboard() {
     if (onComplete) {
       onComplete();
+    } else if (siteId) {
+      router.push(`/dashboard/sites/${siteId}/general`);
     } else {
       router.push("/dashboard/pages");
     }
@@ -538,6 +556,27 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
             <p className="text-sm text-text-muted">{t("accountSubtitle")}</p>
 
             <div className="flex flex-col gap-3">
+              <GoogleLoginButton
+                loading={googleLoading}
+                onSuccess={async (code, redirectUri) => {
+                  setGoogleLoading(true);
+                  setError("");
+                  try {
+                    await loginWithGoogle(code, redirectUri, locale);
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : tAuth("googleLoginFailed"));
+                  } finally {
+                    setGoogleLoading(false);
+                  }
+                }}
+              />
+
+              <div className="my-2 flex items-center gap-4">
+                <div className="h-px flex-1 bg-border-theme" />
+                <span className="text-xs font-medium text-text-muted">{tAuth("orContinueWith")}</span>
+                <div className="h-px flex-1 bg-border-theme" />
+              </div>
+
               <Link
                 href={`/register?redirect=${encodeURIComponent("/create-site")}`}
                 onClick={() => saveFormState("choose")}

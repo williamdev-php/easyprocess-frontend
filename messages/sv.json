@@ -195,6 +195,8 @@
     "continueWithGoogle": "Fortsätt med Google",
     "googleLoginFailed": "Google-inloggning misslyckades. Försök igen.",
     "orRegisterWithEmail": "eller registrera med e-post",
+    "loginWithEmail": "Logga in med e-post",
+    "enterPassword": "Ange ditt lösenord",
     "featureSeo": "Inbyggd SEO från dag ett",
     "featureDesign": "Snygg design, varje gång"
   },
@@ -1073,7 +1075,7 @@
   "createSite": {
     "pageTitle": "Skapa din hemsida",
     "pageSubtitle": "Få en professionell hemsida på några minuter — helt gratis att börja.",
-    "stepEmail": "Konto",
+    "stepAccount": "Konto",
     "stepChoose": "Välj typ",
     "stepDetails": "Detaljer",
     "stepGenerate": "Skapa",
@@ -1155,7 +1157,11 @@
     "industrySpecificHint": "Välj en bransch för att få en sida optimerad för din verksamhetstyp.",
     "industryDropdownLabel": "Välj bransch",
     "industryDropdownPlaceholder": "Välj en bransch...",
-    "industryLoadingError": "Kunde inte ladda branscher"
+    "industryLoadingError": "Kunde inte ladda branscher",
+    "errorGeneric": "Något gick fel. Försök igen.",
+    "errorLogoTooLarge": "Logotypen måste vara under 5 MB.",
+    "errorRateLimit": "Du har skapat för många hemsidor idag. Försök igen imorgon.",
+    "errorInvalidUrl": "Ogiltig webbadress. Kontrollera URL:en och försök igen."
   },
   "analytics": {
     "title": "Analys",
