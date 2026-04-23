@@ -1438,7 +1438,7 @@ export default function SiteEditorPage() {
   const [discardDraftMutation] = useMutation(DISCARD_DRAFT);
 
   const [siteData, setSiteData] = useState<SiteData | null>(null);
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set(["business", "hero"]));
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set());
   const [saveStatus, setSaveStatus] = useState<"idle" | "draft_saving" | "draft_saved" | "publishing" | "published" | "error">("idle");
   const [hasDraft, setHasDraft] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -1762,7 +1762,7 @@ export default function SiteEditorPage() {
           <button
             onClick={handlePublish}
             disabled={!hasUnsavedChanges || saveStatus === "publishing"}
-            className="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-primary to-primary-deep px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:from-primary-dark hover:to-primary-deep disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saveStatus === "publishing" ? (
               <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -1840,6 +1840,11 @@ export default function SiteEditorPage() {
       <div className="flex flex-1 min-h-0">
         {/* Editor panel */}
         <div className="w-full md:w-[380px] lg:w-[420px] shrink-0 overflow-y-auto border-r border-border-light bg-gray-50/50">
+          {/* Site settings label */}
+          <div className="px-4 pt-4 pb-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Webbplatsinställningar</span>
+          </div>
+
           {/* Fixed sections (business, branding) — not draggable */}
           {FIXED_SECTIONS.map((key) => {
             const section = SECTION_MAP[key];
@@ -1862,6 +1867,11 @@ export default function SiteEditorPage() {
               </div>
             );
           })}
+
+          {/* Separator between site settings and content sections */}
+          <div className="px-4 pt-5 pb-1.5 border-t-2 border-primary/10">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Sektioner</span>
+          </div>
 
           {/* Draggable content sections */}
           {sectionOrder.map((key: string, idx: number) => {
