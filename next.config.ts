@@ -3,9 +3,11 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+const viewerUrl = process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001";
+
 const nextConfig: NextConfig = {
   env: {
-    NEXT_PUBLIC_VIEWER_URL: process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001",
+    NEXT_PUBLIC_VIEWER_URL: viewerUrl,
   },
   async headers() {
     return [
@@ -22,16 +24,19 @@ const nextConfig: NextConfig = {
               "font-src 'self' https: data:",
               "media-src 'self' https://d8j0ntlcm91z4.cloudfront.net https://*.supabase.co",
               "connect-src 'self' https://api.stripe.com " + (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"),
-              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com " + (process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001") + " " + (() => {
-                // Allow all subdomains of the viewer URL for iframe embedding
-                try {
-                  const u = new URL(process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001");
-                  const host = u.hostname.replace(/^www\./, "");
-                  return `${u.protocol}//*.${host}`;
-                } catch {
-                  return "";
-                }
-              })(),
+              // Allow viewer iframe: env var + hardcoded production domains as fallback
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com " +
+                viewerUrl + " " +
+                "https://qvickosite.com https://*.qvickosite.com " +
+                (() => {
+                  try {
+                    const u = new URL(viewerUrl);
+                    const host = u.hostname.replace(/^www\./, "");
+                    return `${u.protocol}//*.${host}`;
+                  } catch {
+                    return "";
+                  }
+                })(),
               "frame-ancestors 'none'",
             ].join("; "),
           },
