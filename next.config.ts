@@ -23,7 +23,10 @@ const nextConfig: NextConfig = {
               "img-src 'self' https: data:",
               "font-src 'self' https: data:",
               "media-src 'self' https://d8j0ntlcm91z4.cloudfront.net https://*.supabase.co",
-              "connect-src 'self' https://api.stripe.com " + (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"),
+              "connect-src 'self' https://api.stripe.com " +
+                (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + " " +
+                (process.env.NEXT_PUBLIC_GRAPHQL_URL || "") + " " +
+                "https://d8j0ntlcm91z4.cloudfront.net https://*.supabase.co",
               // Allow viewer iframe: env var + hardcoded production domains as fallback
               "frame-src 'self' https://js.stripe.com https://hooks.stripe.com " +
                 viewerUrl + " " +

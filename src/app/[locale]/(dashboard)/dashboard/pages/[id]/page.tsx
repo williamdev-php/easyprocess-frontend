@@ -1475,25 +1475,32 @@ export default function SiteEditorPage() {
     }
   }, [data, siteData, siteId, loadDraftMutation]);
 
-  // Viewer origin for postMessage security — restrict to known origin
-  const viewerOrigin = process.env.NEXT_PUBLIC_VIEWER_URL ?? "";
+  // Known viewer origins for postMessage validation. Use "*" for sending
+  // since the iframe URL is determined at runtime (may be qvickosite.com in
+  // production even when the env var says localhost). Incoming messages are
+  // validated against a known-good list instead.
+  const knownViewerOrigins = useMemo(() => new Set([
+    "https://qvickosite.com",
+    "https://www.qvickosite.com",
+    "http://localhost:3001",
+    ...(process.env.NEXT_PUBLIC_VIEWER_URL ? [process.env.NEXT_PUBLIC_VIEWER_URL] : []),
+  ].map((u) => { try { return new URL(u).origin; } catch { return u; } })), []);
 
   // Send current data to iframe
   const pushToIframe = useCallback((d: SiteData) => {
     if (iframeRef.current?.contentWindow) {
-      const targetOrigin = viewerOrigin || "*";
       iframeRef.current.contentWindow.postMessage(
         { type: "SITE_DATA_UPDATE", siteData: d },
-        targetOrigin
+        "*"
       );
     }
-  }, [viewerOrigin]);
+  }, []);
 
   // Listen for messages from the viewer iframe
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
-      // Validate origin when viewer URL is configured
-      if (viewerOrigin && event.origin !== viewerOrigin) return;
+      // Validate origin against known viewer origins
+      if (!knownViewerOrigins.has(event.origin)) return;
 
       const msg = event.data;
       if (!msg?.type) return;
@@ -1519,7 +1526,7 @@ export default function SiteEditorPage() {
     }
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [pushToIframe, viewerOrigin]);
+  }, [pushToIframe, knownViewerOrigins]);
 
   // Handle changes: update preview + auto-save draft
   const handleChange = useCallback(
