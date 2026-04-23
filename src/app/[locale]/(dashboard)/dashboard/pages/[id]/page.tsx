@@ -1480,10 +1480,10 @@ export default function SiteEditorPage() {
   // production even when the env var says localhost). Incoming messages are
   // validated against a known-good list instead.
   const knownViewerOrigins = useMemo(() => new Set([
+    "https://preview.qvickosite.com",
     "https://qvickosite.com",
     "https://www.qvickosite.com",
     "http://localhost:3001",
-    ...(process.env.NEXT_PUBLIC_VIEWER_URL ? [process.env.NEXT_PUBLIC_VIEWER_URL] : []),
   ].map((u) => { try { return new URL(u).origin; } catch { return u; } })), []);
 
   // Send current data to iframe
@@ -1674,7 +1674,7 @@ export default function SiteEditorPage() {
     handleChange({ ...current, section_order: order });
   }, [handleChange]);
 
-  const viewerUrl = "https://qvickosite.com";
+  const viewerUrl = "https://preview.qvickosite.com";
   const subdomain = data?.mySite?.subdomain;
 
   const previewIframeUrl = `${viewerUrl}/preview/${siteId}`;
