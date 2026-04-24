@@ -358,7 +358,7 @@ function PageCard({
   siteId: string;
   onDelete: () => void;
   saving: boolean;
-  t: (key: string, values?: Record<string, unknown>) => string;
+  t: (key: string, values?: Record<string, string | number | Date>) => string;
   isChild?: boolean;
 }) {
   const detailHref = `/dashboard/sites/${siteId}/pages/${pageDetailSlug(page)}`;
