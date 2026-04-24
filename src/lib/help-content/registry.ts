@@ -1,10 +1,12 @@
 import type { HelpCategory } from "./types";
 import { domainsCategory } from "./domains";
 import { siteMetricsCategory } from "./site-metrics";
+import { qvickoAppsCategory } from "./qvicko-apps";
 
 export const helpCategories: HelpCategory[] = [
   domainsCategory,
   siteMetricsCategory,
+  qvickoAppsCategory,
 ];
 
 export function getCategory(slug: string): HelpCategory | undefined {
