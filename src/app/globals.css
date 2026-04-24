@@ -23,6 +23,9 @@
   /* Feedback */
   --error: #C44D4D;
   --error-bg: #FDF0F0;
+  --success: #2D8A56;
+  --success-bg: #F0FDF4;
+  --success-ring: rgba(45, 138, 86, 0.2);
 }
 
 @theme inline {
@@ -43,6 +46,8 @@
   --color-text-muted: #7A9BAD;
   --color-error: #C44D4D;
   --color-error-bg: #FDF0F0;
+  --color-success: #2D8A56;
+  --color-success-bg: #F0FDF4;
 }
 
 body {
@@ -140,6 +145,101 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-dropdown {
   animation: dropdown-in 0.15s ease-out forwards;
+}
+
+/* ─── Input success pulse ─── */
+@keyframes input-success {
+  0% { border-color: var(--border); box-shadow: 0 0 0 0 transparent; }
+  50% { border-color: var(--success); box-shadow: 0 0 0 3px var(--success-ring); }
+  100% { border-color: var(--success); box-shadow: 0 0 0 0 transparent; }
+}
+.animate-input-success {
+  animation: input-success 0.4s ease-out forwards;
+}
+
+/* ─── Checkbox pop ─── */
+@keyframes check-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.animate-check-pop {
+  animation: check-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ─── Install success animations ─── */
+@keyframes install-success-icon {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-install-success {
+  animation: install-success-icon 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes install-ripple {
+  0% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.animate-install-ripple {
+  animation: install-ripple 0.6s ease-out forwards;
+}
+
+/* ─── Page enter transition ─── */
+@keyframes page-enter {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-page-enter {
+  animation: page-enter 0.3s ease-out both;
+}
+
+/* ─── Stagger children ─── */
+.animate-stagger > * {
+  opacity: 0;
+  animation: fade-rise 0.4s ease-out both;
+}
+.animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.animate-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.animate-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.animate-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.animate-stagger > *:nth-child(6) { animation-delay: 300ms; }
+
+/* ─── Spin once (for randomize button) ─── */
+@keyframes spin-once {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-once {
+  animation: spin-once 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ─── Collapsible slide ─── */
+@keyframes collapsible-open {
+  0% { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-collapsible-open {
+  animation: collapsible-open 0.2s ease-out both;
+}
+
+/* ─── Fade switch (step transitions) ─── */
+@keyframes fade-switch {
+  0% { opacity: 0; transform: translateX(12px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+.animate-fade-switch {
+  animation: fade-switch 0.3s ease-out both;
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ─── Scrollbar styling ─── */

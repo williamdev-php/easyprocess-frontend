@@ -304,7 +304,7 @@ export default function DashboardSidebar() {
                   </button>
 
                   {customizeOpen && (
-                    <div className="flex flex-col gap-1">
+                    <div className="animate-collapsible-open flex flex-col gap-1">
                       <SidebarLink
                         href={`/dashboard/sites/${sid}/general`}
                         icon={ICONS.overview}

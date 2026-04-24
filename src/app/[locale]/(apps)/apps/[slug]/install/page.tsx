@@ -183,16 +183,19 @@ export default function AppInstallPage({ params }: { params: Promise<{ slug: str
       <div className="flex flex-1 flex-col items-center justify-center p-6 lg:p-12">
         {installSuccess ? (
           <div className="w-full max-w-lg text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
-              <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
+            <div className="relative mx-auto h-16 w-16">
+              <div className="absolute inset-0 rounded-full bg-green-100 animate-install-ripple" />
+              <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-green-50 animate-install-success">
+                <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
             </div>
-            <h2 className="mt-6 text-2xl font-bold text-text-primary">{t("installSuccess")}</h2>
-            <p className="mt-2 text-text-muted">
+            <h2 className="mt-6 text-2xl font-bold text-text-primary animate-fade-rise-delay">{t("installSuccess")}</h2>
+            <p className="mt-2 text-text-muted animate-fade-rise-delay-2">
               {app.name} {t("installedOn")} {selectedSite?.businessName || selectedSite?.subdomain}
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <div className="mt-8 flex flex-col gap-3 opacity-0 animate-fade-rise sm:flex-row sm:justify-center" style={{ animationDelay: "0.6s" }}>
               <Link
                 href={`/dashboard/sites/${selectedSiteId}/apps/${slug}` as "/dashboard"}
                 className="rounded-xl bg-primary-deep px-6 py-2.5 text-sm font-medium text-white transition hover:bg-primary-deep/90"
@@ -334,7 +337,7 @@ export default function AppInstallPage({ params }: { params: Promise<{ slug: str
                 <button
                   onClick={handleInstall}
                   disabled={installing || !selectedSiteId || sites.length === 0}
-                  className="w-full rounded-xl bg-primary-deep px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-deep/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-xl bg-primary-deep px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-primary-deep/90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {installing ? (
                     <span className="flex items-center justify-center gap-2">

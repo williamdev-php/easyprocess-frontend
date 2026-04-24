@@ -174,7 +174,7 @@ export default function DashboardHeader() {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border-light bg-white py-1.5 shadow-xl">
+              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border-light bg-white py-1.5 shadow-xl animate-dropdown">
                 {/* User info in dropdown (mobile) */}
                 <div className="border-b border-border-light px-4 py-3 sm:hidden">
                   <p className="text-sm font-semibold text-primary-deep">

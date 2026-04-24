@@ -1,12 +1,26 @@
-import { InputHTMLAttributes, forwardRef } from "react";
+"use client";
+
+import { InputHTMLAttributes, forwardRef, useState, useCallback } from "react";
 
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   size?: "sm" | "md";
 }
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ size = "md", className = "", ...props }, ref) => {
+  ({ size = "md", className = "", onChange, ...props }, ref) => {
     const sizeClasses = size === "sm" ? "h-[18px] w-[18px]" : "h-5 w-5";
+    const [popping, setPopping] = useState(false);
+
+    const handleChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+          setPopping(true);
+          setTimeout(() => setPopping(false), 300);
+        }
+        onChange?.(e);
+      },
+      [onChange]
+    );
 
     return (
       <span className={`relative inline-flex items-center justify-center ${sizeClasses} ${className}`}>
@@ -14,6 +28,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           ref={ref}
           type="checkbox"
           className="peer absolute inset-0 z-10 opacity-0 cursor-pointer"
+          onChange={handleChange}
           {...props}
         />
         <span
@@ -21,7 +36,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             peer-checked:border-primary peer-checked:bg-primary
             peer-focus-visible:ring-2 peer-focus-visible:ring-primary/20 peer-focus-visible:ring-offset-1
             peer-hover:border-primary/60
-            cursor-pointer`}
+            cursor-pointer ${popping ? "animate-check-pop" : ""}`}
         />
         <svg
           className={`pointer-events-none absolute ${size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3"} text-white opacity-0 transition-opacity duration-100 peer-checked:opacity-100`}

@@ -107,11 +107,11 @@ function DevicePreview({
   const mobileSrc = mobileUrl || previewImage;
 
   return (
-    <div className="relative flex items-end justify-center gap-6 p-6 pb-4">
+    <div className="relative flex items-end justify-center p-6 pb-4">
       {/* Desktop frame */}
       <div className="relative flex-1 max-w-[480px]">
         {/* Monitor */}
-        <div className="rounded-t-xl border-2 border-gray-300 bg-gray-800 p-1">
+        <div className="rounded-t-xl border-2 border-gray-300 bg-gray-800 p-1 shadow-lg">
           {/* Screen */}
           <div className="relative aspect-[16/10] overflow-hidden rounded-t-lg bg-white">
             {loading ? (
@@ -134,16 +134,12 @@ function DevicePreview({
         {/* Monitor stand */}
         <div className="mx-auto h-4 w-24 rounded-b-lg bg-gray-300" />
         <div className="mx-auto h-1.5 w-36 rounded-b-lg bg-gray-200" />
-        {/* Label */}
-        <p className="mt-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-muted">
-          {t("desktop")}
-        </p>
       </div>
 
-      {/* Mobile frame */}
-      <div className="relative w-[100px] shrink-0">
+      {/* Mobile frame — overlapping desktop */}
+      <div className="relative -ml-14 mb-6 w-[90px] shrink-0 z-10">
         {/* Phone body */}
-        <div className="rounded-[16px] border-2 border-gray-300 bg-gray-800 p-1">
+        <div className="rounded-[16px] border-2 border-gray-300 bg-gray-800 p-1 shadow-xl">
           {/* Notch */}
           <div className="mx-auto mb-0.5 h-1 w-8 rounded-full bg-gray-600" />
           {/* Screen */}
@@ -167,10 +163,6 @@ function DevicePreview({
           {/* Home indicator */}
           <div className="mx-auto mt-0.5 h-1 w-6 rounded-full bg-gray-600" />
         </div>
-        {/* Label */}
-        <p className="mt-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-muted">
-          {t("mobile")}
-        </p>
       </div>
 
       {/* Color accent line */}
@@ -372,7 +364,7 @@ export default function SiteGeneralPage() {
     <div className="space-y-6">
       {/* Toast */}
       {message && (
-        <div className={`rounded-xl border px-4 py-3 text-sm ${
+        <div className={`animate-slide-down rounded-xl border px-4 py-3 text-sm ${
           message.type === "success"
             ? "border-emerald-200 bg-emerald-50 text-emerald-700"
             : "border-red-200 bg-red-50 text-red-700"
@@ -429,7 +421,7 @@ export default function SiteGeneralPage() {
       {/* Preview + Status card */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Device preview infographic */}
-        <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-border-light bg-gradient-to-br from-gray-50 to-white shadow-sm">
+        <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-border-light bg-gradient-to-br from-gray-50 to-white shadow-sm transition-shadow hover:shadow-md">
           <DevicePreview
             siteId={siteId}
             siteName={siteName}
@@ -449,7 +441,7 @@ export default function SiteGeneralPage() {
                 <button
                   onClick={handlePublish}
                   disabled={publishing || !hasSubscription}
-                  className="w-full rounded-xl bg-primary-deep px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-deep/90 disabled:opacity-50"
+                  className="w-full rounded-xl bg-primary-deep px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-deep/90 active:scale-[0.97] disabled:opacity-50"
                 >
                   {publishing ? t("publishing") : t("publishSite")}
                 </button>
@@ -479,30 +471,38 @@ export default function SiteGeneralPage() {
                 </button>
               )}
 
-              {siteUrl && (
-                <div className="rounded-lg bg-primary-deep/5 px-3 py-2">
-                  <p className="text-[11px] font-medium text-text-muted">{t("siteAddress")}</p>
+              <div className="flex items-center gap-2">
+                {siteUrl && (
                   <a
                     href={siteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium text-primary-deep hover:underline break-all"
+                    className="flex flex-1 items-center gap-2 rounded-lg bg-primary-deep/5 px-3 py-2 transition hover:bg-primary-deep/10"
+                    title={`${subdomain}.qvickosite.com`}
                   >
-                    {subdomain}.qvickosite.com
+                    <svg className="h-4 w-4 shrink-0 text-primary-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="text-xs font-medium text-primary-deep">{t("visitSite")}</span>
                   </a>
-                </div>
-              )}
+                )}
 
-              <button
-                onClick={handleDownloadZip}
-                disabled={downloading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border-light px-4 py-2.5 text-sm font-medium text-primary-deep transition hover:bg-primary-deep/5 disabled:opacity-50"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
-                {downloading ? t("downloading") : t("downloadZip")}
-              </button>
+                <button
+                  onClick={handleDownloadZip}
+                  disabled={downloading}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border-light text-text-muted transition hover:bg-primary-deep/5 hover:text-primary-deep disabled:opacity-50"
+                  title={t("downloadZip")}
+                >
+                  {downloading ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-light border-t-primary-deep" />
+                  ) : (
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -556,7 +556,7 @@ export default function SiteGeneralPage() {
       {/* Quick actions */}
       <div>
         <h3 className="mb-3 text-sm font-semibold text-primary-deep">{t("quickActions")}</h3>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="animate-stagger grid gap-3 sm:grid-cols-2">
           <ActionCard
             href={`/dashboard/pages/${siteId}`}
             icon="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"
