@@ -41,11 +41,18 @@ export function isAuthInitializing(): boolean {
   return _authInitializing;
 }
 
+let _forceLogoutInProgress = false;
+
 export function forceLogout(): void {
   // Don't force logout while the initial token refresh is still running —
   // queries that fire before the token is available are expected to fail.
   if (_authInitializing) return;
+  // Prevent re-entry: resetStore → refetch → error → forceLogout loop
+  if (_forceLogoutInProgress) return;
+  _forceLogoutInProgress = true;
   if (_forceLogoutCb) _forceLogoutCb();
+  // Allow future logouts after a short delay (e.g. new session)
+  setTimeout(() => { _forceLogoutInProgress = false; }, 2000);
 }
 
 function setAccessToken(token: string | null) {
@@ -91,7 +98,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     _forceLogoutCb = () => {
       setAccessToken(null);
       setUser(null);
-      import("@/lib/apollo-client").then((m) => m.default.resetStore().catch(() => {}));
+      // Use clearStore (not resetStore) to avoid refetching queries without a
+      // token, which would trigger the error link → forceLogout loop.
+      import("@/lib/apollo-client").then((m) => m.default.clearStore().catch(() => {}));
     };
     return () => { _forceLogoutCb = null; };
   }, []);
@@ -164,9 +173,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setAccessToken(null);
       setUser(null);
-      // Clear Apollo cache to prevent stale authenticated data from leaking
+      // Clear Apollo cache to prevent stale authenticated data from leaking.
+      // Use clearStore (not resetStore) to avoid refetching without a token.
       const { default: apolloClient } = await import("@/lib/apollo-client");
-      await apolloClient.resetStore().catch(() => {});
+      await apolloClient.clearStore().catch(() => {});
     }
   }, []);
 
