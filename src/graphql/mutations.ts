@@ -417,6 +417,19 @@ export const ADMIN_UPDATE_USER = gql`
 `;
 
 // ---------------------------------------------------------------------------
+// Platform Settings (Super Admin)
+// ---------------------------------------------------------------------------
+
+export const UPDATE_PLATFORM_SETTING = gql`
+  mutation UpdatePlatformSetting($input: UpdatePlatformSettingInput!) {
+    updatePlatformSetting(input: $input) {
+      key
+      value
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
 // Industries
 // ---------------------------------------------------------------------------
 

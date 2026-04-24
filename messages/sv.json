@@ -560,7 +560,16 @@
     "adding": "Lägger till...",
     "noIndustries": "Inga branscher ännu. Lägg till en för att börja kategorisera leads.",
     "save": "Spara",
-    "allIndustries": "Alla branscher"
+    "allIndustries": "Alla branscher",
+    "aiModelsTitle": "AI-modeller",
+    "aiModelsSubtitle": "Välj vilka AI-modeller som ska användas för att generera hemsidor och bilder.",
+    "siteGenerationModel": "Modell för sidgenerering",
+    "siteGenerationModelDesc": "AI-modell som används för att generera site_schema (hemsidans innehåll och struktur).",
+    "imageGenerationModel": "Modell för bildgenerering",
+    "imageGenerationModelDesc": "AI-modell som ska användas för framtida bildgenerering och bildredigering.",
+    "modelUpdated": "Modellen har uppdaterats.",
+    "modelUpdateFailed": "Kunde inte uppdatera modellen.",
+    "savingModel": "Sparar..."
   },
   "leads": {
     "title": "Leads",

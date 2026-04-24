@@ -560,7 +560,16 @@
     "adding": "Adding...",
     "noIndustries": "No industries yet. Add one to start categorizing leads.",
     "save": "Save",
-    "allIndustries": "All industries"
+    "allIndustries": "All industries",
+    "aiModelsTitle": "AI Models",
+    "aiModelsSubtitle": "Choose which AI models to use for generating websites and images.",
+    "siteGenerationModel": "Site generation model",
+    "siteGenerationModelDesc": "AI model used to generate site_schema (website content and structure).",
+    "imageGenerationModel": "Image generation model",
+    "imageGenerationModelDesc": "AI model for future image generation and editing features.",
+    "modelUpdated": "Model updated successfully.",
+    "modelUpdateFailed": "Failed to update model.",
+    "savingModel": "Saving..."
   },
   "leads": {
     "title": "Leads",

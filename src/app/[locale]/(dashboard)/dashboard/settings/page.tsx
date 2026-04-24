@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { GET_INDUSTRIES } from "@/graphql/queries";
+import { GET_INDUSTRIES, GET_PLATFORM_SETTINGS } from "@/graphql/queries";
 import {
   CREATE_INDUSTRY,
   UPDATE_INDUSTRY,
   DELETE_INDUSTRY,
+  UPDATE_PLATFORM_SETTING,
 } from "@/graphql/mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,42 @@ interface Industry {
   description: string | null;
   createdAt: string;
 }
+
+interface PlatformSetting {
+  key: string;
+  value: string;
+}
+
+const AI_MODELS = [
+  {
+    value: "claude-haiku-4-5-20251001",
+    label: "Claude Haiku 4.5",
+    description: "Snabb & kostnadseffektiv (standard)",
+  },
+  {
+    value: "gemini-2.5-flash",
+    label: "Gemini 2.5 Flash",
+    description: "Google Gemini — snabb & billig",
+  },
+];
+
+const IMAGE_MODELS = [
+  {
+    value: "nano-banana",
+    label: "Nano Banana",
+    description: "Standard kvalitet, snabbast",
+  },
+  {
+    value: "nano-banana-2",
+    label: "Nano Banana 2",
+    description: "Förbättrad kvalitet (standard)",
+  },
+  {
+    value: "nano-banana-pro",
+    label: "Nano Banana Pro",
+    description: "Högsta kvalitet, produktionsklass",
+  },
+];
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -40,6 +77,46 @@ export default function SettingsPage() {
   const [editDesc, setEditDesc] = useState("");
 
   const industries: Industry[] = data?.industries ?? [];
+
+  // Platform settings
+  const { data: settingsData, loading: settingsLoading } = useQuery<any>(
+    GET_PLATFORM_SETTINGS,
+    { fetchPolicy: "cache-and-network" }
+  );
+  const [updatePlatformSetting] = useMutation(UPDATE_PLATFORM_SETTING);
+
+  const [aiModel, setAiModel] = useState("claude-haiku-4-5-20251001");
+  const [imageModel, setImageModel] = useState("nano-banana-2");
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [savedKey, setSavedKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (settingsData?.platformSettings) {
+      const settings: PlatformSetting[] = settingsData.platformSettings;
+      const ai = settings.find((s) => s.key === "ai_model");
+      const img = settings.find((s) => s.key === "image_model");
+      if (ai) setAiModel(ai.value);
+      if (img) setImageModel(img.value);
+    }
+  }, [settingsData]);
+
+  async function handleModelChange(key: string, value: string) {
+    setSavingKey(key);
+    setSavedKey(null);
+    try {
+      await updatePlatformSetting({
+        variables: { input: { key, value } },
+      });
+      if (key === "ai_model") setAiModel(value);
+      if (key === "image_model") setImageModel(value);
+      setSavedKey(key);
+      setTimeout(() => setSavedKey(null), 2000);
+    } catch {
+      // Error shown by Apollo
+    } finally {
+      setSavingKey(null);
+    }
+  }
 
   async function handleCreate() {
     const name = newName.trim();
@@ -94,6 +171,97 @@ export default function SettingsPage() {
       <div>
         <h2 className="text-2xl font-bold text-primary-deep">{t("title")}</h2>
         <p className="mt-1 text-text-muted">{t("subtitle")}</p>
+      </div>
+
+      {/* AI Models section */}
+      <div className="rounded-2xl border border-border-light bg-white p-6">
+        <h3 className="text-lg font-semibold text-primary-deep mb-1">
+          {t("aiModelsTitle")}
+        </h3>
+        <p className="text-sm text-text-muted mb-5">
+          {t("aiModelsSubtitle")}
+        </p>
+
+        {settingsLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-20 animate-shimmer rounded-xl bg-gradient-to-r from-border-light via-white to-border-light bg-[length:200%_100%]"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {/* Site generation model */}
+            <div>
+              <label className="block text-sm font-medium text-primary-deep mb-1">
+                {t("siteGenerationModel")}
+              </label>
+              <p className="text-xs text-text-muted mb-2">
+                {t("siteGenerationModelDesc")}
+              </p>
+              <div className="flex items-center gap-3">
+                <select
+                  value={aiModel}
+                  onChange={(e) => handleModelChange("ai_model", e.target.value)}
+                  disabled={savingKey === "ai_model"}
+                  className="w-full max-w-sm rounded-xl border border-border-light bg-white px-3 py-2 text-sm text-primary-deep shadow-sm transition-colors focus:border-primary-deep focus:outline-none focus:ring-1 focus:ring-primary-deep disabled:opacity-50"
+                >
+                  {AI_MODELS.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label} — {m.description}
+                    </option>
+                  ))}
+                </select>
+                {savingKey === "ai_model" && (
+                  <span className="text-xs text-text-muted animate-pulse">
+                    {t("savingModel")}
+                  </span>
+                )}
+                {savedKey === "ai_model" && (
+                  <span className="text-xs text-green-600">
+                    {t("modelUpdated")}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Image generation model */}
+            <div>
+              <label className="block text-sm font-medium text-primary-deep mb-1">
+                {t("imageGenerationModel")}
+              </label>
+              <p className="text-xs text-text-muted mb-2">
+                {t("imageGenerationModelDesc")}
+              </p>
+              <div className="flex items-center gap-3">
+                <select
+                  value={imageModel}
+                  onChange={(e) => handleModelChange("image_model", e.target.value)}
+                  disabled={savingKey === "image_model"}
+                  className="w-full max-w-sm rounded-xl border border-border-light bg-white px-3 py-2 text-sm text-primary-deep shadow-sm transition-colors focus:border-primary-deep focus:outline-none focus:ring-1 focus:ring-primary-deep disabled:opacity-50"
+                >
+                  {IMAGE_MODELS.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label} — {m.description}
+                    </option>
+                  ))}
+                </select>
+                {savingKey === "image_model" && (
+                  <span className="text-xs text-text-muted animate-pulse">
+                    {t("savingModel")}
+                  </span>
+                )}
+                {savedKey === "image_model" && (
+                  <span className="text-xs text-green-600">
+                    {t("modelUpdated")}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Industries section */}
