@@ -57,7 +57,7 @@ export default function ChatConversationsPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-page-enter">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-text-primary">{t("conversations")}</h2>
@@ -85,7 +85,11 @@ export default function ChatConversationsPage() {
 
       {/* List */}
       {loading && conversations.length === 0 ? (
-        <div className="py-12 text-center text-sm text-text-secondary">...</div>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-16 animate-shimmer rounded-xl bg-gradient-to-r from-border-light via-white to-border-light bg-[length:200%_100%]" />
+          ))}
+        </div>
       ) : conversations.length === 0 ? (
         <div className="rounded-xl border border-border-light bg-white p-12 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-deep/10">
@@ -105,7 +109,7 @@ export default function ChatConversationsPage() {
                 <th className="px-4 py-3 font-medium text-text-secondary hidden sm:table-cell">{t("subject")}</th>
                 <th className="px-4 py-3 font-medium text-text-secondary hidden md:table-cell">{t("lastMessage")}</th>
                 <th className="px-4 py-3 font-medium text-text-secondary">{t("messages")}</th>
-                <th className="px-4 py-3 font-medium text-text-secondary">Status</th>
+                <th className="px-4 py-3 font-medium text-text-secondary">{t("status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-light">

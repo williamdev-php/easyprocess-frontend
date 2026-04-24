@@ -167,7 +167,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="animate-page-enter space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-primary-deep">{t("title")}</h2>
         <p className="mt-1 text-text-muted">{t("subtitle")}</p>
@@ -206,7 +206,7 @@ export default function SettingsPage() {
                   value={aiModel}
                   onChange={(e) => handleModelChange("ai_model", e.target.value)}
                   disabled={savingKey === "ai_model"}
-                  className="w-full max-w-sm rounded-xl border border-border-light bg-white px-3 py-2 text-sm text-primary-deep shadow-sm transition-colors focus:border-primary-deep focus:outline-none focus:ring-1 focus:ring-primary-deep disabled:opacity-50"
+                  className="w-full max-w-sm rounded-xl border border-border-light bg-white px-3 py-2 text-sm text-primary-deep shadow-sm transition-colors focus:border-primary-deep focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
                 >
                   {AI_MODELS.map((m) => (
                     <option key={m.value} value={m.value}>
@@ -240,7 +240,7 @@ export default function SettingsPage() {
                   value={imageModel}
                   onChange={(e) => handleModelChange("image_model", e.target.value)}
                   disabled={savingKey === "image_model"}
-                  className="w-full max-w-sm rounded-xl border border-border-light bg-white px-3 py-2 text-sm text-primary-deep shadow-sm transition-colors focus:border-primary-deep focus:outline-none focus:ring-1 focus:ring-primary-deep disabled:opacity-50"
+                  className="w-full max-w-sm rounded-xl border border-border-light bg-white px-3 py-2 text-sm text-primary-deep shadow-sm transition-colors focus:border-primary-deep focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
                 >
                   {IMAGE_MODELS.map((m) => (
                     <option key={m.value} value={m.value}>

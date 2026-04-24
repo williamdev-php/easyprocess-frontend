@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CREATE_SUPPORT_TICKET } from "@/graphql/mutations";
 import { GET_MY_SUPPORT_TICKETS } from "@/graphql/queries";
+import { Button } from "@/components/ui/button";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -240,7 +241,7 @@ export default function ContactPage() {
   const isFirstLoad = ticketsLoading && !data;
 
   return (
-    <div className="space-y-8">
+    <div className="animate-page-enter space-y-8">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-primary-deep">{t("title")}</h2>
@@ -341,11 +342,7 @@ export default function ContactPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary-deep px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-deep/90 disabled:opacity-50"
-            >
+            <Button type="submit" disabled={submitting}>
               {submitting ? (
                 <>
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -359,7 +356,7 @@ export default function ContactPage() {
                   {t("send")}
                 </>
               )}
-            </button>
+            </Button>
           </form>
         </div>
       )}

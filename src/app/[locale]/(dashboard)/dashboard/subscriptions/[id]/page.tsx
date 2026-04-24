@@ -117,7 +117,7 @@ export default function SubscriptionDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="animate-page-enter space-y-6">
       {/* Back link */}
       <Link href="/dashboard/subscriptions" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-primary-deep transition-colors">
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

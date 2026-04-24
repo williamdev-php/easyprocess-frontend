@@ -145,7 +145,7 @@ export default function RevenuePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="animate-page-enter space-y-6">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-primary-deep">{t("title")}</h2>

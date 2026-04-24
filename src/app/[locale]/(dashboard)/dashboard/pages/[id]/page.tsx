@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { useRouter as useNextRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { MY_SITE } from "@/graphql/queries";
@@ -11,6 +12,7 @@ import { Link } from "@/i18n/routing";
 import { MediaPickerField } from "@/components/media-picker";
 import { FontSelector } from "@/components/ui/font-selector";
 import { ColorPicker } from "@/components/ui/color-picker";
+import RichTextEditor from "@/components/rich-text-editor";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -50,6 +52,7 @@ interface SiteData {
   custom_content?: { title?: string; subtitle?: string; layout?: string; blocks?: { type: string; content?: string; url?: string; alt?: string; label?: string; href?: string }[] } | null;
   banner?: { text?: string; button?: { label: string; href: string } | null; background_color?: string } | null;
   ranking?: { title?: string; subtitle?: string; items?: { rank?: number; title: string; description?: string; image?: string | null; link?: { label: string; href: string } | null }[] } | null;
+  page_content?: { title?: string; content?: string } | null;
   extra_sections?: Record<string, { type: string; data: Record<string, unknown> }>;
   section_settings?: Record<string, { animation?: string; background_color?: string; show_gradient?: boolean }>;
   seo?: { structured_data?: Record<string, unknown>; robots?: string };
@@ -1297,6 +1300,27 @@ function RankingEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteD
   );
 }
 
+function PageContentEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
+  const pc = data.page_content || { title: "", content: "" };
+  const set = (key: string, val: unknown) => {
+    onChange({ ...data, page_content: { ...pc, [key]: val } });
+  };
+  return (
+    <div className="space-y-3 p-4">
+      <FieldGroup label="Rubrik"><TextInput value={pc.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
+      <FieldGroup label="Innehåll">
+        <div className="rounded-lg border border-white/10 bg-white p-1">
+          <RichTextEditor
+            content={pc.content || ""}
+            onChange={(v) => set("content", v)}
+            placeholder="Skriv sidans innehåll här..."
+          />
+        </div>
+      </FieldGroup>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Section config
 // ---------------------------------------------------------------------------
@@ -1305,7 +1329,7 @@ const DEFAULT_SECTION_ORDER = [
   "hero", "about", "features", "stats", "services", "process",
   "gallery", "team", "testimonials", "faq", "cta", "contact",
   "pricing", "video", "logo_cloud", "custom_content", "banner",
-  "ranking",
+  "ranking", "page_content",
 ];
 
 const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{ data: SiteData; onChange: (d: SiteData) => void }>; toggleable: boolean }> = {
@@ -1329,6 +1353,7 @@ const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{
   custom_content: { label: "Eget innehåll", Editor: CustomContentEditor, toggleable: true },
   banner: { label: "Banner", Editor: BannerEditor, toggleable: true },
   ranking: { label: "Topplista", Editor: RankingEditor, toggleable: true },
+  page_content: { label: "Sidinnehåll", Editor: PageContentEditor, toggleable: true },
 };
 
 // Non-content sections always appear first (not draggable)
@@ -1532,12 +1557,17 @@ export default function SiteEditorPage() {
   const params = useParams();
   const siteId = params.id as string;
   const t = useTranslations("siteEditor");
+  const searchParams = useSearchParams();
+  const nextRouter = useNextRouter();
 
   const { data, loading, error } = useQuery<any>(MY_SITE, { variables: { id: siteId } });
   const [saveDraftMutation] = useMutation(SAVE_DRAFT);
   const [loadDraftMutation] = useMutation<{ loadDraft: { siteId: string; draftData: any; updatedAt: string } }>(LOAD_DRAFT);
   const [publishSiteDataMutation] = useMutation(PUBLISH_SITE_DATA);
   const [discardDraftMutation] = useMutation(DISCARD_DRAFT);
+
+  // Read initial page from ?page= URL parameter
+  const initialPage = searchParams.get("page") || null;
 
   const [siteData, setSiteData] = useState<SiteData | null>(null);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
@@ -1548,7 +1578,19 @@ export default function SiteEditorPage() {
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const [isDraggingSection, setIsDraggingSection] = useState(false);
   const [addSectionOpen, setAddSectionOpen] = useState(false);
-  const [activePage, setActivePage] = useState<string | null>(null); // null = home, string = page slug
+  const [activePage, setActivePage] = useState<string | null>(initialPage); // null = home, string = page slug
+
+  /** Update activePage state AND sync to URL search params. */
+  const changeActivePage = useCallback((pageSlug: string | null) => {
+    setActivePage(pageSlug);
+    const url = new URL(window.location.href);
+    if (pageSlug) {
+      url.searchParams.set("page", pageSlug);
+    } else {
+      url.searchParams.delete("page");
+    }
+    nextRouter.replace(url.pathname + url.search, { scroll: false });
+  }, [nextRouter]);
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1578,6 +1620,17 @@ export default function SiteEditorPage() {
         .catch(() => { /* no draft */ });
     }
   }, [data, siteData, siteId, loadDraftMutation]);
+
+  // When siteData first loads and there's a ?page= param, push it to the iframe
+  const didPushInitialPage = useRef(false);
+  useEffect(() => {
+    if (siteData && initialPage && !didPushInitialPage.current) {
+      didPushInitialPage.current = true;
+      // Small delay to let iframe load
+      setTimeout(() => pushToIframe(siteData, initialPage), 500);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [siteData, initialPage]);
 
   // Known viewer origins for postMessage validation. Use "*" for sending
   // since the iframe URL is determined at runtime (may be qvickosite.com in
@@ -1907,7 +1960,7 @@ export default function SiteEditorPage() {
                 value={activePage || "__home__"}
                 onChange={(e) => {
                   const val = e.target.value === "__home__" ? null : e.target.value;
-                  setActivePage(val);
+                  changeActivePage(val);
                   pushToIframe(siteData, val);
                 }}
                 className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 outline-none hover:border-white/20 focus:border-blue-500/50 transition-colors cursor-pointer"

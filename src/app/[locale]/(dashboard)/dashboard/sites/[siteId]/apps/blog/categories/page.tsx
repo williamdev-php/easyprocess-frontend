@@ -82,7 +82,7 @@ export default function BlogCategoriesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-page-enter">
       <h2 className="text-lg font-semibold text-text-primary">{t("categories")}</h2>
 
       {/* Add new category */}
@@ -157,7 +157,7 @@ export default function BlogCategoriesPage() {
                         onClick={() => setEditId(null)}
                         className="rounded-lg border border-border-light px-3 py-1.5 text-sm text-text-muted"
                       >
-                        Avbryt
+                        {t("cancel")}
                       </button>
                     </div>
                   </div>
@@ -171,7 +171,7 @@ export default function BlogCategoriesPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-text-muted">{cat.postCount} inlägg</span>
+                      <span className="text-xs text-text-muted">{cat.postCount} {t("postsCount")}</span>
                       <button
                         onClick={() => startEdit(cat)}
                         className="rounded-lg p-1.5 text-text-muted hover:bg-primary-deep/5 hover:text-primary-deep"

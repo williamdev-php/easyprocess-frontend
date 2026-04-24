@@ -8,6 +8,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { useAuth } from "@/lib/auth-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { MY_DOMAINS, MY_SITES, SEARCH_DOMAIN, MY_PURCHASED_DOMAINS } from "@/graphql/queries";
 import {
   ADD_DOMAIN,
@@ -529,7 +530,7 @@ export default function DomainPage() {
   const txtRecords = verificationSource?.verification || [];
 
   return (
-    <div className="space-y-6">
+    <div className="animate-page-enter space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -788,16 +789,7 @@ export default function DomainPage() {
                       <p className="text-xs font-medium text-primary-deep">{t("autoRenewal")}</p>
                       <p className="text-xs text-text-muted">{t("autoRenewalDesc")}</p>
                     </div>
-                    <button
-                      onClick={() => handleToggleAutoRenew(ud.purchasedDomain!.id, !ud.purchasedDomain!.autoRenew)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        ud.purchasedDomain.autoRenew ? "bg-primary" : "bg-gray-200"
-                      }`}
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        ud.purchasedDomain.autoRenew ? "translate-x-6" : "translate-x-1"
-                      }`} />
-                    </button>
+                    <Switch checked={ud.purchasedDomain.autoRenew} onChange={() => handleToggleAutoRenew(ud.purchasedDomain!.id, !ud.purchasedDomain!.autoRenew)} />
                   </div>
                   {/* Renew + Transfer */}
                   <div className="flex items-center gap-2">

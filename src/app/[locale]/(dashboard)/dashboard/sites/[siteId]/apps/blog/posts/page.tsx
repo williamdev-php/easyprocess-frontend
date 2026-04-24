@@ -73,7 +73,7 @@ export default function BlogPostsPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-page-enter">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-text-primary">{t("posts")}</h2>
@@ -99,7 +99,7 @@ export default function BlogPostsPage() {
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="rounded-lg border border-border-light bg-white px-3 py-2 text-sm"
         >
-          <option value="">{t("status")}: Alla</option>
+          <option value="">{t("allStatuses")}</option>
           <option value="DRAFT">{t("draft")}</option>
           <option value="PUBLISHED">{t("published")}</option>
           <option value="ARCHIVED">{t("archived")}</option>

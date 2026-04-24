@@ -53,7 +53,7 @@ export default function NewBlogPostPage() {
 
   async function handleSave(publishStatus: "DRAFT" | "PUBLISHED") {
     if (!title.trim()) {
-      setError("Titel krävs");
+      setError(t("titleRequired"));
       return;
     }
     setError("");
@@ -79,12 +79,12 @@ export default function NewBlogPostPage() {
         router.push(`/dashboard/sites/${siteId}/apps/blog/posts` as "/dashboard");
       }
     } catch (err: unknown) {
-      setError((err as Error).message || "Något gick fel");
+      setError((err as Error).message || t("somethingWentWrong"));
     }
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6 animate-page-enter">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
@@ -127,7 +127,7 @@ export default function NewBlogPostPage() {
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
             className="w-full rounded-lg border border-border-light bg-white px-3 py-2 text-base outline-none focus:border-primary-deep"
-            placeholder="Ange titel..."
+            placeholder={t("titlePlaceholder")}
           />
         </div>
 
@@ -150,7 +150,7 @@ export default function NewBlogPostPage() {
             onChange={(e) => setExcerpt(e.target.value)}
             rows={2}
             className="w-full resize-none rounded-lg border border-border-light bg-white px-3 py-2 text-sm outline-none focus:border-primary-deep"
-            placeholder="Kort sammanfattning..."
+            placeholder={t("excerptPlaceholder")}
           />
         </div>
 
@@ -160,7 +160,7 @@ export default function NewBlogPostPage() {
           <RichTextEditor
             content={content}
             onChange={setContent}
-            placeholder="Skriv ditt blogginlägg här..."
+            placeholder={t("contentPlaceholder")}
           />
         </div>
 
@@ -183,7 +183,7 @@ export default function NewBlogPostPage() {
               onChange={(e) => setCategoryId(e.target.value)}
               className="w-full rounded-lg border border-border-light bg-white px-3 py-2 text-sm"
             >
-              <option value="">— Ingen kategori —</option>
+              <option value="">{t("noCategory")}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}

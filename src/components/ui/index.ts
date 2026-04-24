@@ -12,3 +12,7 @@ export type { ColorPickerProps } from "./color-picker";
 export { FontSelector } from "./font-selector";
 export { Dropdown, DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from "./dropdown";
 export type { DropdownProps, DropdownOption, DropdownMenuProps } from "./dropdown";
+export { Switch } from "./switch";
+export type { SwitchProps } from "./switch";
+export { Tooltip } from "./tooltip";
+export type { TooltipProps } from "./tooltip";

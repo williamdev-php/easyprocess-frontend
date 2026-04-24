@@ -77,6 +77,7 @@ function StatsCards() {
 /* ──────────────── Outreach Stats Bar ──────────────── */
 
 function OutreachStatsBar() {
+  const t = useTranslations("leads");
   const { data, loading } = useQuery<any>(GET_OUTREACH_STATS, {
     fetchPolicy: "cache-and-network",
   });
@@ -84,33 +85,33 @@ function OutreachStatsBar() {
   if (loading || !stats) return null;
 
   const warmupLabel = stats.warmupStatus === "warming_up"
-    ? `Uppvarmning: Dag ${stats.warmupDay}/${stats.warmupDaysTarget}`
+    ? `${t("warmingUp")}: ${t("day")} ${stats.warmupDay}/${stats.warmupDaysTarget}`
     : stats.warmupStatus === "warmed"
-    ? "Uppvarmd"
-    : "Ej konfigurerad";
+    ? t("warmedUp")
+    : t("notConfigured");
 
   return (
     <div className="rounded-2xl border border-violet-200 bg-violet-50/50 p-4">
       <div className="flex flex-wrap items-center gap-6 text-sm">
         <div className="flex items-center gap-2">
-          <span className="text-text-muted">Skickade (30d):</span>
+          <span className="text-text-muted">{t("sent30d")}</span>
           <span className="font-semibold text-primary-deep">{stats.emailsSent30d}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-text-muted">Oppningsfrekvens:</span>
+          <span className="text-text-muted">{t("openRate")}</span>
           <span className="font-semibold text-primary-deep">{stats.openRate}%</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-text-muted">Svarsfrekvens:</span>
+          <span className="text-text-muted">{t("replyRate")}</span>
           <span className="font-semibold text-primary-deep">{stats.replyRate}%</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-text-muted">Konverteringar:</span>
+          <span className="text-text-muted">{t("conversions")}</span>
           <span className="font-semibold text-green-700">{stats.conversions30d}</span>
         </div>
         <div className="ml-auto flex items-center gap-3">
           <span className="text-xs text-text-muted">
-            {stats.dailySendCount}/{stats.dailySendLimit} idag
+            {stats.dailySendCount}/{stats.dailySendLimit} {t("today")}
           </span>
           <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
             stats.warmupStatus === "warmed"
@@ -204,7 +205,7 @@ export default function LeadsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="animate-page-enter space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

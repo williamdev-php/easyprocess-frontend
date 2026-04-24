@@ -630,3 +630,67 @@ export const REOPEN_CHAT_CONVERSATION = gql`
     reopenChatConversation(siteId: $siteId, conversationId: $conversationId)
   }
 `;
+
+// ---------------------------------------------------------------------------
+// Bookings
+// ---------------------------------------------------------------------------
+
+export const CREATE_BOOKING_SERVICE = gql`
+  mutation CreateBookingService($input: CreateBookingServiceInput!) {
+    createBookingService(input: $input) {
+      id name description durationMinutes price currency isActive sortOrder
+    }
+  }
+`;
+
+export const UPDATE_BOOKING_SERVICE = gql`
+  mutation UpdateBookingService($input: UpdateBookingServiceInput!) {
+    updateBookingService(input: $input) {
+      id name description durationMinutes price currency isActive sortOrder
+    }
+  }
+`;
+
+export const DELETE_BOOKING_SERVICE = gql`
+  mutation DeleteBookingService($siteId: String!, $serviceId: String!) {
+    deleteBookingService(siteId: $siteId, serviceId: $serviceId)
+  }
+`;
+
+export const CREATE_BOOKING_FORM_FIELD = gql`
+  mutation CreateBookingFormField($input: CreateBookingFormFieldInput!) {
+    createBookingFormField(input: $input) {
+      id label fieldType placeholder isRequired options sortOrder isActive
+    }
+  }
+`;
+
+export const UPDATE_BOOKING_FORM_FIELD = gql`
+  mutation UpdateBookingFormField($input: UpdateBookingFormFieldInput!) {
+    updateBookingFormField(input: $input) {
+      id label fieldType placeholder isRequired options sortOrder isActive
+    }
+  }
+`;
+
+export const DELETE_BOOKING_FORM_FIELD = gql`
+  mutation DeleteBookingFormField($siteId: String!, $fieldId: String!) {
+    deleteBookingFormField(siteId: $siteId, fieldId: $fieldId)
+  }
+`;
+
+export const UPDATE_BOOKING_PAYMENT_METHODS = gql`
+  mutation UpdateBookingPaymentMethods($input: UpdateBookingPaymentMethodsInput!) {
+    updateBookingPaymentMethods(input: $input) {
+      id stripeConnectEnabled onSiteEnabled klarnaEnabled swishEnabled
+    }
+  }
+`;
+
+export const UPDATE_BOOKING_STATUS = gql`
+  mutation UpdateBookingStatus($input: UpdateBookingStatusInput!) {
+    updateBookingStatus(input: $input) {
+      id status paymentStatus notes updatedAt
+    }
+  }
+`;

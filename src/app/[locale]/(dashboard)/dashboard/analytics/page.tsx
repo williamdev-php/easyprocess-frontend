@@ -144,7 +144,7 @@ export default function AnalyticsPage() {
   const firstFunnelCount = funnelSteps[0]?.count || 1;
 
   return (
-    <div className="space-y-8">
+    <div className="animate-page-enter space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

@@ -714,7 +714,7 @@ function PagesPageInner() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="animate-page-enter space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-primary-deep">{t("title")}</h2>
         <p className="mt-1 text-text-muted">{t("subtitle")}</p>

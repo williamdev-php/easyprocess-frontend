@@ -882,6 +882,7 @@ export const GET_APPS = gql`
       version
       scopes
       sidebarLinks
+      requiresPayments
     }
   }
 `;
@@ -897,6 +898,7 @@ export const GET_SITE_APPS = gql`
       isActive
       settings
       sidebarLinks
+      requiresPayments
       installedAt
     }
   }
@@ -1019,6 +1021,144 @@ export const GET_CHAT_CONVERSATION = gql`
         content
         createdAt
       }
+    }
+  }
+`;
+
+// ---------------------------------------------------------------------------
+// Bookings
+// ---------------------------------------------------------------------------
+
+export const GET_BOOKING_SERVICES = gql`
+  query GetBookingServices($siteId: String!) {
+    bookingServices(siteId: $siteId) {
+      id
+      siteId
+      name
+      description
+      durationMinutes
+      price
+      currency
+      isActive
+      sortOrder
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_BOOKING_FORM_FIELDS = gql`
+  query GetBookingFormFields($siteId: String!) {
+    bookingFormFields(siteId: $siteId) {
+      id
+      siteId
+      label
+      fieldType
+      placeholder
+      isRequired
+      options
+      sortOrder
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_BOOKING_PAYMENT_METHODS = gql`
+  query GetBookingPaymentMethods($siteId: String!) {
+    bookingPaymentMethods(siteId: $siteId) {
+      id
+      siteId
+      stripeConnectEnabled
+      onSiteEnabled
+      klarnaEnabled
+      swishEnabled
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_BOOKINGS = gql`
+  query GetBookings($siteId: String!, $filter: BookingFilterInput) {
+    bookings(siteId: $siteId, filter: $filter) {
+      items {
+        id
+        siteId
+        serviceId
+        serviceName
+        customerName
+        customerEmail
+        customerPhone
+        status
+        paymentMethod
+        paymentStatus
+        amount
+        currency
+        bookingDate
+        createdAt
+        updatedAt
+      }
+      total
+      page
+      pageSize
+    }
+  }
+`;
+
+export const GET_BOOKING = gql`
+  query GetBooking($siteId: String!, $bookingId: String!) {
+    booking(siteId: $siteId, bookingId: $bookingId) {
+      id
+      siteId
+      serviceId
+      serviceName
+      customerName
+      customerEmail
+      customerPhone
+      formData
+      status
+      paymentMethod
+      paymentStatus
+      stripePaymentIntentId
+      amount
+      currency
+      notes
+      bookingDate
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_BOOKING_STATS = gql`
+  query GetBookingStats($siteId: String!) {
+    bookingStats(siteId: $siteId) {
+      totalBookings
+      pendingCount
+      confirmedCount
+      completedCount
+      cancelledCount
+      totalRevenue
+      currency
+    }
+  }
+`;
+
+export const GET_CONNECTED_ACCOUNT = gql`
+  query GetConnectedAccount($siteId: String!) {
+    connectedAccount(siteId: $siteId) {
+      id
+      siteId
+      stripeAccountId
+      onboardingStatus
+      chargesEnabled
+      payoutsEnabled
+      detailsSubmitted
+      country
+      createdAt
+      updatedAt
     }
   }
 `;
