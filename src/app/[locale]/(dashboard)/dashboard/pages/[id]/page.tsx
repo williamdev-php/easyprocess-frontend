@@ -53,6 +53,15 @@ interface SiteData {
   extra_sections?: Record<string, { type: string; data: Record<string, unknown> }>;
   section_settings?: Record<string, { animation?: string; background_color?: string; show_gradient?: boolean }>;
   seo?: { structured_data?: Record<string, unknown>; robots?: string };
+  pages?: {
+    slug: string;
+    title: string;
+    meta?: { title?: string; description?: string; og_image?: string | null };
+    sections: { type: string; data: Record<string, unknown> }[];
+    parent_slug?: string | null;
+    show_in_nav?: boolean;
+    nav_order?: number;
+  }[] | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -1539,6 +1548,7 @@ export default function SiteEditorPage() {
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const [isDraggingSection, setIsDraggingSection] = useState(false);
   const [addSectionOpen, setAddSectionOpen] = useState(false);
+  const [activePage, setActivePage] = useState<string | null>(null); // null = home, string = page slug
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1581,10 +1591,10 @@ export default function SiteEditorPage() {
   ].map((u) => { try { return new URL(u).origin; } catch { return u; } })), []);
 
   // Send current data to iframe
-  const pushToIframe = useCallback((d: SiteData) => {
+  const pushToIframe = useCallback((d: SiteData, pageSlug?: string | null) => {
     if (iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage(
-        { type: "SITE_DATA_UPDATE", siteData: d },
+        { type: "SITE_DATA_UPDATE", siteData: d, activePage: pageSlug ?? null },
         "*"
       );
     }
@@ -1601,7 +1611,7 @@ export default function SiteEditorPage() {
 
       if (msg.type === "PREVIEW_READY") {
         const current = siteDataRef.current;
-        if (current) pushToIframe(current);
+        if (current) pushToIframe(current, activePage);
         return;
       }
 
@@ -1630,7 +1640,7 @@ export default function SiteEditorPage() {
       setHasDraft(true);
 
       // Immediate preview update
-      pushToIframe(newData);
+      pushToIframe(newData, activePage);
 
       // Debounced draft auto-save (every 3 seconds)
       if (draftTimer.current) clearTimeout(draftTimer.current);
@@ -1889,6 +1899,39 @@ export default function SiteEditorPage() {
             <h1 className="text-base font-bold text-white/90 leading-tight">{siteName}</h1>
             <p className="text-[11px] text-white/40">{t("editingLabel")}</p>
           </div>
+
+          {/* Page selector dropdown */}
+          {siteData.pages && siteData.pages.length > 0 && (
+            <div className="ml-2 border-l border-white/10 pl-3">
+              <select
+                value={activePage || "__home__"}
+                onChange={(e) => {
+                  const val = e.target.value === "__home__" ? null : e.target.value;
+                  setActivePage(val);
+                  pushToIframe(siteData, val);
+                }}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 outline-none hover:border-white/20 focus:border-blue-500/50 transition-colors cursor-pointer"
+              >
+                <option value="__home__" className="bg-[#1e1e2e] text-white">Startsida</option>
+                {siteData.pages
+                  .filter(p => !p.parent_slug)
+                  .sort((a, b) => (a.nav_order ?? 0) - (b.nav_order ?? 0))
+                  .map(p => (
+                    <option key={p.slug} value={p.slug} className="bg-[#1e1e2e] text-white">
+                      {p.title}
+                    </option>
+                  ))}
+                {siteData.pages
+                  .filter(p => p.parent_slug)
+                  .sort((a, b) => (a.nav_order ?? 0) - (b.nav_order ?? 0))
+                  .map(p => (
+                    <option key={`${p.parent_slug}/${p.slug}`} value={`${p.parent_slug}/${p.slug}`} className="bg-[#1e1e2e] text-white">
+                      &nbsp;&nbsp;↳ {p.title}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -2038,11 +2081,161 @@ export default function SiteEditorPage() {
 
           {/* Separator between site settings and content sections */}
           <div className="px-4 pt-5 pb-1.5 border-t-2 border-white/10">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Sektioner</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+              {activePage ? `Sektioner — ${siteData.pages?.find(p => {
+                if (activePage.includes("/")) {
+                  const [parent, slug] = activePage.split("/");
+                  return p.parent_slug === parent && p.slug === slug;
+                }
+                return p.slug === activePage && !p.parent_slug;
+              })?.title || activePage}` : "Sektioner"}
+            </span>
           </div>
 
-          {/* Draggable content sections — only show enabled (including duplicates) */}
-          {sectionOrder.filter((key: string) => {
+          {/* Page sections editor — when a page is selected */}
+          {activePage && (() => {
+            const pageObj = siteData.pages?.find(p => {
+              if (activePage.includes("/")) {
+                const [parent, slug] = activePage.split("/");
+                return p.parent_slug === parent && p.slug === slug;
+              }
+              return p.slug === activePage && !p.parent_slug;
+            });
+            if (!pageObj) return (
+              <div className="px-4 py-8 text-center text-sm text-white/40">Sidan hittades inte</div>
+            );
+            const pageIdx = siteData.pages!.indexOf(pageObj);
+            return (
+              <>
+                {/* Page meta editor */}
+                <div className="rounded-lg mx-2 mb-1.5 border border-white/10 bg-white/[0.06]">
+                  <SectionHeader
+                    title="Sidans SEO"
+                    open={openSections.has("__page_meta__")}
+                    onToggle={() => toggleSection("__page_meta__")}
+                  />
+                  <div
+                    className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                    style={{ gridTemplateRows: openSections.has("__page_meta__") ? "1fr" : "0fr" }}
+                  >
+                    <div className="overflow-hidden px-4 pb-4">
+                      <label className="mt-3 block text-xs font-medium text-white/60">Sidtitel</label>
+                      <input
+                        type="text"
+                        value={pageObj.meta?.title || pageObj.title || ""}
+                        onChange={(e) => {
+                          const pages = [...(siteData.pages || [])];
+                          pages[pageIdx] = {
+                            ...pages[pageIdx],
+                            meta: { ...pages[pageIdx].meta, title: e.target.value },
+                          };
+                          handleChange({ ...siteData, pages });
+                        }}
+                        className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-blue-500/50"
+                        placeholder="SEO-titel"
+                      />
+                      <label className="mt-3 block text-xs font-medium text-white/60">Beskrivning</label>
+                      <textarea
+                        value={pageObj.meta?.description || ""}
+                        onChange={(e) => {
+                          const pages = [...(siteData.pages || [])];
+                          pages[pageIdx] = {
+                            ...pages[pageIdx],
+                            meta: { ...pages[pageIdx].meta, description: e.target.value },
+                          };
+                          handleChange({ ...siteData, pages });
+                        }}
+                        rows={2}
+                        className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-blue-500/50"
+                        placeholder="Meta-beskrivning"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Page sections list */}
+                {pageObj.sections.map((section, secIdx) => {
+                  const sectionDef = SECTION_MAP[section.type];
+                  if (!sectionDef) return null;
+                  const { label, Editor } = sectionDef;
+                  const secKey = `__page_sec_${secIdx}`;
+                  const isOpen = openSections.has(secKey);
+
+                  // Create virtual SiteData where data[type] points to this section's data
+                  const virtualData = { ...siteData, [section.type]: section.data };
+                  const virtualOnChange = (newData: SiteData) => {
+                    const newSectionData = (newData as Record<string, unknown>)[section.type];
+                    const pages = [...(siteData.pages || [])];
+                    const newSections = [...pages[pageIdx].sections];
+                    newSections[secIdx] = { ...newSections[secIdx], data: (newSectionData as Record<string, unknown>) || {} };
+                    pages[pageIdx] = { ...pages[pageIdx], sections: newSections };
+                    handleChange({ ...siteData, pages });
+                  };
+
+                  return (
+                    <div key={secKey} className="rounded-lg mx-2 mb-1.5 border border-white/10 bg-white/[0.06]">
+                      <div className="flex items-center">
+                        <div className="flex-1">
+                          <SectionHeader title={label} open={isOpen} onToggle={() => toggleSection(secKey)} />
+                        </div>
+                        <button
+                          onClick={() => {
+                            const pages = [...(siteData.pages || [])];
+                            const newSections = pages[pageIdx].sections.filter((_, i) => i !== secIdx);
+                            pages[pageIdx] = { ...pages[pageIdx], sections: newSections };
+                            handleChange({ ...siteData, pages });
+                          }}
+                          className="mr-2 rounded p-1 text-white/30 hover:text-red-400 hover:bg-white/10 transition-colors"
+                          title="Ta bort sektion"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div
+                        className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                        style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+                      >
+                        <div className="overflow-hidden">
+                          <Editor data={virtualData} onChange={virtualOnChange} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Add section to page */}
+                <div className="relative mx-2 mt-2 mb-4">
+                  <select
+                    onChange={(e) => {
+                      const type = e.target.value;
+                      if (!type) return;
+                      e.target.value = "";
+                      const pages = [...(siteData.pages || [])];
+                      const section = SECTION_MAP[type];
+                      if (!section) return;
+                      const newSections = [...pages[pageIdx].sections, { type, data: {} }];
+                      pages[pageIdx] = { ...pages[pageIdx], sections: newSections };
+                      handleChange({ ...siteData, pages });
+                    }}
+                    className="w-full rounded-lg border-2 border-dashed border-white/10 bg-transparent px-4 py-3 text-sm font-medium text-white/50 transition-all hover:border-blue-500 hover:text-blue-400 cursor-pointer outline-none"
+                    defaultValue=""
+                  >
+                    <option value="" disabled className="bg-[#1e1e2e]">+ Lägg till sektion...</option>
+                    {Object.entries(SECTION_MAP)
+                      .filter(([k, v]) => v.toggleable)
+                      .map(([key, val]) => (
+                        <option key={key} value={key} className="bg-[#1e1e2e] text-white">{val.label}</option>
+                      ))}
+                  </select>
+                </div>
+              </>
+            );
+          })()}
+
+          {/* Home page: Draggable content sections — only show enabled (including duplicates) */}
+          {!activePage && sectionOrder.filter((key: string) => {
             // Duplicate section: check if it exists in extra_sections
             if (isDuplicateKey(key)) {
               return !!siteData.extra_sections?.[key];
@@ -2134,8 +2327,8 @@ export default function SiteEditorPage() {
             );
           })}
 
-          {/* Add section dropdown */}
-          {(() => {
+          {/* Add section dropdown (home page only) */}
+          {!activePage && (() => {
             const disabledSections = DEFAULT_SECTION_ORDER.filter((key) => {
               const section = SECTION_MAP[key];
               if (!section || !section.toggleable) return false;
@@ -2190,6 +2383,7 @@ export default function SiteEditorPage() {
               </div>
             );
           })()}
+          {/* End: Home page sections conditional */}
         </div>
 
         {/* Preview panel — full remaining width */}
