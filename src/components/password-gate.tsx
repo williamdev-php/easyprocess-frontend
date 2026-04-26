@@ -2,13 +2,15 @@
 
 import { useState, useEffect, FormEvent, ReactNode } from "react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Button, Input } from "@/components/ui";
+import { subscribeNewsletter } from "@/lib/api";
 
 const STORAGE_KEY = "qvicko_site_unlocked";
 
 export default function PasswordGate({ children }: { children: ReactNode }) {
   const t = useTranslations("passwordGate");
+  const locale = useLocale();
 
   const isEnabled =
     process.env.NEXT_PUBLIC_PASSWORD_PROTECTION_ENABLED === "true";
@@ -21,6 +23,8 @@ export default function PasswordGate({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [showPasswordField, setShowPasswordField] = useState(false);
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [newsletterError, setNewsletterError] = useState("");
 
   useEffect(() => {
     if (!isEnabled) {
@@ -52,10 +56,26 @@ export default function PasswordGate({ children }: { children: ReactNode }) {
     }, 400);
   }
 
-  function handleNewsletterSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (email) {
+  async function handleNewsletterSubmit() {
+    if (!email || newsletterLoading) return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setNewsletterError(t("newsletterInvalidEmail"));
+      return;
+    }
+
+    setNewsletterLoading(true);
+    setNewsletterError("");
+
+    try {
+      await subscribeNewsletter({ email, locale, source: "password_gate" });
       setNewsletterSubmitted(true);
+    } catch (err) {
+      console.error("Newsletter subscribe failed:", err);
+      setNewsletterError(t("newsletterError"));
+    } finally {
+      setNewsletterLoading(false);
     }
   }
 
@@ -120,19 +140,29 @@ export default function PasswordGate({ children }: { children: ReactNode }) {
               <p className="text-sm text-white/80">{t("newsletterThanks")}</p>
             </div>
           ) : (
-            <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
-              <Input
-                type="email"
-                placeholder={t("emailPlaceholder")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="flex-1 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-accent/50 focus:ring-accent/20"
-              />
-              <Button type="submit" size="lg" className="shrink-0">
-                {t("cta")}
-              </Button>
-            </form>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder={t("emailPlaceholder")}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={newsletterLoading}
+                  className="flex-1 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-accent/50 focus:ring-accent/20"
+                />
+                <Button
+                  size="lg"
+                  className="shrink-0"
+                  disabled={newsletterLoading || !email}
+                  onClick={handleNewsletterSubmit}
+                >
+                  {newsletterLoading ? t("newsletterSending") : t("cta")}
+                </Button>
+              </div>
+              {newsletterError && (
+                <p className="text-sm text-red-400">{newsletterError}</p>
+              )}
+            </div>
           )}
         </div>
 

@@ -1,10 +1,20 @@
 import type { HelpCategory } from "./types";
+import { gettingStartedCategory } from "./getting-started";
+import { websiteEditorCategory } from "./website-editor";
 import { domainsCategory } from "./domains";
+import { seoAndMarketingCategory } from "./seo-and-marketing";
+import { billingAndPlansCategory } from "./billing-and-plans";
+import { accountAndSecurityCategory } from "./account-and-security";
 import { siteMetricsCategory } from "./site-metrics";
 import { qvickoAppsCategory } from "./qvicko-apps";
 
 export const helpCategories: HelpCategory[] = [
+  gettingStartedCategory,
+  websiteEditorCategory,
   domainsCategory,
+  seoAndMarketingCategory,
+  billingAndPlansCategory,
+  accountAndSecurityCategory,
   siteMetricsCategory,
   qvickoAppsCategory,
 ];

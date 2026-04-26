@@ -182,6 +182,25 @@ export function googleAuth(code: string, redirectUri: string, locale?: string): 
 }
 
 // ---------------------------------------------------------------------------
+// Newsletter API
+// ---------------------------------------------------------------------------
+
+export interface NewsletterSubscribePayload {
+  email: string;
+  locale: string;
+  source?: string;
+}
+
+export function subscribeNewsletter(
+  payload: NewsletterSubscribePayload
+): Promise<{ ok: boolean; message: string }> {
+  return request<{ ok: boolean; message: string }>("/api/newsletter/subscribe", {
+    method: "POST",
+    body: JSON.stringify(convertKeys(payload, toSnakeCase)),
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Google Search Console API
 // ---------------------------------------------------------------------------
 
