@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
@@ -28,6 +28,20 @@ interface QvickoSite {
 type Step = "loading" | "login_required" | "select_site" | "error";
 
 export default function OAuthAuthorizePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-20">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      }
+    >
+      <OAuthAuthorizeInner />
+    </Suspense>
+  );
+}
+
+function OAuthAuthorizeInner() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const t = useTranslations("oauth");
