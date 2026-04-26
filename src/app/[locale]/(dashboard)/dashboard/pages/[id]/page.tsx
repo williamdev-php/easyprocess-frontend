@@ -13,6 +13,7 @@ import { MediaPickerField } from "@/components/media-picker";
 import { FontSelector } from "@/components/ui/font-selector";
 import { ColorPicker } from "@/components/ui/color-picker";
 import RichTextEditor from "@/components/rich-text-editor";
+import { AIChatBubble } from "@/components/ai-chat-bubble";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1699,6 +1700,9 @@ export default function SiteEditorPage() {
   const [isDraggingSection, setIsDraggingSection] = useState(false);
   const [addSectionOpen, setAddSectionOpen] = useState(false);
   const [activePage, setActivePage] = useState<string | null>(initialPage); // null = home, string = page slug
+  const [editorMode, setEditorMode] = useState<"manual" | "ai">(
+    searchParams.get("mode") === "ai" ? "ai" : "manual"
+  );
 
   /** Update activePage state AND sync to URL search params. */
   const changeActivePage = useCallback((pageSlug: string | null) => {
@@ -2060,15 +2064,15 @@ export default function SiteEditorPage() {
 
   const editorContent = (
     <div className="fixed inset-0 z-[100] flex flex-col bg-[#1e1e2e] text-white">
-      {/* Top bar */}
-      <div className="flex items-center justify-between border-b border-white/10 bg-[#1e1e2e] px-4 py-2.5 shrink-0">
+      {/* Top bar — minimal in AI mode */}
+      <div className={`flex items-center justify-between border-b border-white/10 px-4 shrink-0 ${editorMode === "ai" ? "bg-black/60 backdrop-blur-md py-1.5" : "bg-[#1e1e2e] py-2.5"}`}>
         <div className="flex items-center gap-3">
           <Link href={`/dashboard/sites/${siteId}/general` as "/dashboard"} className="rounded-lg p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
           </Link>
-          <div>
+          <div className={editorMode === "ai" ? "hidden" : ""}>
             <h1 className="text-base font-bold text-white/90 leading-tight">{siteName}</h1>
             <p className="text-[11px] text-white/40">{t("editingLabel")}</p>
           </div>
@@ -2108,8 +2112,8 @@ export default function SiteEditorPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          {/* Draft / save status */}
-          <span className={`text-xs font-medium ${
+          {/* Draft / save status — hidden in AI mode */}
+          <span className={`text-xs font-medium ${editorMode === "ai" ? "hidden" : ""} ${
             saveStatus === "draft_saving" ? "text-amber-400" :
             saveStatus === "draft_saved" ? "text-white/40" :
             saveStatus === "publishing" ? "text-amber-400" :
@@ -2127,11 +2131,11 @@ export default function SiteEditorPage() {
             {saveStatus === "idle" && !hasUnsavedChanges && "Inga ändringar"}
           </span>
 
-          {/* Discard draft */}
+          {/* Discard draft — hidden in AI mode */}
           {hasDraft && (
             <button
               onClick={handleDiscardDraft}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/60 transition-colors hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10"
+              className={`rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/60 transition-colors hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10 ${editorMode === "ai" ? "hidden" : ""}`}
             >
               Ångra
             </button>
@@ -2153,8 +2157,8 @@ export default function SiteEditorPage() {
             Publicera
           </button>
 
-          {/* Preview mode toggle */}
-          <div className="hidden md:flex items-center gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5">
+          {/* Preview mode toggle — hidden in AI mode */}
+          <div className={`${editorMode === "ai" ? "hidden" : "hidden md:flex"} items-center gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5`}>
             <button
               onClick={() => setPreviewMode("desktop")}
               className={`rounded-md p-1.5 transition-colors ${
@@ -2187,10 +2191,33 @@ export default function SiteEditorPage() {
             </button>
           </div>
 
-          {/* Site settings */}
+          {/* Editor mode toggle */}
+          <div className="flex items-center gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5">
+            <button
+              onClick={() => setEditorMode("manual")}
+              className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                editorMode === "manual" ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white/60"
+              }`}
+            >
+              Manuell
+            </button>
+            <button
+              onClick={() => setEditorMode("ai")}
+              className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                editorMode === "ai" ? "bg-blue-600/30 text-blue-300 shadow-sm" : "text-white/40 hover:text-white/60"
+              }`}
+            >
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+              AI
+            </button>
+          </div>
+
+          {/* Site settings — hidden in AI mode */}
           <Link
             href={`/dashboard/pages/${siteId}/settings`}
-            className="rounded-lg p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            className={`rounded-lg p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors ${editorMode === "ai" ? "hidden" : ""}`}
             title={t("settings")}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -2199,12 +2226,12 @@ export default function SiteEditorPage() {
             </svg>
           </Link>
 
-          {/* Open preview in new tab */}
+          {/* Open preview in new tab — hidden in AI mode */}
           <a
             href={publicSiteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            className={`rounded-lg p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors ${editorMode === "ai" ? "hidden" : ""}`}
             title={t("openPreview")}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -2217,8 +2244,8 @@ export default function SiteEditorPage() {
 
       {/* Editor + Preview split — takes all remaining height */}
       <div className="flex flex-1 min-h-0">
-        {/* Editor panel */}
-        <div className="w-full md:w-[380px] lg:w-[420px] shrink-0 overflow-y-auto border-r border-white/10 bg-[#1e1e2e]">
+        {/* Editor panel — hidden in AI mode */}
+        <div className={`w-full md:w-[380px] lg:w-[420px] shrink-0 overflow-y-auto border-r border-white/10 bg-[#1e1e2e] ${editorMode === "ai" ? "hidden" : ""}`}>
           {/* Site settings label */}
           <div className="px-4 pt-4 pb-1.5">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Webbplatsinställningar</span>
@@ -2559,14 +2586,14 @@ export default function SiteEditorPage() {
           {/* End: Home page sections conditional */}
         </div>
 
-        {/* Preview panel — full remaining width */}
-        <div className="hidden md:flex flex-1 flex-col items-center bg-black/20 p-3 overflow-hidden min-h-0">
+        {/* Preview panel — fullscreen in AI mode, split in manual mode */}
+        <div className={`${editorMode === "ai" ? "flex" : "hidden md:flex"} flex-1 flex-col items-center ${editorMode === "ai" ? "bg-white" : "bg-black/20 p-3"} overflow-hidden min-h-0`}>
           <div
-            className={`rounded-xl border border-white/10 bg-white shadow-lg overflow-hidden transition-all duration-300 origin-top ${
+            className={`${editorMode === "ai" ? "w-full h-full" : `rounded-xl border border-white/10 bg-white shadow-lg overflow-hidden transition-all duration-300 origin-top ${
               previewMode === "mobile" ? "w-[375px]" :
               previewMode === "tablet" ? "w-[768px]" :
               "w-full"
-            } ${isDraggingSection ? "scale-[0.65] h-[140%]" : `flex-1 ${previewMode === "desktop" ? "w-full" : ""}`}`}
+            } ${isDraggingSection ? "scale-[0.65] h-[140%]" : `flex-1 ${previewMode === "desktop" ? "w-full" : ""}`}`}`}
             style={{ minHeight: 0 }}
           >
             <iframe
@@ -2580,6 +2607,14 @@ export default function SiteEditorPage() {
           </div>
         </div>
       </div>
+
+      {/* AI Chat Bubble */}
+      <AIChatBubble
+        siteId={siteId}
+        onSiteUpdate={(newData) => handleChange(newData as SiteData)}
+        enabled={!!siteData}
+        defaultOpen={editorMode === "ai"}
+      />
     </div>
   );
 
