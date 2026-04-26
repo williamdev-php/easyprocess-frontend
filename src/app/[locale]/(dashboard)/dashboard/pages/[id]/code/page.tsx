@@ -16,7 +16,7 @@ const VALID_SECTION_KEYS = [
   "hero", "about", "features", "stats", "services", "process",
   "gallery", "team", "testimonials", "faq", "cta", "contact",
   "pricing", "video", "logo_cloud", "custom_content", "banner",
-  "ranking", "page_content",
+  "ranking", "quiz", "page_content",
 ];
 
 type FieldRule = {
@@ -135,6 +135,10 @@ const SECTION_RULES: Record<string, SectionRule> = {
     nullable: true,
     items: { list: "items", fields: [{ field: "title", type: "string", required: true }] },
   },
+  quiz: {
+    nullable: true,
+    items: { list: "steps", fields: [{ field: "question", type: "string", required: true }] },
+  },
   page_content: {
     nullable: true,
     fields: [
@@ -248,6 +252,7 @@ const SECTION_FILES = [
   { key: "custom_content", label: "custom_content.json", icon: "X" },
   { key: "banner", label: "banner.json", icon: "B" },
   { key: "ranking", label: "ranking.json", icon: "R" },
+  { key: "quiz", label: "quiz.json", icon: "Q" },
   { key: "page_content", label: "page_content.json", icon: "P" },
   { key: "section_settings", label: "section_settings.json", icon: "⚙" },
   { key: "seo", label: "seo.json", icon: "S" },

@@ -52,6 +52,7 @@ interface SiteData {
   custom_content?: { title?: string; subtitle?: string; layout?: string; blocks?: { type: string; content?: string; url?: string; alt?: string; label?: string; href?: string }[] } | null;
   banner?: { text?: string; button?: { label: string; href: string } | null; background_color?: string } | null;
   ranking?: { title?: string; subtitle?: string; items?: { rank?: number; title: string; description?: string; image?: string | null; link?: { label: string; href: string } | null }[] } | null;
+  quiz?: { title?: string; subtitle?: string; steps?: { question: string; options: { label: string; next?: number }[]; image?: string | null }[]; results?: { title: string; description?: string; cta?: { label: string; href: string } | null }[]; result_logic?: string } | null;
   page_content?: { title?: string; content?: string } | null;
   extra_sections?: Record<string, { type: string; data: Record<string, unknown> }>;
   section_settings?: Record<string, { animation?: string; background_color?: string; show_gradient?: boolean }>;
@@ -1300,6 +1301,124 @@ function RankingEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteD
   );
 }
 
+function QuizEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
+  const quiz = data.quiz || { title: "", subtitle: "", steps: [], results: [], result_logic: "score" };
+  const steps = quiz.steps || [];
+  const results = quiz.results || [];
+  const set = (key: string, val: unknown) => {
+    onChange({ ...data, quiz: { ...quiz, [key]: val } });
+  };
+  const updateStep = (idx: number, key: string, val: unknown) => {
+    const next = deepClone(steps);
+    (next[idx] as Record<string, unknown>)[key] = val;
+    set("steps", next);
+  };
+  const removeStep = (idx: number) => set("steps", steps.filter((_: unknown, i: number) => i !== idx));
+  const addStep = () => set("steps", [...steps, { question: "", options: [{ label: "" }, { label: "" }] }]);
+
+  const updateResult = (idx: number, key: string, val: unknown) => {
+    const next = deepClone(results);
+    (next[idx] as Record<string, unknown>)[key] = val;
+    set("results", next);
+  };
+  const removeResult = (idx: number) => set("results", results.filter((_: unknown, i: number) => i !== idx));
+  const addResult = () => set("results", [...results, { title: "", description: "" }]);
+
+  return (
+    <div className="space-y-3 p-4">
+      <FieldGroup label="Rubrik"><TextInput value={quiz.title || ""} onChange={(v) => set("title", v)} /></FieldGroup>
+      <FieldGroup label="Underrubrik"><TextInput value={quiz.subtitle || ""} onChange={(v) => set("subtitle", v)} /></FieldGroup>
+
+      <FieldGroup label="Frågor (steg)">
+        <div className="space-y-2">
+          {steps.map((step: NonNullable<NonNullable<SiteData["quiz"]>["steps"]>[number], idx: number) => (
+            <div key={idx} className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-medium text-white/80">Fråga {idx + 1}</span>
+                <button type="button" onClick={() => removeStep(idx)}
+                  className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 shrink-0">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <FieldGroup label="Fråga"><TextInput value={step.question || ""} onChange={(v) => updateStep(idx, "question", v)} /></FieldGroup>
+              <FieldGroup label="Svarsalternativ">
+                <div className="space-y-1">
+                  {(step.options || []).map((opt: { label: string }, oi: number) => (
+                    <div key={oi} className="flex items-center gap-1.5">
+                      <TextInput
+                        value={opt.label || ""}
+                        onChange={(v) => {
+                          const opts = deepClone(step.options || []);
+                          opts[oi] = { ...opts[oi], label: v };
+                          updateStep(idx, "options", opts);
+                        }}
+                        placeholder={`Alternativ ${oi + 1}`}
+                      />
+                      <button type="button" onClick={() => {
+                        const opts = (step.options || []).filter((_: unknown, i: number) => i !== oi);
+                        updateStep(idx, "options", opts);
+                      }} className="shrink-0 rounded p-1 text-red-400 hover:text-red-600">
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => {
+                    const opts = [...(step.options || []), { label: "" }];
+                    updateStep(idx, "options", opts);
+                  }} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Alternativ
+                  </button>
+                </div>
+              </FieldGroup>
+            </div>
+          ))}
+          <button type="button" onClick={addStep}
+            className="flex items-center gap-1.5 rounded-lg border border-dashed border-white/10 px-3 py-2 text-xs font-medium text-white/50 transition-colors hover:border-blue-500 hover:text-blue-400">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Lägg till fråga
+          </button>
+        </div>
+      </FieldGroup>
+
+      <FieldGroup label="Resultat">
+        <div className="space-y-2">
+          {results.map((res: NonNullable<NonNullable<SiteData["quiz"]>["results"]>[number], idx: number) => (
+            <div key={idx} className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-medium text-white/80">Resultat {idx + 1}</span>
+                <button type="button" onClick={() => removeResult(idx)}
+                  className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 shrink-0">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <FieldGroup label="Titel"><TextInput value={res.title || ""} onChange={(v) => updateResult(idx, "title", v)} /></FieldGroup>
+              <FieldGroup label="Beskrivning"><TextArea value={res.description || ""} onChange={(v) => updateResult(idx, "description", v)} rows={2} /></FieldGroup>
+            </div>
+          ))}
+          <button type="button" onClick={addResult}
+            className="flex items-center gap-1.5 rounded-lg border border-dashed border-white/10 px-3 py-2 text-xs font-medium text-white/50 transition-colors hover:border-blue-500 hover:text-blue-400">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Lägg till resultat
+          </button>
+        </div>
+      </FieldGroup>
+    </div>
+  );
+}
+
 function PageContentEditor({ data, onChange }: { data: SiteData; onChange: (d: SiteData) => void }) {
   const pc = data.page_content || { title: "", content: "" };
   const set = (key: string, val: unknown) => {
@@ -1329,7 +1448,7 @@ const DEFAULT_SECTION_ORDER = [
   "hero", "about", "features", "stats", "services", "process",
   "gallery", "team", "testimonials", "faq", "cta", "contact",
   "pricing", "video", "logo_cloud", "custom_content", "banner",
-  "ranking", "page_content",
+  "ranking", "quiz", "page_content",
 ];
 
 const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{ data: SiteData; onChange: (d: SiteData) => void }>; toggleable: boolean }> = {
@@ -1353,6 +1472,7 @@ const SECTION_MAP: Record<string, { label: string; Editor: React.ComponentType<{
   custom_content: { label: "Eget innehåll", Editor: CustomContentEditor, toggleable: true },
   banner: { label: "Banner", Editor: BannerEditor, toggleable: true },
   ranking: { label: "Topplista", Editor: RankingEditor, toggleable: true },
+  quiz: { label: "Quiz", Editor: QuizEditor, toggleable: true },
   page_content: { label: "Sidinnehåll", Editor: PageContentEditor, toggleable: true },
 };
 

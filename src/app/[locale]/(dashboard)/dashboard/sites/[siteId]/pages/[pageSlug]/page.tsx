@@ -53,6 +53,7 @@ const SECTION_LABELS: Record<string, string> = {
   custom_content: "Eget innehåll",
   banner: "Banner",
   ranking: "Topplista",
+  quiz: "Quiz",
   page_content: "Sidinnehåll",
 };
 
