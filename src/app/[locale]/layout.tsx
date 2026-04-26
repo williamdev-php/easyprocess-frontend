@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
 import Providers from "@/components/providers";
 import TrackingProvider from "@/components/tracking-provider";
+import PasswordGate from "@/components/password-gate";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -68,9 +69,11 @@ export default async function LocaleLayout({
     <NextIntlClientProvider messages={messages}>
       <Providers>
         <TrackingProvider>
-          <div className="bg-background text-text-theme min-h-full flex flex-col" lang={locale}>
-            {children}
-          </div>
+          <PasswordGate>
+            <div className="bg-background text-text-theme min-h-full flex flex-col" lang={locale}>
+              {children}
+            </div>
+          </PasswordGate>
         </TrackingProvider>
       </Providers>
     </NextIntlClientProvider>

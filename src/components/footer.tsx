@@ -11,7 +11,7 @@ export default function Footer() {
   return (
     <footer className="bg-primary-deep text-white">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
             <Link href="/" className="inline-block">
@@ -45,6 +45,25 @@ export default function Footer() {
               <li>
                 <Link href={{ pathname: "/help", query: { from: pathname } }} className="text-sm text-white/60 transition hover:text-white">
                   {t("helpCenter")}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Free Tools */}
+          <div>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40">
+              {t("tools")}
+            </h4>
+            <ul className="mt-4 space-y-3">
+              <li>
+                <Link href="/tools/business-name-generator" className="text-sm text-white/60 transition hover:text-white">
+                  {t("nameGenerator")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/color-palette-generator" className="text-sm text-white/60 transition hover:text-white">
+                  {t("colorPalette")}
                 </Link>
               </li>
             </ul>

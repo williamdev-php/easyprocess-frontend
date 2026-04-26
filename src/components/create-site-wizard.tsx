@@ -14,78 +14,7 @@ import { pickSafeDefaultFont } from "@/lib/fonts";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-// ---------------------------------------------------------------------------
-// Color palette presets & randomizer
-// ---------------------------------------------------------------------------
-
-const PALETTE_PRESETS = [
-  // --- Blues ---
-  { primary: "#326586", secondary: "#24506E", accent: "#F4E9D4", background: "#FDFAF5", text: "#1A1A1A" },
-  { primary: "#1E40AF", secondary: "#3B82F6", accent: "#F59E0B", background: "#F9FAFB", text: "#1F2937" },
-  { primary: "#2563EB", secondary: "#93C5FD", accent: "#EF4444", background: "#FFFFFF", text: "#1E293B" },
-  { primary: "#0EA5E9", secondary: "#38BDF8", accent: "#F97316", background: "#F8FAFC", text: "#0F172A" },
-  { primary: "#1D4ED8", secondary: "#BFDBFE", accent: "#10B981", background: "#EFF6FF", text: "#1E3A5F" },
-  { primary: "#0284C7", secondary: "#7DD3FC", accent: "#FBBF24", background: "#F0F9FF", text: "#1F2937" },
-  // --- Teals & Cyans ---
-  { primary: "#0D9488", secondary: "#5EEAD4", accent: "#F43F5E", background: "#F0FDFA", text: "#134E4A" },
-  { primary: "#0891B2", secondary: "#67E8F9", accent: "#A855F7", background: "#ECFEFF", text: "#164E63" },
-  { primary: "#14B8A6", secondary: "#99F6E4", accent: "#FB923C", background: "#FFFFFF", text: "#1F2937" },
-  // --- Greens ---
-  { primary: "#059669", secondary: "#6EE7B7", accent: "#8B5CF6", background: "#F0FDF4", text: "#1A2E1A" },
-  { primary: "#16A34A", secondary: "#86EFAC", accent: "#E11D48", background: "#FFFFFF", text: "#1F2937" },
-  { primary: "#65A30D", secondary: "#BEF264", accent: "#0EA5E9", background: "#FEFCE8", text: "#1A2E05" },
-  { primary: "#166534", secondary: "#BBF7D0", accent: "#D97706", background: "#F7FEE7", text: "#14532D" },
-  // --- Purples & Violets ---
-  { primary: "#7C3AED", secondary: "#C4B5FD", accent: "#F97316", background: "#FAF5FF", text: "#2E1065" },
-  { primary: "#6D28D9", secondary: "#A78BFA", accent: "#10B981", background: "#FFFFFF", text: "#1E1B4B" },
-  { primary: "#9333EA", secondary: "#D8B4FE", accent: "#EC4899", background: "#FDF4FF", text: "#3B0764" },
-  { primary: "#5B21B6", secondary: "#DDD6FE", accent: "#FBBF24", background: "#EDE9FE", text: "#1E1B4B" },
-  // --- Pinks & Roses ---
-  { primary: "#DB2777", secondary: "#FBCFE8", accent: "#0EA5E9", background: "#FDF2F8", text: "#1F2937" },
-  { primary: "#E11D48", secondary: "#FDA4AF", accent: "#2563EB", background: "#FFF1F2", text: "#1C1917" },
-  { primary: "#EC4899", secondary: "#F9A8D4", accent: "#8B5CF6", background: "#FFFFFF", text: "#292524" },
-  // --- Reds & Warm ---
-  { primary: "#DC2626", secondary: "#FCA5A5", accent: "#1D4ED8", background: "#FFFFFF", text: "#1C1917" },
-  { primary: "#B91C1C", secondary: "#FECACA", accent: "#F59E0B", background: "#FEF2F2", text: "#292524" },
-  { primary: "#EA580C", secondary: "#FDBA74", accent: "#0891B2", background: "#FFF7ED", text: "#1C1917" },
-  // --- Oranges & Yellows ---
-  { primary: "#D97706", secondary: "#FDE68A", accent: "#7C3AED", background: "#FFFBEB", text: "#292524" },
-  { primary: "#F59E0B", secondary: "#FEF3C7", accent: "#1E40AF", background: "#FFFFFF", text: "#1F2937" },
-  { primary: "#E85D04", secondary: "#FFBA08", accent: "#3A86FF", background: "#FFF8F0", text: "#2B2D42" },
-  // --- Earth Tones ---
-  { primary: "#92400E", secondary: "#D4A373", accent: "#2D6A4F", background: "#FEFAE0", text: "#292524" },
-  { primary: "#78350F", secondary: "#A8763E", accent: "#059669", background: "#FAF3E0", text: "#3E2723" },
-  { primary: "#6B4226", secondary: "#C4A882", accent: "#D4A017", background: "#F5F0EB", text: "#2C1810" },
-  { primary: "#5C4033", secondary: "#A0816C", accent: "#C84B31", background: "#FAF6F1", text: "#3E2723" },
-  { primary: "#8E793E", secondary: "#AD974F", accent: "#E07A5F", background: "#F8F5F1", text: "#231F20" },
-  // --- Pastels ---
-  { primary: "#6C63FF", secondary: "#B8B5FF", accent: "#FF6584", background: "#F8F9FF", text: "#2D3748" },
-  { primary: "#48BB78", secondary: "#B5EAD7", accent: "#FFDAC1", background: "#FAFFFE", text: "#2D3748" },
-  { primary: "#9F7AEA", secondary: "#D6BCFA", accent: "#FC8181", background: "#FAF5FF", text: "#2D3748" },
-  { primary: "#ED8936", secondary: "#FEEBC8", accent: "#667EEA", background: "#FFFAF0", text: "#2D3748" },
-  { primary: "#4FD1C5", secondary: "#B2F5EA", accent: "#F687B3", background: "#F0FFFF", text: "#234E52" },
-  // --- Neutral / Minimal ---
-  { primary: "#4B5563", secondary: "#9CA3AF", accent: "#3B82F6", background: "#FFFFFF", text: "#1F2937" },
-  { primary: "#374151", secondary: "#D1D5DB", accent: "#10B981", background: "#F9FAFB", text: "#111827" },
-  // --- Dark Themes ---
-  { primary: "#3B82F6", secondary: "#1E40AF", accent: "#F59E0B", background: "#0F172A", text: "#F1F5F9" },
-  { primary: "#6366F1", secondary: "#312E81", accent: "#F472B6", background: "#1E1B4B", text: "#E0E7FF" },
-  { primary: "#8B5CF6", secondary: "#4C1D95", accent: "#34D399", background: "#1C1033", text: "#EDE9FE" },
-  { primary: "#22D3EE", secondary: "#155E75", accent: "#F97316", background: "#0C1222", text: "#E2E8F0" },
-  { primary: "#10B981", secondary: "#065F46", accent: "#F59E0B", background: "#0D1117", text: "#D1FAE5" },
-  { primary: "#EC4899", secondary: "#831843", accent: "#A78BFA", background: "#18181B", text: "#FAFAFA" },
-  { primary: "#F43F5E", secondary: "#881337", accent: "#38BDF8", background: "#1A1A2E", text: "#F1F5F9" },
-  { primary: "#14B8A6", secondary: "#134E4A", accent: "#F472B6", background: "#111827", text: "#F0FDFA" },
-  { primary: "#A855F7", secondary: "#581C87", accent: "#FB923C", background: "#09090B", text: "#FAFAF9" },
-  { primary: "#FBBF24", secondary: "#92400E", accent: "#60A5FA", background: "#1C1917", text: "#FFFBEB" },
-  { primary: "#E879F9", secondary: "#701A75", accent: "#2DD4BF", background: "#170B1E", text: "#FAE8FF" },
-  { primary: "#4ADE80", secondary: "#166534", accent: "#C084FC", background: "#0A0A0A", text: "#F0FDF4" },
-  { primary: "#FB7185", secondary: "#9F1239", accent: "#67E8F9", background: "#18181B", text: "#FFE4E6" },
-];
-
-function randomPalette() {
-  return PALETTE_PRESETS[Math.floor(Math.random() * PALETTE_PRESETS.length)];
-}
+import { PALETTE_PRESETS, randomPalette } from "@/lib/palette-presets";
 
 // ---------------------------------------------------------------------------
 // Types

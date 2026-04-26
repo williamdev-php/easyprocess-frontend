@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { Link } from "@/i18n/routing";
@@ -362,6 +362,7 @@ function PageCard({
   t: (key: string, values?: Record<string, string | number | Date>) => string;
   isChild?: boolean;
 }) {
+  const router = useRouter();
   const detailHref = `/dashboard/sites/${siteId}/pages/${pageDetailSlug(page)}`;
   const editorPageParam = page.parent_slug ? `${page.parent_slug}/${page.slug}` : page.slug;
   const editorHref = `/dashboard/pages/${siteId}?page=${encodeURIComponent(editorPageParam)}`;
@@ -415,16 +416,15 @@ function PageCard({
 
         {/* Actions */}
         <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.preventDefault()}>
-          <Link
-            href={editorHref as "/dashboard"}
+          <button
             className="hidden items-center gap-1.5 rounded-lg bg-primary-deep/10 px-3 py-1.5 text-xs font-medium text-primary-deep transition hover:bg-primary-deep/20 sm:flex"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); router.push(editorHref); }}
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
             </svg>
             Editor
-          </Link>
+          </button>
           <button
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); onDelete(); }}
             disabled={saving}
