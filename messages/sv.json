@@ -1720,5 +1720,24 @@
     "parentPage": "Föräldrasida",
     "none": "Ingen",
     "navOrder": "Ordning i navigering"
+  },
+  "oauth": {
+    "loginRequired": "Logga in krävs",
+    "loginRequiredDescription": "{app} vill ansluta till ditt Qvicko-konto. Logga in för att fortsätta.",
+    "loginButton": "Logga in",
+    "errorTitle": "Något gick fel",
+    "authorizeTitle": "Anslut {app}",
+    "authorizeDescription": "{app} begär tillgång till din Qvicko-butik.",
+    "requestedPermissions": "Begärda behörigheter",
+    "scopeBlogRead": "Läsa blogginlägg",
+    "scopeBlogWrite": "Skapa och redigera blogginlägg",
+    "selectSite": "Välj butik",
+    "noSites": "Du har inga Qvicko-butiker. Skapa en butik först.",
+    "blogAppNotInstalled": "\"Blog by Qvicko\" är inte installerad",
+    "blogAppNotInstalledDescription": "Blog-appen behöver vara installerad på den här butiken för att blogginlägg ska visas. Du kan fortfarande ansluta, men inlägg kommer inte att synas förrän appen är installerad.",
+    "deny": "Neka",
+    "authorize": "Godkänn",
+    "authorizing": "Godkänner...",
+    "loggedInAs": "Inloggad som {email}"
   }
 }

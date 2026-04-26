@@ -1720,5 +1720,24 @@
     "parentPage": "Parent Page",
     "none": "None",
     "navOrder": "Navigation Order"
+  },
+  "oauth": {
+    "loginRequired": "Login required",
+    "loginRequiredDescription": "{app} wants to connect to your Qvicko account. Please log in to continue.",
+    "loginButton": "Log in",
+    "errorTitle": "Something went wrong",
+    "authorizeTitle": "Connect {app}",
+    "authorizeDescription": "{app} is requesting access to your Qvicko store.",
+    "requestedPermissions": "Requested permissions",
+    "scopeBlogRead": "Read blog posts",
+    "scopeBlogWrite": "Create and edit blog posts",
+    "selectSite": "Select store",
+    "noSites": "You have no Qvicko stores. Create a store first.",
+    "blogAppNotInstalled": "\"Blog by Qvicko\" is not installed",
+    "blogAppNotInstalledDescription": "The Blog app needs to be installed on this store for blog posts to be displayed. You can still connect, but posts will not be visible until the app is installed.",
+    "deny": "Deny",
+    "authorize": "Authorize",
+    "authorizing": "Authorizing...",
+    "loggedInAs": "Logged in as {email}"
   }
 }
