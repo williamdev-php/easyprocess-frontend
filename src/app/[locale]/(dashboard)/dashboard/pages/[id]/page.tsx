@@ -9,10 +9,10 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { MY_SITE } from "@/graphql/queries";
 import { SAVE_DRAFT, LOAD_DRAFT, PUBLISH_SITE_DATA, DISCARD_DRAFT } from "@/graphql/mutations";
 import { Link } from "@/i18n/routing";
-import { MediaPickerField } from "@/components/media-picker";
+import { MediaPickerField } from "@/components/media-picker-dynamic";
 import { FontSelector } from "@/components/ui/font-selector";
 import { ColorPicker } from "@/components/ui/color-picker";
-import RichTextEditor from "@/components/rich-text-editor";
+import RichTextEditor from "@/components/rich-text-editor-dynamic";
 import { AIChatBubble } from "@/components/ai-chat-bubble";
 
 // ---------------------------------------------------------------------------

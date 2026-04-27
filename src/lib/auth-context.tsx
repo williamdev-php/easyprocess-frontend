@@ -6,6 +6,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import Cookies from "js-cookie";
 import {
@@ -93,6 +94,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = !!user;
 
+  // Holds the cleanup function for the proactive refresh timer
+  const refreshTimerCleanupRef = useRef<(() => void) | null>(null);
+
   // Register the force-logout callback so the Apollo error link can trigger it
   useEffect(() => {
     _forceLogoutCb = () => {
@@ -112,26 +116,84 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSuperuserFlag(userData.isSuperuser);
   }, []);
 
-  // Try to refresh token on mount (with timeout to prevent indefinite hang)
-  useEffect(() => {
-    async function init() {
+  // Schedule a proactive token refresh before expiry.  Call after every
+  // successful token acquisition.  Returns a cleanup function.
+  const scheduleProactiveRefresh = useCallback((expiresIn?: number) => {
+    // Default to 15 minutes if the server didn't tell us.
+    const ttlMs = (expiresIn ?? 900) * 1000;
+    // Refresh 5 minutes before expiry (but at least 30 s from now).
+    const refreshIn = Math.max(ttlMs - 5 * 60 * 1000, 30_000);
+    const timer = setTimeout(async () => {
       try {
-        const timeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Auth refresh timeout")), 10_000),
-        );
-        const data = await Promise.race([refreshToken(), timeout]);
+        const data = await refreshToken();
         setAccessToken(data.accessToken);
         await fetchUser(data.accessToken);
+        // Re-schedule after a successful refresh
+        scheduleProactiveRefresh(data.expiresIn);
       } catch {
+        // Refresh failed — force logout so the user can re-authenticate.
+        forceLogout();
+      }
+    }, refreshIn);
+    return () => clearTimeout(timer);
+  }, [fetchUser]);
+
+  // Try to refresh token on mount with retry logic for slow networks
+  useEffect(() => {
+    let cancelled = false;
+    let cleanupRefreshTimer: (() => void) | undefined;
+
+    async function attemptRefresh(): Promise<{ accessToken: string; expiresIn?: number }> {
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Auth refresh timeout")), 30_000),
+      );
+      return Promise.race([refreshToken(), timeout]);
+    }
+
+    async function init() {
+      const MAX_RETRIES = 2;
+      let lastError: unknown;
+
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        if (cancelled) return;
+        try {
+          const data = await attemptRefresh();
+          if (cancelled) return;
+          setAccessToken(data.accessToken);
+          await fetchUser(data.accessToken);
+          cleanupRefreshTimer = scheduleProactiveRefresh(data.expiresIn);
+          return; // success
+        } catch (err) {
+          lastError = err;
+          // Only retry on timeout / network errors, not on auth rejection (4xx)
+          const isTimeout = err instanceof Error && err.message === "Auth refresh timeout";
+          const isNetworkError = err instanceof TypeError; // fetch network failure
+          if ((isTimeout || isNetworkError) && attempt < MAX_RETRIES) {
+            // Exponential back-off: 2s, 4s
+            await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+            continue;
+          }
+          break;
+        }
+      }
+
+      // All attempts exhausted — clear auth state
+      if (!cancelled) {
         setAccessToken(null);
         setUser(null);
-      } finally {
-        _authInitializing = false;
-        setIsLoading(false);
       }
     }
-    init();
-  }, [fetchUser]);
+
+    init().finally(() => {
+      _authInitializing = false;
+      setIsLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+      cleanupRefreshTimer?.();
+    };
+  }, [fetchUser, scheduleProactiveRefresh]);
 
   const login = useCallback(async (payload: LoginPayload) => {
     const data = await loginUser(payload);
@@ -139,9 +201,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const me = await getMe(data.accessToken);
     setUser(me);
     setSuperuserFlag(me.isSuperuser);
+    refreshTimerCleanupRef.current?.();
+    refreshTimerCleanupRef.current = scheduleProactiveRefresh(data.expiresIn);
     trackEvent("login");
     identifyUser(me.id);
-  }, []);
+  }, [scheduleProactiveRefresh]);
 
   const register = useCallback(async (payload: RegisterPayload) => {
     const data = await registerUser(payload);
@@ -149,9 +213,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const me = await getMe(data.accessToken);
     setUser(me);
     setSuperuserFlag(me.isSuperuser);
+    refreshTimerCleanupRef.current?.();
+    refreshTimerCleanupRef.current = scheduleProactiveRefresh(data.expiresIn);
     trackEvent("signup");
     identifyUser(me.id);
-  }, []);
+  }, [scheduleProactiveRefresh]);
 
   const loginWithGoogle = useCallback(async (code: string, redirectUri: string, locale?: string) => {
     const data = await googleAuth(code, redirectUri, locale);
@@ -159,9 +225,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const me = await getMe(data.accessToken);
     setUser(me);
     setSuperuserFlag(me.isSuperuser);
+    refreshTimerCleanupRef.current?.();
+    refreshTimerCleanupRef.current = scheduleProactiveRefresh(data.expiresIn);
     trackEvent("login");
     identifyUser(me.id);
-  }, []);
+  }, [scheduleProactiveRefresh]);
 
   const updateUser = useCallback((updates: Partial<User>) => {
     setUser((prev) => prev ? { ...prev, ...updates } : prev);
@@ -171,6 +239,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await logoutUser();
     } finally {
+      refreshTimerCleanupRef.current?.();
+      refreshTimerCleanupRef.current = null;
       setAccessToken(null);
       setUser(null);
       // Clear Apollo cache to prevent stale authenticated data from leaking.

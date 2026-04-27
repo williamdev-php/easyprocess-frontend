@@ -27,8 +27,9 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [forgotPasswordStatus, setForgotPasswordStatus] = useState<
-    "idle" | "loading" | "sent" | "limited"
+    "idle" | "loading" | "sent" | "limited" | "error"
   >("idle");
+  const [forgotPasswordError, setForgotPasswordError] = useState("");
 
   const FORGOT_PASSWORD_STORAGE_KEY = "lastPasswordResetRequest";
 
@@ -72,12 +73,15 @@ function LoginForm() {
     }
 
     setForgotPasswordStatus("loading");
+    setForgotPasswordError("");
     try {
       await forgotPassword(email);
       localStorage.setItem(FORGOT_PASSWORD_STORAGE_KEY, Date.now().toString());
       setForgotPasswordStatus("sent");
-    } catch {
-      setForgotPasswordStatus("sent");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t("forgotPasswordError");
+      setForgotPasswordError(message);
+      setForgotPasswordStatus("error");
     }
   }
 
@@ -218,6 +222,11 @@ function LoginForm() {
               )}
               {forgotPasswordStatus === "limited" && (
                 <p className="text-sm text-amber-600">{t("forgotPasswordLimit")}</p>
+              )}
+              {forgotPasswordStatus === "error" && (
+                <p className="text-sm text-red-600">
+                  {forgotPasswordError || t("forgotPasswordError")}
+                </p>
               )}
             </div>
 

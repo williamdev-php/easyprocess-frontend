@@ -7,8 +7,8 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { useRouter, Link } from "@/i18n/routing";
 import { GET_BLOG_POST, GET_BLOG_CATEGORIES } from "@/graphql/queries";
 import { UPDATE_BLOG_POST, DELETE_BLOG_POST } from "@/graphql/mutations";
-import { MediaPickerField } from "@/components/media-picker";
-import RichTextEditor from "@/components/rich-text-editor";
+import { MediaPickerField } from "@/components/media-picker-dynamic";
+import RichTextEditor from "@/components/rich-text-editor-dynamic";
 
 interface BlogPostData {
   id: string;

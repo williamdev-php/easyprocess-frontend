@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui";
 import { getCookieConsent, acceptAllCookies } from "@/lib/cookie-consent";
@@ -11,6 +11,11 @@ export default function CookieBanner() {
   const [showPreferences, setShowPreferences] = useState(false);
   const t = useTranslations("cookies");
 
+  const handleAcceptAll = useCallback(() => {
+    acceptAllCookies();
+    setVisible(false);
+  }, []);
+
   useEffect(() => {
     const consent = getCookieConsent();
     if (!consent) {
@@ -18,10 +23,17 @@ export default function CookieBanner() {
     }
   }, []);
 
-  function handleAcceptAll() {
-    acceptAllCookies();
-    setVisible(false);
-  }
+  // Keyboard dismiss: Escape key accepts all cookies and closes the banner
+  useEffect(() => {
+    if (!visible || showPreferences) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        handleAcceptAll();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [visible, showPreferences, handleAcceptAll]);
 
   function handlePreferencesSaved() {
     setShowPreferences(false);
@@ -33,7 +45,14 @@ export default function CookieBanner() {
   return (
     <>
       {visible && !showPreferences && (
-        <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm">
+        <div
+          className="fixed bottom-4 right-4 z-50 w-full max-w-sm"
+          role="dialog"
+          aria-label={t("title")}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") handleAcceptAll();
+          }}
+        >
           <div className="rounded-2xl border border-border-theme bg-surface p-5 shadow-xl">
             <h3 className="text-sm font-semibold text-primary-deep">
               {t("title")}
@@ -46,10 +65,16 @@ export default function CookieBanner() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowPreferences(true)}
+                aria-label={t("managePreferences")}
               >
                 {t("managePreferences")}
               </Button>
-              <Button variant="primary" size="sm" onClick={handleAcceptAll}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleAcceptAll}
+                aria-label={t("acceptAll")}
+              >
                 {t("acceptAll")}
               </Button>
             </div>

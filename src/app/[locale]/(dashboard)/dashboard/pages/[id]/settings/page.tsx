@@ -10,7 +10,7 @@ import { Link } from "@/i18n/routing";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MediaPickerField } from "@/components/media-picker";
+import { MediaPickerField } from "@/components/media-picker-dynamic";
 
 interface OpeningHoursDay {
   day: string;

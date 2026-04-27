@@ -96,5 +96,5 @@ export function pickSafeDefaultFont(): string {
 /** Build a Google Fonts CSS URL for a given font name */
 export function googleFontUrl(fontName: string): string {
   const family = fontName.replace(/ /g, "+");
-  return `https://fonts.googleapis.com/css2?family=${family}:wght@300;400;500;600;700&display=swap`;
+  return `https://fonts.googleapis.com/css2?family=${family}:wght@300;400;500;600;700&display=optional`;
 }

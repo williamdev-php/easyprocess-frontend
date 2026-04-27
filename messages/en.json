@@ -1843,5 +1843,97 @@
     "unlock": "Unlock",
     "error": "Incorrect password",
     "footer": "© Qvicko — Coming soon"
+  },
+  "richTextEditor": {
+    "headingStyle": "Heading style",
+    "normalText": "Normal text",
+    "heading": "Heading {level}",
+    "textFormatting": "Text formatting",
+    "bold": "Bold (Ctrl+B)",
+    "italic": "Italic (Ctrl+I)",
+    "underline": "Underline (Ctrl+U)",
+    "strikethrough": "Strikethrough",
+    "bulletList": "Bullet list",
+    "orderedList": "Ordered list",
+    "blockquote": "Blockquote",
+    "inlineCode": "Inline code",
+    "codeBlock": "Code block",
+    "insertLink": "Insert link (Ctrl+K)",
+    "insertImage": "Insert image",
+    "horizontalRule": "Horizontal rule",
+    "undo": "Undo (Ctrl+Z)",
+    "redo": "Redo (Ctrl+Shift+Z)",
+    "blogContent": "Blog content",
+    "linkDialog": {
+      "title": "Insert / edit link",
+      "relAttribute": "Rel attribute",
+      "openIn": "Open in",
+      "newWindow": "New window (_blank)",
+      "sameWindow": "Same window (_self)",
+      "removeLink": "Remove link",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "imageDialog": {
+      "title": "Insert image",
+      "changeImage": "Change image",
+      "altText": "Alt text (accessibility)",
+      "altPlaceholder": "Describe the image...",
+      "width": "Width (optional)",
+      "widthPlaceholder": "e.g. 600px, 100%, 50%",
+      "cancel": "Cancel",
+      "insert": "Insert"
+    }
+  },
+  "fontSelector": {
+    "placeholder": "Choose font...",
+    "searchPlaceholder": "Search fonts...",
+    "noResults": "No font found"
+  },
+  "countrySelect": {
+    "placeholder": "Choose country...",
+    "searchPlaceholder": "Search country...",
+    "noResults": "No country found"
+  },
+  "mediaPicker": {
+    "changeImage": "Change image",
+    "selectMedia": "Select media",
+    "remove": "Remove",
+    "title": "Media library",
+    "storageUsed": "{used} / {limit} used",
+    "newFolder": "New folder",
+    "upload": "Upload",
+    "folderNamePlaceholder": "Folder name...",
+    "create": "Create",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loadError": "Could not load media",
+    "uploadFailed": "Upload failed: {name}",
+    "uploading": "Uploading {name}...",
+    "uploadingProgress": "Uploading {name} ({current}/{total})...",
+    "deleteError": "Could not delete the file",
+    "folderError": "Could not create folder",
+    "noFiles": "No files yet",
+    "dropHint": "Drag and drop files here or click \"Upload\"",
+    "back": "Back",
+    "folders": "Folders",
+    "files": "Files",
+    "deleteTitle": "Delete file?",
+    "deleteDescription": "The file will be permanently deleted and cannot be restored.",
+    "delete": "Delete",
+    "select": "Select"
+  },
+  "aiChat": {
+    "title": "AI Editor",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "greeting": "Hi! I can help you edit your page.",
+    "hint": "Describe what you want to change, e.g. \"Change the heading to Welcome\" or \"Remove the FAQ section\".",
+    "placeholder": "Describe what you want to change...",
+    "reconnect": "Reconnect"
+  },
+  "helpArticle": {
+    "previous": "Previous",
+    "next": "Next"
   }
 }

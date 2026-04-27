@@ -16,6 +16,7 @@ import {
   isImageType,
   type MediaFile,
 } from "@/lib/media-api";
+import { useTranslations } from "next-intl";
 
 // ---------------------------------------------------------------------------
 // MediaPickerField — the small inline control that opens the dialog
@@ -34,6 +35,7 @@ export function MediaPickerField({
   accept?: string;
   folder?: string;
 }) {
+  const t = useTranslations("mediaPicker");
   const [open, setOpen] = useState(false);
   const hasValue = !!value;
 
@@ -51,6 +53,8 @@ export function MediaPickerField({
             <img
               src={value}
               alt=""
+              width={48}
+              height={48}
               className="h-full w-full object-cover"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
@@ -81,7 +85,7 @@ export function MediaPickerField({
             onClick={() => setOpen(true)}
             className="rounded-lg border border-border-light bg-white px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:border-primary hover:bg-primary/5"
           >
-            {hasValue ? "Byt bild" : "Välj media"}
+            {hasValue ? t("changeImage") : t("selectMedia")}
           </button>
           {hasValue && (
             <button
@@ -89,7 +93,7 @@ export function MediaPickerField({
               onClick={() => onChange("")}
               className="text-left text-[10px] text-red-400 hover:text-red-600 transition-colors"
             >
-              Ta bort
+              {t("remove")}
             </button>
           )}
         </div>
@@ -141,6 +145,7 @@ export function MediaPickerDialog({
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations("mediaPicker");
 
   const loadMedia = useCallback(async () => {
     setLoading(true);
@@ -152,11 +157,11 @@ export function MediaPickerDialog({
       setStorageUsed(data.storageUsed);
       setStorageLimit(data.storageLimit);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Kunde inte ladda media");
+      setError(err instanceof Error ? err.message : t("loadError"));
     } finally {
       setLoading(false);
     }
-  }, [currentFolder]);
+  }, [currentFolder, t]);
 
   useEffect(() => {
     loadMedia();
@@ -182,13 +187,15 @@ export function MediaPickerDialog({
       for (let i = 0; i < filesToUpload.length; i++) {
         const file = filesToUpload[i];
         setUploadProgress(
-          `Laddar upp ${file.name}${filesToUpload.length > 1 ? ` (${i + 1}/${filesToUpload.length})` : ""}...`
+          filesToUpload.length > 1
+            ? t("uploadingProgress", { name: file.name, current: i + 1, total: filesToUpload.length })
+            : t("uploading", { name: file.name })
         );
         try {
           await uploadMediaFile(file, currentFolder);
         } catch (err) {
           setError(
-            err instanceof Error ? err.message : `Uppladdning misslyckades: ${file.name}`
+            err instanceof Error ? err.message : t("uploadFailed", { name: file.name })
           );
           break;
         }
@@ -219,7 +226,7 @@ export function MediaPickerDialog({
         setConfirmDeleteId(null);
         await loadMedia();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Kunde inte ta bort filen");
+        setError(err instanceof Error ? err.message : t("deleteError"));
       }
     },
     [loadMedia]
@@ -237,7 +244,7 @@ export function MediaPickerDialog({
         : newFolderName.trim();
       setCurrentFolder(newPath);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Kunde inte skapa mapp");
+      setError(err instanceof Error ? err.message : t("folderError"));
     }
   }, [newFolderName, currentFolder]);
 
@@ -263,7 +270,7 @@ export function MediaPickerDialog({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
           <div>
-            <h2 className="text-lg font-bold text-primary-deep">Mediabibliotek</h2>
+            <h2 className="text-lg font-bold text-primary-deep">{t("title")}</h2>
             <p className="mt-0.5 text-xs text-text-muted">
               {formatFileSize(storageUsed)} / {formatFileSize(storageLimit)} använt
             </p>
@@ -334,7 +341,7 @@ export function MediaPickerDialog({
                   d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44z"
                 />
               </svg>
-              Ny mapp
+              {t("newFolder")}
             </button>
             <button
               type="button"
@@ -355,7 +362,7 @@ export function MediaPickerDialog({
                   d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
                 />
               </svg>
-              Ladda upp
+              {t("upload")}
             </button>
             <input
               ref={fileInputRef}
@@ -382,7 +389,7 @@ export function MediaPickerDialog({
                 if (e.key === "Enter") handleCreateFolder();
                 if (e.key === "Escape") setShowNewFolder(false);
               }}
-              placeholder="Mappnamn..."
+              placeholder={t("folderNamePlaceholder")}
               autoFocus
               className="flex-1 rounded-lg border border-border-light bg-white px-3 py-1.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
             />
@@ -391,7 +398,7 @@ export function MediaPickerDialog({
               onClick={handleCreateFolder}
               className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-deep"
             >
-              Skapa
+              {t("create")}
             </button>
             <button
               type="button"
@@ -401,7 +408,7 @@ export function MediaPickerDialog({
               }}
               className="rounded-lg px-2 py-1.5 text-xs text-text-muted hover:text-primary-deep"
             >
-              Avbryt
+              {t("cancel")}
             </button>
           </div>
         )}
@@ -415,7 +422,7 @@ export function MediaPickerDialog({
               onClick={() => setError(null)}
               className="ml-2 font-medium hover:underline"
             >
-              Stäng
+              {t("close")}
             </button>
           </div>
         )}
@@ -460,10 +467,10 @@ export function MediaPickerDialog({
                 </svg>
               </div>
               <p className="text-sm font-medium text-primary-deep">
-                Inga filer ännu
+                {t("noFiles")}
               </p>
               <p className="mt-1 text-xs text-text-muted">
-                Dra och släpp filer här eller klicka &quot;Ladda upp&quot;
+                {t("dropHint")}
               </p>
             </div>
           ) : (
@@ -488,7 +495,7 @@ export function MediaPickerDialog({
                       d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
                     />
                   </svg>
-                  Tillbaka
+                  {t("back")}
                 </button>
               )}
 
@@ -496,7 +503,7 @@ export function MediaPickerDialog({
               {folders.length > 0 && (
                 <div className="mb-4">
                   <p className="mb-2 text-xs font-medium text-text-muted">
-                    Mappar
+                    {t("folders")}
                   </p>
                   <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
                     {folders.map((folder) => (
@@ -532,7 +539,7 @@ export function MediaPickerDialog({
               {files.length > 0 && (
                 <div>
                   <p className="mb-2 text-xs font-medium text-text-muted">
-                    Filer
+                    {t("files")}
                   </p>
                   <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
                     {files.map((file) => {
@@ -555,6 +562,8 @@ export function MediaPickerDialog({
                               <img
                                 src={file.url}
                                 alt={file.originalFilename}
+                                width={200}
+                                height={200}
                                 className="h-full w-full object-cover"
                                 loading="lazy"
                               />
@@ -649,7 +658,7 @@ export function MediaPickerDialog({
               onClick={onClose}
               className="rounded-lg border border-border-light px-4 py-2 text-xs font-medium text-text-muted transition-colors hover:bg-gray-50"
             >
-              Avbryt
+              {t("cancel")}
             </button>
             <button
               type="button"
@@ -659,7 +668,7 @@ export function MediaPickerDialog({
               disabled={!selectedFile}
               className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-primary-deep disabled:opacity-40"
             >
-              Välj
+              {t("select")}
             </button>
           </div>
         </div>
@@ -670,10 +679,10 @@ export function MediaPickerDialog({
         <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/30">
           <div className="rounded-2xl border border-border-light bg-white p-6 shadow-xl">
             <h3 className="text-sm font-semibold text-primary-deep">
-              Ta bort fil?
+              {t("deleteTitle")}
             </h3>
             <p className="mt-1 text-xs text-text-muted">
-              Filen tas bort permanent och kan inte återställas.
+              {t("deleteDescription")}
             </p>
             <div className="mt-4 flex justify-end gap-2">
               <button
@@ -681,14 +690,14 @@ export function MediaPickerDialog({
                 onClick={() => setConfirmDeleteId(null)}
                 className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-text-muted hover:bg-gray-50"
               >
-                Avbryt
+                {t("cancel")}
               </button>
               <button
                 type="button"
                 onClick={() => handleDelete(confirmDeleteId)}
                 className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
               >
-                Ta bort
+                {t("delete")}
               </button>
             </div>
           </div>

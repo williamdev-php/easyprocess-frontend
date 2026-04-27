@@ -122,7 +122,12 @@ function MetricCard({
         <span className="text-sm font-medium text-text-muted">{label}</span>
         {tooltip ? (
           <Tooltip text={tooltip}>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-deep/5 cursor-help transition-colors hover:bg-primary-deep/10">
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-deep/5 cursor-help transition-colors hover:bg-primary-deep/10"
+              role="button"
+              tabIndex={0}
+              aria-label={`${label}: ${tooltip}`}
+            >
               <svg
                 className="h-[18px] w-[18px] text-primary"
                 fill="none"
@@ -905,6 +910,14 @@ function UserOverview() {
     }
   );
 
+  // Track when data was last synced
+  const [lastSynced, setLastSynced] = useState<Date | null>(null);
+  useEffect(() => {
+    if (analyticsData && !analyticsLoading) {
+      setLastSynced(new Date());
+    }
+  }, [analyticsData, analyticsLoading]);
+
   const loading = sitesLoading || analyticsLoading;
   const analytics = analyticsData?.siteAnalytics;
   const hasData = analytics && analytics.totalPageViews > 0;
@@ -955,7 +968,21 @@ function UserOverview() {
           <p className="mt-1 text-text-muted">{greetingSubtitle}</p>
         </div>
 
-        {/* Site selector is in the sidebar */}
+        {/* Last synced indicator */}
+        {lastSynced && (
+          <div className="flex items-center gap-1.5 text-xs text-text-muted">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+            </svg>
+            <span>
+              {locale === "sv" ? "Senast synkad" : "Last synced"}{" "}
+              {lastSynced.toLocaleTimeString(locale === "sv" ? "sv-SE" : "en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          </div>
+        )}
       </div>
 
       {!siteId ? (

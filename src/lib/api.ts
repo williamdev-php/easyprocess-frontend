@@ -54,6 +54,8 @@ export interface LoginPayload {
 export interface TokenResponse {
   accessToken: string;
   tokenType: string;
+  /** Token lifetime in seconds (if provided by the server). */
+  expiresIn?: number;
 }
 
 export interface User {

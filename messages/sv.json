@@ -1843,5 +1843,97 @@
     "unlock": "Lås upp",
     "error": "Felaktigt lösenord",
     "footer": "© Qvicko — Kommer snart"
+  },
+  "richTextEditor": {
+    "headingStyle": "Rubrikstil",
+    "normalText": "Normal text",
+    "heading": "Rubrik {level}",
+    "textFormatting": "Textformatering",
+    "bold": "Fetstil (Ctrl+B)",
+    "italic": "Kursiv (Ctrl+I)",
+    "underline": "Understruken (Ctrl+U)",
+    "strikethrough": "Genomstruken",
+    "bulletList": "Punktlista",
+    "orderedList": "Numrerad lista",
+    "blockquote": "Citat",
+    "inlineCode": "Inline-kod",
+    "codeBlock": "Kodblock",
+    "insertLink": "Infoga länk (Ctrl+K)",
+    "insertImage": "Infoga bild",
+    "horizontalRule": "Horisontell linje",
+    "undo": "Ångra (Ctrl+Z)",
+    "redo": "Gör om (Ctrl+Shift+Z)",
+    "blogContent": "Blogginnehåll",
+    "linkDialog": {
+      "title": "Infoga / redigera länk",
+      "relAttribute": "Rel-attribut",
+      "openIn": "Öppna i",
+      "newWindow": "Nytt fönster (_blank)",
+      "sameWindow": "Samma fönster (_self)",
+      "removeLink": "Ta bort länk",
+      "cancel": "Avbryt",
+      "save": "Spara"
+    },
+    "imageDialog": {
+      "title": "Infoga bild",
+      "changeImage": "Byt bild",
+      "altText": "Alt-text (tillgänglighet)",
+      "altPlaceholder": "Beskriv bilden...",
+      "width": "Bredd (valfritt)",
+      "widthPlaceholder": "t.ex. 600px, 100%, 50%",
+      "cancel": "Avbryt",
+      "insert": "Infoga"
+    }
+  },
+  "fontSelector": {
+    "placeholder": "Välj typsnitt...",
+    "searchPlaceholder": "Sök typsnitt...",
+    "noResults": "Inget typsnitt hittades"
+  },
+  "countrySelect": {
+    "placeholder": "Välj land...",
+    "searchPlaceholder": "Sök land...",
+    "noResults": "Inget land hittades"
+  },
+  "mediaPicker": {
+    "changeImage": "Byt bild",
+    "selectMedia": "Välj media",
+    "remove": "Ta bort",
+    "title": "Mediabibliotek",
+    "storageUsed": "{used} / {limit} använt",
+    "newFolder": "Ny mapp",
+    "upload": "Ladda upp",
+    "folderNamePlaceholder": "Mappnamn...",
+    "create": "Skapa",
+    "cancel": "Avbryt",
+    "close": "Stäng",
+    "loadError": "Kunde inte ladda media",
+    "uploadFailed": "Uppladdning misslyckades: {name}",
+    "uploading": "Laddar upp {name}...",
+    "uploadingProgress": "Laddar upp {name} ({current}/{total})...",
+    "deleteError": "Kunde inte ta bort filen",
+    "folderError": "Kunde inte skapa mapp",
+    "noFiles": "Inga filer ännu",
+    "dropHint": "Dra och släpp filer här eller klicka \"Ladda upp\"",
+    "back": "Tillbaka",
+    "folders": "Mappar",
+    "files": "Filer",
+    "deleteTitle": "Ta bort fil?",
+    "deleteDescription": "Filen tas bort permanent och kan inte återställas.",
+    "delete": "Ta bort",
+    "select": "Välj"
+  },
+  "aiChat": {
+    "title": "AI Redigerare",
+    "connected": "Ansluten",
+    "disconnected": "Frånkopplad",
+    "greeting": "Hej! Jag kan hjälpa dig redigera din sida.",
+    "hint": "Beskriv vad du vill ändra, t.ex. \"Ändra rubriken till Välkommen\" eller \"Ta bort FAQ-sektionen\".",
+    "placeholder": "Beskriv vad du vill ändra...",
+    "reconnect": "Anslut igen"
+  },
+  "helpArticle": {
+    "previous": "Föregående",
+    "next": "Nästa"
   }
 }

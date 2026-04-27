@@ -26,6 +26,12 @@ export function GoogleLoginButton({ loading, onSuccess }: GoogleLoginButtonProps
     }
 
     const redirectUri = getGoogleRedirectUri();
+
+    // Generate a random CSRF state token and store it in a cookie so the
+    // callback route can validate it.
+    const state = crypto.randomUUID();
+    document.cookie = `oauth_state=${state}; path=/; max-age=600; samesite=lax`;
+
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       redirect_uri: redirectUri,
@@ -33,6 +39,7 @@ export function GoogleLoginButton({ loading, onSuccess }: GoogleLoginButtonProps
       scope: "openid email profile",
       access_type: "offline",
       prompt: "select_account",
+      state,
     });
 
     const width = 500;

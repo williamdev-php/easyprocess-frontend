@@ -246,8 +246,30 @@ export default function SubscribeDialog({ open, onClose, onSubscribed }: Subscri
         {/* Body */}
         <div className="px-6 py-5 space-y-4">
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+              <p className="text-sm font-medium text-red-700">{error}</p>
+              <p className="mt-1 text-xs text-red-600">
+                {t("cancel") === "Avbryt"
+                  ? "Kontrollera dina kortuppgifter och prova igen. Om problemet kvarstar, kontakta oss."
+                  : "Please check your card details and try again. If the issue persists, contact support."}
+              </p>
+              <button
+                onClick={() => {
+                  setError(null);
+                  if (step === "card") {
+                    setClientSecret(null);
+                    fetchSetupIntent();
+                  } else if (selectedPlan) {
+                    handleSubscribe(selectedPlan);
+                  }
+                }}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 transition hover:bg-red-50"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+                </svg>
+                {t("cancel") === "Avbryt" ? "Forsok igen" : "Try again"}
+              </button>
             </div>
           )}
 

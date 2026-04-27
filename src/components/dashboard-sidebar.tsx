@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/auth-context";
@@ -140,7 +140,14 @@ export default function DashboardSidebar() {
   const sites = sitesData?.mySites ?? [];
 
   // Selected site — derive from URL or localStorage
-  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(() => {
+    // Initialize from localStorage synchronously to prevent flash
+    try {
+      return localStorage.getItem("selectedSiteId");
+    } catch {
+      return null;
+    }
+  });
 
   // Extract siteId from URL (works for /dashboard/pages/[id] and /dashboard/sites/[siteId])
   useEffect(() => {
@@ -234,11 +241,11 @@ export default function DashboardSidebar() {
   const sid = selectedSiteId;
   const hasMultipleSites = sites.length > 1;
 
-  // Site options for dropdown
-  const siteOptions = sites.map((s) => ({
-    value: s.id,
-    label: getSiteName(s),
-  }));
+  // Memoize site options to prevent unnecessary re-renders / flashes on navigation
+  const siteOptions = useMemo(
+    () => sites.map((s) => ({ value: s.id, label: getSiteName(s) })),
+    [sites],
+  );
 
   // "Customize" section is open when viewing general, editor, settings, code or navigation pages
   const customizeActive = sid
@@ -450,27 +457,31 @@ function MobileNav({
   isActive: (href: string) => boolean;
 }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border-light bg-white/95 backdrop-blur-xl lg:hidden">
-      <div className="mx-auto flex h-16 max-w-lg items-stretch justify-around px-2">
-        {items.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href as "/dashboard"}
-              className={`flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
-                active ? "text-primary-deep" : "text-text-muted"
-              }`}
-            >
-              <div className={`flex h-8 w-8 items-center justify-center rounded-xl transition-colors ${active ? "bg-primary-deep/10" : ""}`}>
-                <Icon d={item.icon} className={`h-5 w-5 ${active ? "" : ""}`} />
-              </div>
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-      <div className="h-[env(safe-area-inset-bottom)]" />
-    </nav>
+    <>
+      {/* Spacer to prevent content from being hidden behind the fixed mobile nav */}
+      <div className="h-20 lg:hidden" aria-hidden="true" />
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border-light bg-white/95 backdrop-blur-xl lg:hidden">
+        <div className="mx-auto flex h-16 max-w-lg items-stretch justify-around px-2">
+          {items.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href as "/dashboard"}
+                className={`flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
+                  active ? "text-primary-deep" : "text-text-muted"
+                }`}
+              >
+                <div className={`flex h-8 w-8 items-center justify-center rounded-xl transition-colors ${active ? "bg-primary-deep/10" : ""}`}>
+                  <Icon d={item.icon} className={`h-5 w-5 ${active ? "" : ""}`} />
+                </div>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+        <div className="h-[env(safe-area-inset-bottom)]" />
+      </nav>
+    </>
   );
 }

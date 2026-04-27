@@ -28,13 +28,22 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const AUTH_ERROR_CODES = new Set([
+  "UNAUTHENTICATED",
+  "AUTHENTICATION_REQUIRED",
+  "AUTH_REQUIRED",
+]);
+
 const errorLink = new ErrorLink(({ error }) => {
   if (CombinedGraphQLErrors.is(error)) {
-    const hasAuthError = error.errors.some(
-      (err) =>
-        err.message === "Authentication required" ||
-        err.message === "PermissionError: Authentication required",
-    );
+    const hasAuthError = error.errors.some((err) => {
+      // Prefer checking the structured error code (i18n-safe) over message strings
+      const code =
+        (err.extensions?.code as string) ?? "";
+      if (AUTH_ERROR_CODES.has(code)) return true;
+      // Fallback: match message patterns for backends that don't set codes yet
+      return /authentication required/i.test(err.message);
+    });
     if (hasAuthError) {
       forceLogout();
     }

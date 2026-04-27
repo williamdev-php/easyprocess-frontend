@@ -7,6 +7,7 @@ import Underline from "@tiptap/extension-underline";
 import LinkExtension from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import { MediaPickerDialog } from "@/components/media-picker";
+import { useTranslations } from "next-intl";
 
 // ---------------------------------------------------------------------------
 // Custom resizable image extension
@@ -125,6 +126,7 @@ function LinkDialog({
   editor: Editor;
   onClose: () => void;
 }) {
+  const t = useTranslations("richTextEditor.linkDialog");
   const currentAttrs = editor.getAttributes("link");
   const [url, setUrl] = useState(currentAttrs.href || "");
   const [rel, setRel] = useState(currentAttrs.rel || "noopener noreferrer nofollow");
@@ -169,7 +171,7 @@ function LinkDialog({
         onSubmit={handleSubmit}
         className="w-full max-w-md rounded-xl border border-border-light bg-white p-5 shadow-xl space-y-4"
       >
-        <h3 className="text-sm font-semibold text-primary-deep">Infoga / redigera l&auml;nk</h3>
+        <h3 className="text-sm font-semibold text-primary-deep">{t("title")}</h3>
 
         <div>
           <label htmlFor="link-url" className="mb-1 block text-xs font-medium text-text-secondary">
@@ -188,7 +190,7 @@ function LinkDialog({
 
         <div>
           <label htmlFor="link-rel" className="mb-1 block text-xs font-medium text-text-secondary">
-            Rel-attribut
+            {t("relAttribute")}
           </label>
           <select
             id="link-rel"
@@ -206,7 +208,7 @@ function LinkDialog({
 
         <div>
           <label htmlFor="link-target" className="mb-1 block text-xs font-medium text-text-secondary">
-            &Ouml;ppna i
+            {t("openIn")}
           </label>
           <select
             id="link-target"
@@ -214,8 +216,8 @@ function LinkDialog({
             onChange={(e) => setTarget(e.target.value)}
             className="w-full rounded-lg border border-border-light bg-white px-3 py-2 text-sm"
           >
-            <option value="_blank">Nytt f&ouml;nster (_blank)</option>
-            <option value="_self">Samma f&ouml;nster (_self)</option>
+            <option value="_blank">{t("newWindow")}</option>
+            <option value="_self">{t("sameWindow")}</option>
           </select>
         </div>
 
@@ -226,7 +228,7 @@ function LinkDialog({
               onClick={handleRemove}
               className="text-xs font-medium text-red-500 hover:text-red-700"
             >
-              Ta bort l&auml;nk
+              {t("removeLink")}
             </button>
           ) : (
             <span />
@@ -237,13 +239,13 @@ function LinkDialog({
               onClick={onClose}
               className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-text-muted hover:bg-gray-50"
             >
-              Avbryt
+              {t("cancel")}
             </button>
             <button
               type="submit"
               className="rounded-lg bg-primary-deep px-4 py-1.5 text-xs font-semibold text-white hover:bg-primary-deep/90"
             >
-              Spara
+              {t("save")}
             </button>
           </div>
         </div>
@@ -263,6 +265,7 @@ function ImageDialog({
   editor: Editor;
   onClose: () => void;
 }) {
+  const t = useTranslations("richTextEditor.imageDialog");
   const [showMediaPicker, setShowMediaPicker] = useState(true);
   const [imageUrl, setImageUrl] = useState("");
   const [alt, setAlt] = useState("");
@@ -310,7 +313,7 @@ function ImageDialog({
         onSubmit={handleInsert}
         className="w-full max-w-md rounded-xl border border-border-light bg-white p-5 shadow-xl space-y-4"
       >
-        <h3 className="text-sm font-semibold text-primary-deep">Infoga bild</h3>
+        <h3 className="text-sm font-semibold text-primary-deep">{t("title")}</h3>
 
         <div className="flex items-center gap-3">
           <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border-light bg-gray-50">
@@ -321,34 +324,34 @@ function ImageDialog({
             onClick={() => setShowMediaPicker(true)}
             className="text-xs font-medium text-primary hover:underline"
           >
-            Byt bild
+            {t("changeImage")}
           </button>
         </div>
 
         <div>
           <label htmlFor="img-alt" className="mb-1 block text-xs font-medium text-text-secondary">
-            Alt-text (tillg&auml;nglighet)
+            {t("altText")}
           </label>
           <input
             id="img-alt"
             type="text"
             value={alt}
             onChange={(e) => setAlt(e.target.value)}
-            placeholder="Beskriv bilden..."
+            placeholder={t("altPlaceholder")}
             className="w-full rounded-lg border border-border-light bg-white px-3 py-2 text-sm outline-none focus:border-primary-deep"
           />
         </div>
 
         <div>
           <label htmlFor="img-width" className="mb-1 block text-xs font-medium text-text-secondary">
-            Bredd (valfritt)
+            {t("width")}
           </label>
           <input
             id="img-width"
             type="text"
             value={width}
             onChange={(e) => setWidth(e.target.value)}
-            placeholder="t.ex. 600px, 100%, 50%"
+            placeholder={t("widthPlaceholder")}
             className="w-full rounded-lg border border-border-light bg-white px-3 py-2 text-sm outline-none focus:border-primary-deep"
           />
         </div>
@@ -359,13 +362,13 @@ function ImageDialog({
             onClick={onClose}
             className="rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-text-muted hover:bg-gray-50"
           >
-            Avbryt
+            {t("cancel")}
           </button>
           <button
             type="submit"
             className="rounded-lg bg-primary-deep px-4 py-1.5 text-xs font-semibold text-white hover:bg-primary-deep/90"
           >
-            Infoga
+            {t("insert")}
           </button>
         </div>
       </form>
@@ -378,6 +381,7 @@ function ImageDialog({
 // ---------------------------------------------------------------------------
 
 function HeadingDropdown({ editor }: { editor: Editor }) {
+  const t = useTranslations("richTextEditor");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -402,7 +406,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
         onClick={() => setOpen(!open)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        title="Rubrikstil"
+        title={t("headingStyle")}
         className="flex h-8 items-center gap-1 rounded-md px-2 text-xs font-medium text-text-secondary transition-colors hover:bg-gray-100 hover:text-primary-deep"
       >
         {label}
@@ -427,7 +431,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
               !currentLevel ? "bg-primary-deep/5 font-medium text-primary-deep" : "text-text-secondary hover:bg-gray-50"
             }`}
           >
-            Normal text
+            {t("normalText")}
           </button>
           {levels.map((level) => (
             <button
@@ -446,7 +450,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
               }`}
               style={{ fontSize: `${Math.max(0.75, 1.1 - level * 0.08)}rem`, fontWeight: 600 }}
             >
-              Rubrik {level}
+              {t("heading", { level })}
             </button>
           ))}
         </div>
@@ -460,6 +464,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
 // ---------------------------------------------------------------------------
 
 function Toolbar({ editor }: { editor: Editor }) {
+  const t = useTranslations("richTextEditor");
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
 
@@ -467,7 +472,7 @@ function Toolbar({ editor }: { editor: Editor }) {
     <>
       <div
         role="toolbar"
-        aria-label="Textformatering"
+        aria-label={t("textFormatting")}
         className="flex flex-wrap items-center gap-0.5 border-b border-border-light bg-gray-50/50 px-2 py-1.5"
       >
         {/* Headings */}
@@ -479,7 +484,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive("bold")}
-          title="Fetstil (Ctrl+B)"
+          title={t("bold")}
         >
           <strong>B</strong>
         </ToolbarButton>
@@ -487,7 +492,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleItalic().run()}
           active={editor.isActive("italic")}
-          title="Kursiv (Ctrl+I)"
+          title={t("italic")}
         >
           <em>I</em>
         </ToolbarButton>
@@ -495,7 +500,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleUnderline().run()}
           active={editor.isActive("underline")}
-          title="Understruken (Ctrl+U)"
+          title={t("underline")}
         >
           <span className="underline">U</span>
         </ToolbarButton>
@@ -503,7 +508,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleStrike().run()}
           active={editor.isActive("strike")}
-          title="Genomstruken"
+          title={t("strikethrough")}
         >
           <span className="line-through">S</span>
         </ToolbarButton>
@@ -514,7 +519,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           active={editor.isActive("bulletList")}
-          title="Punktlista"
+          title={t("bulletList")}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -524,7 +529,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           active={editor.isActive("orderedList")}
-          title="Numrerad lista"
+          title={t("orderedList")}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
@@ -540,7 +545,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           active={editor.isActive("blockquote")}
-          title="Citat"
+          title={t("blockquote")}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
@@ -550,7 +555,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleCode().run()}
           active={editor.isActive("code")}
-          title="Inline-kod"
+          title={t("inlineCode")}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25" />
@@ -560,7 +565,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
           active={editor.isActive("codeBlock")}
-          title="Kodblock"
+          title={t("codeBlock")}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
@@ -573,7 +578,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => setShowLinkDialog(true)}
           active={editor.isActive("link")}
-          title="Infoga l&auml;nk (Ctrl+K)"
+          title={t("insertLink")}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.239a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.25 9.503" />
@@ -583,7 +588,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         {/* Image */}
         <ToolbarButton
           onClick={() => setShowImageDialog(true)}
-          title="Infoga bild"
+          title={t("insertImage")}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
@@ -595,7 +600,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         {/* Horizontal rule */}
         <ToolbarButton
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
-          title="Horisontell linje"
+          title={t("horizontalRule")}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" d="M3 12h18" />
@@ -608,7 +613,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
-          title="&Aring;ngra (Ctrl+Z)"
+          title={t("undo")}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
@@ -618,7 +623,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
-          title="G&ouml;r om (Ctrl+Shift+Z)"
+          title={t("redo")}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
@@ -641,6 +646,7 @@ function Toolbar({ editor }: { editor: Editor }) {
 // ---------------------------------------------------------------------------
 
 export default function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
+  const t = useTranslations("richTextEditor");
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -667,7 +673,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
           "prose-img:rounded-lg prose-img:mx-auto prose-blockquote:border-l-4 prose-blockquote:border-gray-300 " +
           "prose-code:rounded prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 " +
           "prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-lg",
-        "aria-label": "Blogginneh\u00e5ll",
+        "aria-label": t("blogContent"),
         role: "textbox",
         "aria-multiline": "true",
       },

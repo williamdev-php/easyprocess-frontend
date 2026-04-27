@@ -516,6 +516,22 @@ export default function CreateSiteWizard({ embedded = false, onComplete }: Creat
       <div className="rounded-2xl border border-border-theme bg-white p-6 shadow-sm sm:p-8">
         {error && step !== "generating" && <Alert className="mb-6">{error}</Alert>}
 
+        {/* Loading skeleton while auth state is being determined */}
+        {authLoading && (
+          <div className="space-y-6 py-4">
+            <div className="flex justify-center">
+              <SkeletonLine className="h-16 w-16 rounded-full" />
+            </div>
+            <SkeletonLine className="mx-auto h-6 w-48" />
+            <SkeletonLine className="mx-auto h-4 w-64" />
+            <div className="space-y-3 pt-4">
+              <SkeletonLine className="h-12 w-full rounded-xl" />
+              <SkeletonLine className="h-12 w-full rounded-xl" />
+              <SkeletonLine className="h-12 w-full rounded-xl" />
+            </div>
+          </div>
+        )}
+
         {/* Step 1: Account — require auth before proceeding */}
         {step === "account" && !authLoading && !isAuthenticated && (
           <div key="account" className="animate-fade-switch space-y-6 py-4 text-center">

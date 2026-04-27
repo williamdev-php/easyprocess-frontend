@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { GOOGLE_FONTS, googleFontUrl } from "@/lib/fonts";
 import type { FontOption } from "@/lib/fonts";
+import { useTranslations } from "next-intl";
 
 // Track which fonts have been loaded into the page
 const loadedFonts = new Set<string>();
@@ -23,6 +24,7 @@ interface FontSelectorProps {
 }
 
 export function FontSelector({ value, onChange, label }: FontSelectorProps) {
+  const t = useTranslations("fontSelector");
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,7 +92,7 @@ export function FontSelector({ value, onChange, label }: FontSelectorProps) {
         className="flex w-full items-center justify-between rounded-lg border border-border-light bg-white px-3 py-2 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20"
       >
         <span style={{ fontFamily: `"${value}", sans-serif` }}>
-          {value || "Välj typsnitt..."}
+          {value || t("placeholder")}
         </span>
         <svg
           className={`h-4 w-4 text-text-muted transition-transform ${open ? "rotate-180" : ""}`}
@@ -126,7 +128,7 @@ export function FontSelector({ value, onChange, label }: FontSelectorProps) {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Sök typsnitt..."
+                placeholder={t("searchPlaceholder")}
                 className="w-full rounded-lg border border-border-light bg-gray-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-primary"
               />
             </div>
@@ -155,7 +157,7 @@ export function FontSelector({ value, onChange, label }: FontSelectorProps) {
             ))}
             {filtered.length === 0 && (
               <p className="px-3 py-4 text-center text-sm text-text-muted">
-                Inget typsnitt hittades
+                {t("noResults")}
               </p>
             )}
           </div>

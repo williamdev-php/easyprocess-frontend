@@ -7,8 +7,8 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useRouter, Link } from "@/i18n/routing";
 import { CREATE_BLOG_POST } from "@/graphql/mutations";
 import { GET_BLOG_CATEGORIES } from "@/graphql/queries";
-import { MediaPickerField } from "@/components/media-picker";
-import RichTextEditor from "@/components/rich-text-editor";
+import { MediaPickerField } from "@/components/media-picker-dynamic";
+import RichTextEditor from "@/components/rich-text-editor-dynamic";
 
 export default function NewBlogPostPage() {
   const params = useParams();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 // ISO 3166-1 alpha-2 countries with flag emoji and Swedish names
 const COUNTRIES = [
@@ -101,6 +102,8 @@ interface CountrySelectProps {
 }
 
 export function CountrySelect({ value, onChange, disabled, className = "" }: CountrySelectProps) {
+  const t = useTranslations("countrySelect");
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -108,6 +111,7 @@ export function CountrySelect({ value, onChange, disabled, className = "" }: Cou
   const listRef = useRef<HTMLDivElement>(null);
 
   const selected = value ? getCountryByCode(value) : null;
+  const countryName = (c: typeof COUNTRIES[number]) => locale === "sv" ? c.name : c.nameEn;
 
   const filtered = useMemo(() => {
     if (!search) return COUNTRIES;
@@ -198,10 +202,10 @@ export function CountrySelect({ value, onChange, disabled, className = "" }: Cou
         {selected ? (
           <>
             <span className="text-lg leading-none">{selected.flag}</span>
-            <span className="flex-1 truncate text-primary-deep">{selected.name}</span>
+            <span className="flex-1 truncate text-primary-deep">{countryName(selected)}</span>
           </>
         ) : (
-          <span className="flex-1 text-text-muted">Välj land...</span>
+          <span className="flex-1 text-text-muted">{t("placeholder")}</span>
         )}
         <svg
           className={`h-4 w-4 shrink-0 text-text-muted transition-transform duration-150 ${open ? "rotate-180" : ""}`}
@@ -234,7 +238,7 @@ export function CountrySelect({ value, onChange, disabled, className = "" }: Cou
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Sök land..."
+                placeholder={t("searchPlaceholder")}
                 className="w-full rounded-lg border border-border-light bg-background py-2 pl-8 pr-3 text-sm text-primary-deep placeholder:text-text-muted focus:outline-none focus:border-primary/40"
               />
             </div>
@@ -244,7 +248,7 @@ export function CountrySelect({ value, onChange, disabled, className = "" }: Cou
           <div ref={listRef} className="max-h-56 overflow-y-auto overscroll-contain">
             {filtered.length === 0 ? (
               <div className="px-3 py-6 text-center text-sm text-text-muted">
-                Inget land hittades
+                {t("noResults")}
               </div>
             ) : (
               filtered.map((country, idx) => (
@@ -263,7 +267,7 @@ export function CountrySelect({ value, onChange, disabled, className = "" }: Cou
                   } ${value === country.code ? "font-medium" : ""}`}
                 >
                   <span className="text-lg leading-none">{country.flag}</span>
-                  <span className="flex-1 truncate">{country.name}</span>
+                  <span className="flex-1 truncate">{countryName(country)}</span>
                   <span className="text-xs text-text-muted">{country.code}</span>
                   {value === country.code && (
                     <svg className="h-4 w-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

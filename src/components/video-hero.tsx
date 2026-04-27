@@ -11,6 +11,8 @@ export default function VideoHero() {
         loop
         muted
         playsInline
+        preload="none"
+        poster="/images/hero-poster.jpg"
         className="absolute inset-0 w-full h-full object-cover z-0"
       >
         <source

@@ -53,6 +53,7 @@ export default async function ArticlePage({ params }: Props) {
   const content = article.content[locale];
   const catLabel = cat.label[locale];
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.com";
+  const ta = await getTranslations({ locale, namespace: "helpArticle" });
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -104,7 +105,7 @@ export default async function ArticlePage({ params }: Props) {
               href={`/help/${category}/${prev.slug}`}
               className="group flex flex-col rounded-2xl border border-border-theme bg-surface p-5 transition hover:shadow-md"
             >
-              <span className="text-xs font-medium text-text-muted">&larr; {locale === "sv" ? "Föregående" : "Previous"}</span>
+              <span className="text-xs font-medium text-text-muted">&larr; {ta("previous")}</span>
               <span className="mt-1 text-sm font-semibold text-primary-deep group-hover:text-primary transition">
                 {prev.content[locale].title}
               </span>
@@ -115,7 +116,7 @@ export default async function ArticlePage({ params }: Props) {
               href={`/help/${category}/${next.slug}`}
               className="group flex flex-col rounded-2xl border border-border-theme bg-surface p-5 text-right transition hover:shadow-md sm:items-end"
             >
-              <span className="text-xs font-medium text-text-muted">{locale === "sv" ? "Nästa" : "Next"} &rarr;</span>
+              <span className="text-xs font-medium text-text-muted">{ta("next")} &rarr;</span>
               <span className="mt-1 text-sm font-semibold text-primary-deep group-hover:text-primary transition">
                 {next.content[locale].title}
               </span>

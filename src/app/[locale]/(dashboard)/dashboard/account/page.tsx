@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
 import { CountrySelect } from "@/components/ui/country-select";
-import { MediaPickerField } from "@/components/media-picker";
+import { MediaPickerField } from "@/components/media-picker-dynamic";
 import { EmailVerificationAlert } from "@/components/email-verification-alert";
 import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
