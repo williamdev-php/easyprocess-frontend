@@ -4,6 +4,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const viewerUrl = process.env.NEXT_PUBLIC_VIEWER_URL || "http://localhost:3001";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const wsUrl = apiUrl.replace(/^https:/, "wss:").replace(/^http:/, "ws:");
 
 const nextConfig: NextConfig = {
   env: {
@@ -24,7 +26,7 @@ const nextConfig: NextConfig = {
               "font-src 'self' https://fonts.gstatic.com https: data:",
               "media-src 'self' https://d8j0ntlcm91z4.cloudfront.net https://*.supabase.co",
               "connect-src 'self' https://api.stripe.com https://fonts.googleapis.com " +
-                (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + " " +
+                apiUrl + " " + wsUrl + " " +
                 (process.env.NEXT_PUBLIC_GRAPHQL_URL || "") + " " +
                 "https://d8j0ntlcm91z4.cloudfront.net https://*.supabase.co",
               // Allow viewer iframe: env var + hardcoded production domains as fallback

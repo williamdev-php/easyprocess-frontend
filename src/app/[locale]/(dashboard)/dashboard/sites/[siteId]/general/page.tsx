@@ -16,7 +16,7 @@ const SECTION_FILES = [
   "meta", "branding", "business", "hero", "about", "features", "stats",
   "services", "process", "gallery", "team", "testimonials", "faq", "cta",
   "contact", "pricing", "video", "logo_cloud", "custom_content", "banner",
-  "section_settings", "seo", "section_order",
+  "ranking", "quiz", "section_settings", "seo", "section_order",
 ];
 
 // ---------------------------------------------------------------------------
