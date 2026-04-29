@@ -17,7 +17,7 @@
   /* Text */
   --text: #1A3A50;
   --text-secondary: #4A7A96;
-  --text-muted: #7A9BAD;
+  --text-muted: #4F7386;
 
   /* Feedback */
   --error: #C44D4D;
@@ -42,7 +42,7 @@
   --color-border-light: #EDE7DC;
   --color-text-theme: #1A3A50;
   --color-text-secondary: #4A7A96;
-  --color-text-muted: #7A9BAD;
+  --color-text-muted: #4F7386;
   --color-error: #C44D4D;
   --color-error-bg: #FDF0F0;
   --color-success: #2D8A56;

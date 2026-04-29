@@ -23,27 +23,27 @@ export default function Footer() {
                 className="h-8 w-auto"
               />
             </Link>
-            <p className="mt-4 text-sm text-white/60">{t("tagline")}</p>
+            <p className="mt-4 text-sm text-white/80">{t("tagline")}</p>
           </div>
 
           {/* Company */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40">
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-white/70">
               {t("company")}
             </h4>
             <ul className="mt-4 space-y-3">
               <li>
-                <a href="/#services" className="text-sm text-white/60 transition hover:text-white">
+                <a href="/#services" className="text-sm text-white/80 transition hover:text-white">
                   {t("aboutLink")}
                 </a>
               </li>
               <li>
-                <Link href="/pricing" className="text-sm text-white/60 transition hover:text-white">
+                <Link href="/pricing" className="text-sm text-white/80 transition hover:text-white">
                   {t("pricingLink")}
                 </Link>
               </li>
               <li>
-                <Link href={{ pathname: "/help", query: { from: pathname } }} className="text-sm text-white/60 transition hover:text-white">
+                <Link href={{ pathname: "/help", query: { from: pathname } }} className="text-sm text-white/80 transition hover:text-white">
                   {t("helpCenter")}
                 </Link>
               </li>
@@ -52,17 +52,17 @@ export default function Footer() {
 
           {/* Free Tools */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40">
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-white/70">
               {t("tools")}
             </h4>
             <ul className="mt-4 space-y-3">
               <li>
-                <Link href="/tools/business-name-generator" className="text-sm text-white/60 transition hover:text-white">
+                <Link href="/tools/business-name-generator" className="text-sm text-white/80 transition hover:text-white">
                   {t("nameGenerator")}
                 </Link>
               </li>
               <li>
-                <Link href="/tools/color-palette-generator" className="text-sm text-white/60 transition hover:text-white">
+                <Link href="/tools/color-palette-generator" className="text-sm text-white/80 transition hover:text-white">
                   {t("colorPalette")}
                 </Link>
               </li>
@@ -71,14 +71,14 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white/40">
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-white/70">
               {t("contact")}
             </h4>
             <ul className="mt-4 space-y-3">
               <li>
                 <a
                   href={`mailto:${t("email")}`}
-                  className="text-sm text-white/60 transition hover:text-white"
+                  className="text-sm text-white/80 transition hover:text-white"
                 >
                   {t("email")}
                 </a>
@@ -86,7 +86,7 @@ export default function Footer() {
               <li>
                 <a
                   href={`tel:${t("phone").replace(/\s/g, "")}`}
-                  className="text-sm text-white/60 transition hover:text-white"
+                  className="text-sm text-white/80 transition hover:text-white"
                 >
                   {t("phone")}
                 </a>
@@ -97,15 +97,15 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 border-t border-white/10 pt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <p className="text-sm text-white/40">{t("copyright")}</p>
+          <p className="text-sm text-white/70">{t("copyright")}</p>
           <div className="flex gap-6">
-            <Link href="/terms" className="text-sm text-white/40 transition hover:text-white/60">
+            <Link href="/terms" className="text-sm text-white/70 transition hover:text-white">
               {t("privacy")}
             </Link>
-            <Link href="/terms" className="text-sm text-white/40 transition hover:text-white/60">
+            <Link href="/terms" className="text-sm text-white/70 transition hover:text-white">
               {t("terms")}
             </Link>
-            <Link href="/terms" className="text-sm text-white/40 transition hover:text-white/60">
+            <Link href="/terms" className="text-sm text-white/70 transition hover:text-white">
               {t("cookies")}
             </Link>
           </div>

@@ -5,6 +5,13 @@ import { Link } from "@/i18n/routing";
 import { getBlogIndex } from "@/lib/blog-content";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.com";
+const defaultLocale = "en";
+
+function toAbsolute(path: string): string {
+  if (path.startsWith("http")) return path;
+  const stripped = path.replace(new RegExp(`^/${defaultLocale}(/|$)`), "$1") || "/";
+  return `${baseUrl}${stripped}`;
+}
 
 export async function generateMetadata({
   params,
@@ -23,10 +30,10 @@ export async function generateMetadata({
     title,
     description,
     alternates: {
-      canonical: `${baseUrl}/${locale}/blog`,
+      canonical: toAbsolute(`/${locale}/blog`),
       languages: {
         sv: `${baseUrl}/sv/blog`,
-        en: `${baseUrl}/en/blog`,
+        en: `${baseUrl}/blog`,
       },
     },
     openGraph: {
@@ -35,7 +42,7 @@ export async function generateMetadata({
       locale: locale === "sv" ? "sv_SE" : "en_US",
       alternateLocale: locale === "sv" ? ["en_US"] : ["sv_SE"],
       type: "website",
-      url: `${baseUrl}/${locale}/blog`,
+      url: toAbsolute(`/${locale}/blog`),
     },
     twitter: {
       card: "summary_large_image",
@@ -76,13 +83,13 @@ export default async function BlogIndexPage({
         "@type": "ListItem",
         position: 1,
         name: homeLabel,
-        item: `${baseUrl}/${locale}`,
+        item: toAbsolute(`/${locale}`),
       },
       {
         "@type": "ListItem",
         position: 2,
         name: heading,
-        item: `${baseUrl}/${locale}/blog`,
+        item: toAbsolute(`/${locale}/blog`),
       },
     ],
   };

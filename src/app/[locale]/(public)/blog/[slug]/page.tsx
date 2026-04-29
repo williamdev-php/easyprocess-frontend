@@ -6,9 +6,14 @@ import { getBlogPost, getAllPostSlugs, getPostMeta } from "@/lib/blog-content";
 import { locales } from "@/i18n/config";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://qvicko.com";
+const defaultLocale = "en";
 
+/** Convert relative path to absolute URL, respecting localePrefix: "as-needed" */
 function toAbsolute(url: string): string {
-  return url.startsWith("http") ? url : `${baseUrl}${url}`;
+  if (url.startsWith("http")) return url;
+  // Strip default locale prefix since localePrefix is "as-needed"
+  const stripped = url.replace(new RegExp(`^/${defaultLocale}(/|$)`), "$1") || "/";
+  return `${baseUrl}${stripped}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -66,7 +71,7 @@ export async function generateMetadata({
       locale: locale === "sv" ? "sv_SE" : "en_US",
       alternateLocale: locale === "sv" ? ["en_US"] : ["sv_SE"],
       type: "article",
-      url: `${baseUrl}/${locale}/blog/${slug}`,
+      url: toAbsolute(`/${locale}/blog/${slug}`),
       publishedTime: meta.published_at,
       modifiedTime: meta.updated_at || meta.published_at,
       authors: [meta.author?.name || "Qvicko"],
