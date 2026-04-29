@@ -1,7 +1,9 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
+import { ApolloProvider } from "@apollo/client/react";
 import { useQuery } from "@apollo/client/react";
+import apolloClient from "@/lib/apollo-client";
 import { MY_SITES } from "@/graphql/queries";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
@@ -135,9 +137,11 @@ export default function AppsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background">
-      <AppLibraryHeader />
-      {children}
-    </div>
+    <ApolloProvider client={apolloClient}>
+      <div className="min-h-screen bg-background">
+        <AppLibraryHeader />
+        {children}
+      </div>
+    </ApolloProvider>
   );
 }

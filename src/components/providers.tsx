@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { ApolloProvider } from "@apollo/client/react";
-import apolloClient from "@/lib/apollo-client";
 import { AuthProvider } from "@/lib/auth-context";
 
 class ErrorBoundary extends React.Component<
@@ -46,9 +44,7 @@ class ErrorBoundary extends React.Component<
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
-      <ApolloProvider client={apolloClient}>
-        <AuthProvider>{children}</AuthProvider>
-      </ApolloProvider>
+      <AuthProvider>{children}</AuthProvider>
     </ErrorBoundary>
   );
 }

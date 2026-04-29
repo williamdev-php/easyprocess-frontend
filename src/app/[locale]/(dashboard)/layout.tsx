@@ -4,7 +4,9 @@ import { Suspense } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "@/i18n/routing";
 import { useEffect, useState } from "react";
+import { ApolloProvider } from "@apollo/client/react";
 import { useQuery } from "@apollo/client/react";
+import apolloClient from "@/lib/apollo-client";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { MY_SITES } from "@/graphql/queries";
@@ -42,6 +44,18 @@ function MinimalHeader() {
 }
 
 export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ApolloProvider client={apolloClient}>
+      <DashboardLayoutInner>{children}</DashboardLayoutInner>
+    </ApolloProvider>
+  );
+}
+
+function DashboardLayoutInner({
   children,
 }: {
   children: React.ReactNode;
