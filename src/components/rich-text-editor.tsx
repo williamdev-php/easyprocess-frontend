@@ -100,7 +100,7 @@ function ToolbarButton({
       title={title}
       aria-label={title}
       aria-pressed={active}
-      className={`flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors ${
+      className={`flex h-8 w-8 items-center justify-center rounded-md text-sm transition-all duration-100 active:scale-90 ${
         active
           ? "bg-primary-deep/10 text-primary-deep"
           : "text-text-secondary hover:bg-gray-100 hover:text-primary-deep"
@@ -383,17 +383,26 @@ function ImageDialog({
 function HeadingDropdown({ editor }: { editor: Editor }) {
   const t = useTranslations("richTextEditor");
   const [open, setOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  const closeDropdown = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setIsClosing(false);
+    }, 120);
+  }, []);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
+        if (open && !isClosing) closeDropdown();
       }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+  }, [open, isClosing, closeDropdown]);
 
   const levels = [1, 2, 3, 4, 5, 6] as const;
   const currentLevel = levels.find((l) => editor.isActive("heading", { level: l }));
@@ -403,7 +412,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
     <div className="relative" ref={ref}>
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={() => open && !isClosing ? closeDropdown() : setOpen(true)}
         aria-haspopup="listbox"
         aria-expanded={open}
         title={t("headingStyle")}
@@ -417,7 +426,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 top-full z-50 mt-1 w-44 rounded-lg border border-border-light bg-white py-1 shadow-lg"
+          className={`absolute left-0 top-full z-50 mt-1 w-44 rounded-lg border border-border-light bg-white py-1 shadow-lg ${isClosing ? "animate-dropdown-out" : "animate-dropdown"}`}
         >
           <button
             type="button"
@@ -425,7 +434,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
             aria-selected={!currentLevel}
             onClick={() => {
               editor.chain().focus().setParagraph().run();
-              setOpen(false);
+              closeDropdown();
             }}
             className={`block w-full px-3 py-1.5 text-left text-sm transition-colors ${
               !currentLevel ? "bg-primary-deep/5 font-medium text-primary-deep" : "text-text-secondary hover:bg-gray-50"
@@ -441,7 +450,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
               aria-selected={currentLevel === level}
               onClick={() => {
                 editor.chain().focus().toggleHeading({ level }).run();
-                setOpen(false);
+                closeDropdown();
               }}
               className={`block w-full px-3 py-1.5 text-left transition-colors ${
                 currentLevel === level

@@ -143,9 +143,26 @@ export function MediaPickerDialog({
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const closingTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const t = useTranslations("mediaPicker");
+
+  const handleAnimatedClose = useCallback(() => {
+    setIsClosing(true);
+    closingTimerRef.current = setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 150);
+  }, [onClose]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (closingTimerRef.current) clearTimeout(closingTimerRef.current);
+    };
+  }, []);
 
   const loadMedia = useCallback(async () => {
     setLoading(true);
@@ -170,11 +187,11 @@ export function MediaPickerDialog({
   // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleAnimatedClose();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  }, [handleAnimatedClose]);
 
   const handleUpload = useCallback(
     async (fileList: FileList | File[]) => {
@@ -262,9 +279,14 @@ export function MediaPickerDialog({
   const breadcrumbs = currentFolder ? currentFolder.split("/") : [];
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      {/* Backdrop */}
       <div
-        className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border-light bg-white shadow-2xl"
+        className={`absolute inset-0 bg-black/50 ${isClosing ? "animate-backdrop-out" : "animate-backdrop-in"}`}
+        onClick={handleAnimatedClose}
+      />
+      <div
+        className={`relative z-10 flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border-light bg-white shadow-2xl ${isClosing ? "animate-modal-out" : "animate-modal-in"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -277,7 +299,7 @@ export function MediaPickerDialog({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleAnimatedClose}
             className="rounded-lg p-2 text-text-muted transition-colors hover:bg-gray-100 hover:text-primary-deep"
           >
             <svg
@@ -655,7 +677,7 @@ export function MediaPickerDialog({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleAnimatedClose}
               className="rounded-lg border border-border-light px-4 py-2 text-xs font-medium text-text-muted transition-colors hover:bg-gray-50"
             >
               {t("cancel")}

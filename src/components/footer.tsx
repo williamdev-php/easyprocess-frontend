@@ -9,7 +9,7 @@ export default function Footer() {
   const pathname = usePathname();
 
   return (
-    <footer className="bg-primary-deep text-white">
+    <footer className="animate-fade-in bg-primary-deep text-white">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}

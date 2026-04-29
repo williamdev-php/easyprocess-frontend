@@ -97,7 +97,7 @@ export default function SelectSitePage() {
         <p className="mt-2 text-text-muted">{t("subtitle")}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 animate-stagger">
         {sites.map((site) => {
           const name = getSiteName(site);
           const color = getSitePrimaryColor(site);

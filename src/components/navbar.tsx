@@ -251,12 +251,12 @@ export default function Navbar() {
       <div
         className={`fixed inset-x-0 top-[68px] bottom-0 z-40 overflow-y-auto bg-primary-deep/98 backdrop-blur-xl transition-all duration-300 lg:hidden ${
           mobileOpen
-            ? "pointer-events-auto opacity-100"
+            ? "pointer-events-auto opacity-100 animate-nav-slide-down"
             : "pointer-events-none opacity-0"
         }`}
       >
         <div className="mx-auto max-w-7xl px-4 py-6">
-          <div className="flex flex-col gap-1">
+          <div className="animate-stagger flex flex-col gap-1">
             <Link
               href="/"
               onClick={() => setMobileOpen(false)}

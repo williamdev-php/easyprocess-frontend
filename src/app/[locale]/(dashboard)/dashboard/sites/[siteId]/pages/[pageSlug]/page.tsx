@@ -180,8 +180,40 @@ export default function PageDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-deep border-t-transparent" />
+      <div className="mx-auto max-w-2xl space-y-6 pb-12">
+        {/* Back link + title skeleton */}
+        <div>
+          <div className="h-4 w-24 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-2">
+              <div className="h-8 w-48 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              <div className="h-4 w-32 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            </div>
+            <div className="h-10 w-28 rounded-xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          </div>
+        </div>
+        {/* Page details card skeleton */}
+        <div className="rounded-2xl border border-border-light bg-white/80 shadow-sm">
+          <div className="border-b border-border-light px-5 py-4 sm:px-6">
+            <div className="h-5 w-32 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          </div>
+          <div className="space-y-5 px-5 py-5 sm:px-6">
+            <div className="h-8 w-full rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            <div className="h-8 w-full rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            <div className="h-8 w-full rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          </div>
+        </div>
+        {/* SEO card skeleton */}
+        <div className="rounded-2xl border border-border-light bg-white/80 shadow-sm">
+          <div className="border-b border-border-light px-5 py-4 sm:px-6">
+            <div className="h-5 w-16 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          </div>
+          <div className="space-y-5 px-5 py-5 sm:px-6">
+            <div className="h-8 w-full rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            <div className="h-20 w-full rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            <div className="h-8 w-full rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          </div>
+        </div>
       </div>
     );
   }

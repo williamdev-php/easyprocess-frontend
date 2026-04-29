@@ -89,7 +89,7 @@ export function GoogleLoginButton({ loading, onSuccess }: GoogleLoginButtonProps
       type="button"
       onClick={handleClick}
       disabled={isLoading}
-      className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-border-theme px-6 py-3 text-sm font-semibold text-primary-deep transition hover:border-primary hover:bg-primary-deep/5 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-border-theme px-6 py-3 text-sm font-semibold text-primary-deep transition-transform duration-150 hover:border-primary hover:bg-primary-deep/5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isLoading ? (
         <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">

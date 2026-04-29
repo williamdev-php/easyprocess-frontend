@@ -66,7 +66,7 @@ export default async function CollectionsPage({
             key={listing.id}
             href={listing.type === "auction" ? `/auction/${listing.id}` : `/product/${listing.id}`}
           >
-            <Card hover className="h-full">
+            <Card hover className="h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
               <div className="mb-3">
                 <Badge variant={listing.type === "auction" ? "primary" : "outline"}>
                   {listing.type === "auction" ? t("auction") : t("fixedPrice")}

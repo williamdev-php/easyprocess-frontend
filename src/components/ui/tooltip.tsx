@@ -9,6 +9,8 @@ interface TooltipProps {
 
 function Tooltip({ text, children }: TooltipProps) {
   const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [closing, setClosing] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,6 +22,20 @@ function Tooltip({ text, children }: TooltipProps) {
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      setClosing(false);
+    } else if (visible) {
+      setClosing(true);
+      const timer = setTimeout(() => {
+        setVisible(false);
+        setClosing(false);
+      }, 120);
+      return () => clearTimeout(timer);
+    }
   }, [open]);
 
   return (
@@ -46,8 +62,8 @@ function Tooltip({ text, children }: TooltipProps) {
           </svg>
         )}
       </button>
-      {open && (
-        <div className="absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg bg-primary-deep px-3 py-2 text-xs text-white shadow-lg animate-tooltip-in">
+      {visible && (
+        <div className={`absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg bg-primary-deep px-3 py-2 text-xs text-white shadow-lg ${closing ? 'animate-tooltip-out' : 'animate-tooltip-in'}`}>
           {text}
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-primary-deep" />
         </div>

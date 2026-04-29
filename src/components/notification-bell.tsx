@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { Link } from "@/i18n/routing";
@@ -31,9 +31,18 @@ function formatRelative(d: string) {
 export default function NotificationBell() {
   const t = useTranslations("notifications");
   const [open, setOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const { data, refetch } = useQuery(GET_MY_NOTIFICATIONS, {
+  const closeDropdown = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setIsClosing(false);
+    }, 120);
+  }, []);
+
+  const { data, loading: notifLoading, refetch } = useQuery(GET_MY_NOTIFICATIONS, {
     fetchPolicy: "cache-and-network",
     pollInterval: 60000, // Poll every 60s for new notifications
   });
@@ -47,12 +56,12 @@ export default function NotificationBell() {
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
+        if (open && !isClosing) closeDropdown();
       }
     }
     if (open) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
+  }, [open, isClosing, closeDropdown]);
 
   async function handleMarkAllRead() {
     await markAllRead();
@@ -64,13 +73,13 @@ export default function NotificationBell() {
       await markRead({ variables: { notificationId: notif.id } });
       refetch();
     }
-    setOpen(false);
+    closeDropdown();
   }
 
   return (
     <div className="relative" ref={ref}>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => open && !isClosing ? closeDropdown() : setOpen(true)}
         className="relative flex h-9 w-9 items-center justify-center rounded-xl text-text-muted transition-colors hover:bg-primary-deep/5 hover:text-primary-deep"
         aria-label={t("title")}
       >
@@ -85,7 +94,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border-light bg-white shadow-xl overflow-hidden z-50">
+        <div className={`absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border-light bg-white shadow-xl overflow-hidden z-50 ${isClosing ? "animate-dropdown-out" : "animate-dropdown"}`}>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
             <h3 className="text-sm font-semibold text-primary-deep">{t("title")}</h3>
@@ -101,7 +110,19 @@ export default function NotificationBell() {
 
           {/* Notification list */}
           <div className="max-h-80 overflow-y-auto divide-y divide-border-light">
-            {notifications.length === 0 ? (
+            {notifLoading && !data ? (
+              <div className="divide-y divide-border-light">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex gap-3 px-4 py-3">
+                    <div className="mt-0.5 h-7 w-7 shrink-0 bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded-lg" />
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="h-3 w-3/4 bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded" />
+                      <div className="h-2.5 w-1/2 bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : notifications.length === 0 ? (
               <div className="px-4 py-8 text-center">
                 <svg className="mx-auto h-8 w-8 text-text-muted/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />

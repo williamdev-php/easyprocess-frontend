@@ -168,6 +168,9 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
+      {/* Content area keyed by range for fade-switch animation */}
+      <div key={range} className="animate-fade-switch space-y-8">
+
       {/* Key Metrics */}
       {overview && (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
@@ -313,6 +316,8 @@ export default function AnalyticsPage() {
           )}
         </div>
       </div>
+
+      </div>{/* end animate-fade-switch wrapper */}
     </div>
   );
 }
@@ -323,7 +328,7 @@ export default function AnalyticsPage() {
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border-theme bg-surface p-5">
+    <div className="rounded-2xl border border-border-theme bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
       <p className="mt-1 text-2xl font-bold text-primary-deep">{value}</p>
     </div>
@@ -332,28 +337,28 @@ function MetricCard({ label, value }: { label: string; value: string }) {
 
 function AnalyticsSkeleton() {
   return (
-    <div className="space-y-8 animate-pulse">
+    <div className="space-y-8">
       <div className="flex justify-between">
         <div>
-          <div className="h-7 w-40 rounded bg-background-subtle" />
-          <div className="mt-2 h-4 w-64 rounded bg-background-subtle" />
+          <div className="h-7 w-40 rounded-xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          <div className="mt-2 h-4 w-64 rounded-xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
         </div>
         <div className="flex gap-2">
-          <div className="h-8 w-12 rounded-lg bg-background-subtle" />
-          <div className="h-8 w-12 rounded-lg bg-background-subtle" />
-          <div className="h-8 w-12 rounded-lg bg-background-subtle" />
+          <div className="h-8 w-12 rounded-lg bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          <div className="h-8 w-12 rounded-lg bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          <div className="h-8 w-12 rounded-lg bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-24 rounded-2xl bg-background-subtle" />
+          <div key={i} className="h-24 rounded-2xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
         ))}
       </div>
-      <div className="h-64 rounded-2xl bg-background-subtle" />
-      <div className="h-48 rounded-2xl bg-background-subtle" />
+      <div className="h-64 rounded-2xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+      <div className="h-48 rounded-2xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="h-48 rounded-2xl bg-background-subtle" />
-        <div className="h-48 rounded-2xl bg-background-subtle" />
+        <div className="h-48 rounded-2xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+        <div className="h-48 rounded-2xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
       </div>
     </div>
   );

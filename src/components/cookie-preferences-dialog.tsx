@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui";
 import { setCookieConsent, getCookieConsent } from "@/lib/cookie-consent";
@@ -16,6 +16,33 @@ export default function CookiePreferencesDialog({ open, onClose }: Props) {
 
   const [analytics, setAnalytics] = useState(existing?.analytics ?? false);
   const [marketing, setMarketing] = useState(existing?.marketing ?? false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const closingTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Track mounted state for rendering during exit animation
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      setIsClosing(false);
+    }
+  }, [open]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (closingTimerRef.current) clearTimeout(closingTimerRef.current);
+    };
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    closingTimerRef.current = setTimeout(() => {
+      setIsClosing(false);
+      setMounted(false);
+      onClose();
+    }, 150);
+  }, [onClose]);
 
   function save() {
     setCookieConsent({
@@ -24,21 +51,22 @@ export default function CookiePreferencesDialog({ open, onClose }: Props) {
       marketing,
       timestamp: new Date().toISOString(),
     });
-    onClose();
+    handleClose();
   }
 
-  if (!open) return null;
+  if (!open && !mounted) return null;
+  if (!mounted) return null;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
+        className={`absolute inset-0 bg-black/40 ${isClosing ? "animate-backdrop-out" : "animate-backdrop-in"}`}
+        onClick={handleClose}
       />
 
       {/* Dialog */}
-      <div className="relative z-10 mx-4 w-full max-w-md rounded-2xl border border-border-theme bg-surface p-6 shadow-2xl">
+      <div className={`relative z-10 mx-4 w-full max-w-md rounded-2xl border border-border-theme bg-surface p-6 shadow-2xl ${isClosing ? "animate-modal-out" : "animate-modal-in"}`}>
         <h2 className="text-lg font-semibold text-primary-deep">
           {t("preferencesTitle")}
         </h2>
@@ -124,7 +152,7 @@ export default function CookiePreferencesDialog({ open, onClose }: Props) {
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={handleClose}>
             {t("cancel")}
           </Button>
           <Button variant="primary" size="sm" onClick={save}>

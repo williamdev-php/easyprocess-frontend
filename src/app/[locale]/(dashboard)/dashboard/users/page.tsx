@@ -162,7 +162,7 @@ export default function UsersPage() {
               <th className="hidden px-4 py-3 text-right font-semibold text-primary-deep lg:table-cell">{t("joined")}</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="animate-stagger">
             {loading && users.length === 0 ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <tr key={i} className="border-b border-border-light">

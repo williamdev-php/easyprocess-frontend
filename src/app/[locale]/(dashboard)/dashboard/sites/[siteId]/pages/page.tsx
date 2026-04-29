@@ -143,8 +143,29 @@ export default function PagesManagerPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-deep border-t-transparent" />
+      <div className="mx-auto max-w-4xl space-y-6">
+        {/* Header skeleton */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-48 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            <div className="h-4 w-64 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          </div>
+          <div className="h-10 w-32 rounded-xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+        </div>
+        {/* Page card skeletons */}
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl border border-border-light bg-white/80 p-4 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-32 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+                  <div className="h-3 w-24 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

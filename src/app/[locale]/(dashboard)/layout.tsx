@@ -81,7 +81,35 @@ export default function DashboardLayout({
   }, [isLoading, isAuthenticated, sitesLoading, siteCreated, sitesData, user, router, billingRedirectHandled]);
 
   if (isLoading || sitesLoading) {
-    return null;
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Header skeleton */}
+        <div className="sticky top-0 z-30 border-b border-border-light bg-white/80 backdrop-blur-xl">
+          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+            <div className="h-10 w-28 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            <div className="h-4 w-16 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          </div>
+        </div>
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+          <div className="flex gap-8">
+            {/* Sidebar skeleton */}
+            <div className="hidden w-56 shrink-0 space-y-4 lg:block">
+              <div className="h-8 w-40 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              <div className="h-4 w-48 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              <div className="h-4 w-36 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              <div className="h-4 w-44 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              <div className="h-4 w-32 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            </div>
+            {/* Main content skeleton */}
+            <div className="min-w-0 flex-1 space-y-6">
+              <div className="h-8 w-48 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              <div className="h-32 w-full rounded-lg bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              <div className="h-48 w-full rounded-lg bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {

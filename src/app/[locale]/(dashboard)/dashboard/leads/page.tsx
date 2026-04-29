@@ -297,7 +297,7 @@ export default function LeadsPage() {
               <th className="px-4 py-3 text-right font-semibold text-primary-deep">{t("actions")}</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="animate-stagger">
             {loading && leads.length === 0 ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} className="border-b border-border-light">

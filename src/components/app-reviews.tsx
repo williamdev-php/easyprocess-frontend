@@ -67,7 +67,7 @@ function StarRatingInput({
           <svg
             className={`h-6 w-6 ${
               star <= (hovered || rating) ? "text-amber-400" : "text-gray-200"
-            } transition`}
+            } transition-colors duration-200`}
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -85,7 +85,7 @@ function StarRating({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map((star) => (
         <svg
           key={star}
-          className={`h-4 w-4 ${star <= Math.round(rating) ? "text-amber-400" : "text-gray-200"}`}
+          className={`h-4 w-4 transition-colors duration-200 ${star <= Math.round(rating) ? "text-amber-400" : "text-gray-200"}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >

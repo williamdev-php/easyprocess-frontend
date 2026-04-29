@@ -80,6 +80,8 @@ interface ColorPickerProps {
 
 function ColorPicker({ label, value, onChange }: ColorPickerProps) {
   const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [hexInput, setHexInput] = useState(value);
   const [hsl, setHsl] = useState<[number, number, number]>(() => hexToHSL(value));
 
@@ -104,6 +106,21 @@ function ColorPicker({ label, value, onChange }: ColorPickerProps) {
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  // Exit animation lifecycle
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      setClosing(false);
+    } else if (visible) {
+      setClosing(true);
+      const timer = setTimeout(() => {
+        setVisible(false);
+        setClosing(false);
+      }, 120);
+      return () => clearTimeout(timer);
+    }
   }, [open]);
 
   const commitColor = useCallback(
@@ -220,8 +237,8 @@ function ColorPicker({ label, value, onChange }: ColorPickerProps) {
       <span className="text-[10px] font-mono text-text-muted select-all">{value}</span>
 
       {/* Popover */}
-      {open && (
-        <div className="absolute top-full left-1/2 z-50 mt-2 w-64 -translate-x-1/2 rounded-2xl border border-border-theme bg-white p-4 shadow-xl animate-tooltip-in">
+      {visible && (
+        <div className={`absolute top-full left-1/2 z-50 mt-2 w-64 -translate-x-1/2 rounded-2xl border border-border-theme bg-white p-4 shadow-xl ${closing ? 'animate-tooltip-out' : 'animate-tooltip-in'}`}>
           {/* Arrow */}
           <div className="absolute -top-2 left-1/2 -translate-x-1/2">
             <div className="h-3 w-3 rotate-45 border-l border-t border-border-theme bg-white" />

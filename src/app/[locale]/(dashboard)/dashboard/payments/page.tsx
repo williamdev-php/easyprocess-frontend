@@ -238,12 +238,43 @@ export default function PaymentsPage() {
   if (authLoading || !user) {
     return (
       <div className="space-y-6">
+        {/* Header */}
         <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="mt-2 h-4 w-80" />
+          <div className="h-8 w-48 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          <div className="mt-2 h-4 w-64 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
         </div>
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-64 w-full" />
+        {/* Balance / connect card */}
+        <div className="rounded-2xl border border-border-light bg-white p-6">
+          <div className="flex items-start gap-6">
+            <div className="h-16 w-16 shrink-0 rounded-2xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            <div className="flex-1 space-y-3">
+              <div className="h-5 w-48 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              <div className="h-4 w-64 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              <div className="h-10 w-32 rounded-xl bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            </div>
+          </div>
+        </div>
+        {/* Payment methods grid */}
+        <div className="rounded-2xl border border-border-light bg-white p-6">
+          <div className="h-5 w-48 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex flex-col items-center gap-3 rounded-xl border border-border-light p-4">
+                <div className="h-8 w-12 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+                <div className="h-4 w-16 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Transaction table */}
+        <div className="rounded-2xl border border-border-light bg-white p-6">
+          <div className="h-5 w-36 rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+          <div className="mt-4 space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-8 w-full rounded bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

@@ -27,6 +27,7 @@ export function AIChatBubble({
 }: AIChatBubbleProps) {
   const t = useTranslations("aiChat");
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isClosing, setIsClosing] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -70,6 +71,14 @@ export function AIChatBubble({
     [handleSend]
   );
 
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      setIsOpen(false);
+    }, 250);
+  }, []);
+
   // --- Collapsed: floating button ---
   if (!isOpen) {
     return (
@@ -88,7 +97,7 @@ export function AIChatBubble({
 
   // --- Expanded: chat panel ---
   return (
-    <div className="fixed bottom-0 right-0 z-[200] flex flex-col md:bottom-4 md:right-4 md:rounded-2xl md:h-[520px] md:w-[380px] h-full w-full bg-[#1a1a2e] border border-white/10 shadow-2xl shadow-black/40 overflow-hidden">
+    <div className={`fixed bottom-0 right-0 z-[200] flex flex-col md:bottom-4 md:right-4 md:rounded-2xl md:h-[520px] md:w-[380px] h-full w-full bg-[#1a1a2e] border border-white/10 shadow-2xl shadow-black/40 overflow-hidden ${isClosing ? "animate-slide-in-right [animation-direction:reverse]" : "animate-slide-in-right"}`}>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 shrink-0 bg-[#1a1a2e]">
         <div className="flex items-center gap-2.5">
@@ -109,7 +118,7 @@ export function AIChatBubble({
         </div>
 
         <button
-          onClick={() => setIsOpen(false)}
+          onClick={handleClose}
           className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition-colors"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -228,7 +237,7 @@ function MessageBubble({ message }: { message: AIChatMessage }) {
   if (!displayContent) return null;
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex animate-fade-in ${isUser ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 ${
           isUser

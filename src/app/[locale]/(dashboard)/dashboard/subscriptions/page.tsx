@@ -186,7 +186,7 @@ export default function SubscriptionsPage() {
               <th className="hidden px-4 py-3 text-right font-semibold text-primary-deep lg:table-cell">{t("created")}</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="animate-stagger">
             {loading && subs.length === 0 ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <tr key={i} className="border-b border-border-light">

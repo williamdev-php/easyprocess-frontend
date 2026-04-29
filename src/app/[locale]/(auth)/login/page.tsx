@@ -98,7 +98,7 @@ function LoginForm() {
         <p className="mt-2 text-text-muted">{t("loginSubtitle")}</p>
       </div>
 
-      {error && <Alert className="mb-6">{error}</Alert>}
+      {error && <Alert className="mb-6 animate-fade-in">{error}</Alert>}
 
       {/* ---- Step 1: Google + email ---- */}
       {step === 1 && (
@@ -161,7 +161,7 @@ function LoginForm() {
 
       {/* ---- Step 2: Password ---- */}
       {step === 2 && (
-        <>
+        <div className="animate-fade-switch">
           {/* Email display + back */}
           <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/10 bg-primary-deep/5 p-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-deep/10">
@@ -215,22 +215,22 @@ function LoginForm() {
                 </button>
               )}
               {forgotPasswordStatus === "loading" && (
-                <p className="text-sm text-text-muted">...</p>
+                <p className="text-sm text-text-muted animate-pulse">...</p>
               )}
               {forgotPasswordStatus === "sent" && (
-                <p className="text-sm text-green-600">{t("forgotPasswordSent")}</p>
+                <p className="text-sm text-green-600 animate-fade-in">{t("forgotPasswordSent")}</p>
               )}
               {forgotPasswordStatus === "limited" && (
-                <p className="text-sm text-amber-600">{t("forgotPasswordLimit")}</p>
+                <p className="text-sm text-amber-600 animate-fade-in">{t("forgotPasswordLimit")}</p>
               )}
               {forgotPasswordStatus === "error" && (
-                <p className="text-sm text-red-600">
+                <p className="text-sm text-red-600 animate-fade-in">
                   {forgotPasswordError || t("forgotPasswordError")}
                 </p>
               )}
             </div>
 
-            <Button type="submit" disabled={loading} fullWidth size="lg">
+            <Button type="submit" disabled={loading} fullWidth size="lg" className="disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200">
               {loading ? (
                 <span className="inline-flex items-center gap-2">
                   <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -244,7 +244,7 @@ function LoginForm() {
               )}
             </Button>
           </form>
-        </>
+        </div>
       )}
 
       {/* Register link */}

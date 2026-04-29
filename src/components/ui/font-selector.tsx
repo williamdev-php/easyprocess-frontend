@@ -26,6 +26,8 @@ interface FontSelectorProps {
 export function FontSelector({ value, onChange, label }: FontSelectorProps) {
   const t = useTranslations("fontSelector");
   const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [search, setSearch] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -47,6 +49,21 @@ export function FontSelector({ value, onChange, label }: FontSelectorProps) {
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  // Exit animation lifecycle
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      setClosing(false);
+    } else if (visible) {
+      setClosing(true);
+      const timer = setTimeout(() => {
+        setVisible(false);
+        setClosing(false);
+      }, 120);
+      return () => clearTimeout(timer);
+    }
   }, [open]);
 
   // Focus search when opening
@@ -105,8 +122,8 @@ export function FontSelector({ value, onChange, label }: FontSelectorProps) {
         </svg>
       </button>
 
-      {open && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-border-light bg-white shadow-xl">
+      {visible && (
+        <div className={`absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-border-light bg-white shadow-xl ${closing ? 'animate-dropdown-out' : 'animate-dropdown'}`}>
           {/* Search */}
           <div className="border-b border-border-light p-2">
             <div className="relative">

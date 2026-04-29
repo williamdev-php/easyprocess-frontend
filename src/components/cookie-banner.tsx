@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui";
 import { getCookieConsent, acceptAllCookies } from "@/lib/cookie-consent";
@@ -8,13 +8,23 @@ import CookiePreferencesDialog from "@/components/cookie-preferences-dialog";
 
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   const t = useTranslations("cookies");
+  const closingTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  const dismissBanner = useCallback(() => {
+    setIsClosing(true);
+    closingTimerRef.current = setTimeout(() => {
+      setIsClosing(false);
+      setVisible(false);
+    }, 250);
+  }, []);
 
   const handleAcceptAll = useCallback(() => {
     acceptAllCookies();
-    setVisible(false);
-  }, []);
+    dismissBanner();
+  }, [dismissBanner]);
 
   useEffect(() => {
     const consent = getCookieConsent();
@@ -35,6 +45,13 @@ export default function CookieBanner() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [visible, showPreferences, handleAcceptAll]);
 
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (closingTimerRef.current) clearTimeout(closingTimerRef.current);
+    };
+  }, []);
+
   function handlePreferencesSaved() {
     setShowPreferences(false);
     setVisible(false);
@@ -44,9 +61,9 @@ export default function CookieBanner() {
 
   return (
     <>
-      {visible && !showPreferences && (
+      {(visible || isClosing) && !showPreferences && (
         <div
-          className="fixed bottom-4 right-4 z-50 w-full max-w-sm"
+          className={`fixed bottom-4 right-4 z-50 w-full max-w-sm ${isClosing ? "animate-slide-up-out" : "animate-slide-up"}`}
           role="dialog"
           aria-label={t("title")}
           onKeyDown={(e) => {

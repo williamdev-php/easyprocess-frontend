@@ -94,7 +94,64 @@ export default function ChatConversationDetailPage() {
   }
 
   if (loading && !data) {
-    return <div className="py-12 text-center text-sm text-text-secondary">...</div>;
+    const shimmer = "bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded";
+    return (
+      <div className="space-y-4">
+        {/* Header skeleton */}
+        <div className="flex items-center gap-3">
+          <div className={`h-9 w-44 ${shimmer}`} />
+        </div>
+
+        {/* Conversation info skeleton */}
+        <div className="rounded-xl border border-border-light bg-white p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2">
+              <div className={`h-5 w-40 ${shimmer}`} />
+              <div className={`h-4 w-52 ${shimmer}`} />
+              <div className={`h-4 w-36 ${shimmer}`} />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={`h-6 w-14 ${shimmer}`} />
+              <div className={`h-9 w-16 ${shimmer}`} />
+            </div>
+          </div>
+        </div>
+
+        {/* Messages skeleton */}
+        <div className="rounded-xl border border-border-light bg-white">
+          <div className="max-h-[500px] p-4 space-y-3">
+            {/* Visitor message - left */}
+            <div className="flex justify-start">
+              <div className={`h-16 w-3/5 rounded-xl ${shimmer}`} />
+            </div>
+            {/* Agent message - right */}
+            <div className="flex justify-end">
+              <div className={`h-12 w-2/5 rounded-xl ${shimmer}`} />
+            </div>
+            {/* Visitor message - left */}
+            <div className="flex justify-start">
+              <div className={`h-20 w-1/2 rounded-xl ${shimmer}`} />
+            </div>
+            {/* Agent message - right */}
+            <div className="flex justify-end">
+              <div className={`h-14 w-3/5 rounded-xl ${shimmer}`} />
+            </div>
+            {/* Visitor message - left */}
+            <div className="flex justify-start">
+              <div className={`h-12 w-2/5 rounded-xl ${shimmer}`} />
+            </div>
+          </div>
+
+          {/* Reply form skeleton */}
+          <div className="border-t border-border-light p-4">
+            <div className="flex gap-2">
+              <div className={`h-10 flex-1 ${shimmer}`} />
+              <div className={`h-10 w-20 ${shimmer}`} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!conversation) {

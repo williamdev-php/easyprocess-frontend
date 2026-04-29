@@ -39,7 +39,7 @@ export default function LazySection({
   return (
     <div ref={ref} className={className}>
       {visible ? (
-        children
+        <div className="animate-fade-rise">{children}</div>
       ) : (
         <div className="min-h-[200px]" />
       )}

@@ -1,9 +1,77 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Button, Card, Badge, Input, Label } from "@/components/ui";
 import { JsonLd } from "@/components/json-ld";
 import { generateAuctionJsonLd, generateBreadcrumbJsonLd } from "@/lib/seo";
+
+const shimmer = "bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded";
+
+function AuctionSkeleton() {
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* Breadcrumb skeleton */}
+      <nav className="mb-6 flex items-center gap-2">
+        <div className={`h-4 w-12 ${shimmer}`} />
+        <div className={`h-4 w-4 ${shimmer}`} />
+        <div className={`h-4 w-20 ${shimmer}`} />
+        <div className={`h-4 w-4 ${shimmer}`} />
+        <div className={`h-4 w-24 ${shimmer}`} />
+      </nav>
+
+      <div className="grid gap-10 lg:grid-cols-5">
+        {/* Image placeholder */}
+        <div className="lg:col-span-3">
+          <div className={`aspect-video rounded-2xl ${shimmer}`} />
+          {/* Description card skeleton */}
+          <div className="mt-6 rounded-xl border border-border-light bg-white p-6">
+            <div className={`h-4 w-full ${shimmer}`} />
+            <div className={`mt-3 h-4 w-3/4 ${shimmer}`} />
+            <div className={`mt-3 h-4 w-5/6 ${shimmer}`} />
+          </div>
+        </div>
+
+        {/* Bid panel skeleton */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="rounded-xl border border-border-light bg-white p-6">
+            <div className={`h-6 w-20 ${shimmer}`} />
+            <div className={`mt-3 h-8 w-48 ${shimmer}`} />
+            <div className="mt-6 space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex justify-between border-b border-border-light py-2">
+                  <div className={`h-4 w-24 ${shimmer}`} />
+                  <div className={`h-4 w-28 ${shimmer}`} />
+                </div>
+              ))}
+            </div>
+            <div className="mt-6">
+              <div className={`h-4 w-20 ${shimmer}`} />
+              <div className={`mt-2 h-10 w-full ${shimmer}`} />
+              <div className={`mt-3 h-10 w-full ${shimmer}`} />
+            </div>
+          </div>
+
+          {/* Bid history skeleton */}
+          <div className="rounded-xl border border-border-light bg-white p-6">
+            <div className={`h-5 w-32 ${shimmer} mb-4`} />
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between rounded-xl bg-background px-4 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className={`h-4 w-24 ${shimmer}`} />
+                    <div className={`h-3 w-20 ${shimmer}`} />
+                  </div>
+                  <div className={`h-4 w-20 ${shimmer}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
 
 export async function generateMetadata({
   params,
@@ -38,6 +106,15 @@ export default async function AuctionPage({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
+
+  return (
+    <Suspense fallback={<AuctionSkeleton />}>
+      <AuctionContent locale={locale} id={id} />
+    </Suspense>
+  );
+}
+
+async function AuctionContent({ locale, id }: { locale: string; id: string }) {
   const t = await getTranslations("auction");
 
   // TODO: Replace with real data fetching

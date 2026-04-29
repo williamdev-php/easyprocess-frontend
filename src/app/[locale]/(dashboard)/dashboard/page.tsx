@@ -114,7 +114,7 @@ function MetricCard({
 
   return (
     <div
-      className={`rounded-2xl border border-border-light bg-white p-5 transition-all duration-500 hover:shadow-md ${
+      className={`rounded-2xl border border-border-light bg-white p-5 transition-all duration-500 hover:shadow-md hover:-translate-y-0.5 ${
         visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       }`}
     >
@@ -313,7 +313,7 @@ function AdminOverview() {
 
       {/* Platform stats */}
       {userStats && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-stagger">
           <MetricCard
             label={t("totalUsers")}
             value={String(userStats.totalUsers)}
@@ -345,7 +345,7 @@ function AdminOverview() {
       )}
 
       {/* Lead pipeline stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3 animate-stagger">
         <MetricCard
           label={t("totalLeads")}
           value={String(stats?.totalLeads ?? 0)}
@@ -991,7 +991,7 @@ function UserOverview() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3 animate-stagger">
             <MetricCard
               label={t("visitors")}
               value={visitorsValue}

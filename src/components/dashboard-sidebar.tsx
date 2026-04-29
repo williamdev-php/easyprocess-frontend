@@ -216,7 +216,7 @@ export default function DashboardSidebar() {
     return (
       <>
         <aside className="hidden lg:block">
-          <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col overflow-y-auto space-y-3 scrollbar-thin">
+          <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col overflow-y-auto space-y-3 transition-all duration-300 scrollbar-thin">
             <div className="w-52 rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur-sm">
               <nav className="flex flex-col gap-1 p-2">
                 {adminNav.map((item) => (
@@ -262,7 +262,7 @@ export default function DashboardSidebar() {
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:block">
-        <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col space-y-3 overflow-y-auto scrollbar-thin">
+        <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col space-y-3 overflow-y-auto transition-all duration-300 scrollbar-thin">
           {/* Site selector — only show if multiple sites */}
           {hasMultipleSites && (
             <div className="w-52 shrink-0 rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur-sm">
@@ -314,7 +314,7 @@ export default function DashboardSidebar() {
                   </button>
 
                   {customizeOpen && (
-                    <div className="animate-collapsible-open flex flex-col gap-1">
+                    <div className="animate-collapsible-open animate-stagger flex flex-col gap-1">
                       <SidebarLink
                         href={`/dashboard/sites/${sid}/general`}
                         icon={ICONS.overview}
@@ -380,7 +380,7 @@ export default function DashboardSidebar() {
                   {installedApps.map((app) => {
                     const appBase = `/dashboard/sites/${sid}/apps/${app.appSlug}`;
                     return (
-                      <div key={app.appSlug}>
+                      <div key={app.appSlug} className="animate-collapsible-open">
                         {app.sidebarLinks?.map((link) => (
                           <SidebarLink
                             key={link.key}

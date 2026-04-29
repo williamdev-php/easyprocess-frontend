@@ -239,7 +239,7 @@ export default function InboxPage() {
 
       {/* Item list */}
       <div className="overflow-hidden rounded-2xl border border-border-light bg-white">
-        <div className="divide-y divide-border-light">
+        <div className="divide-y divide-border-light animate-stagger">
           {loading && items.length === 0 ? (
             Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex items-start gap-3 p-4">

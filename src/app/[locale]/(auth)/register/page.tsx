@@ -11,7 +11,35 @@ import { GoogleLoginButton } from "@/components/google-login-button";
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={
+      <div className="mx-auto w-full max-w-md rounded-2xl border border-border-light bg-white p-8 shadow-sm">
+        {/* Header skeleton */}
+        <div className="mb-8">
+          <div className="h-6 w-24 bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded-full" />
+          <div className="mt-4 h-8 w-56 bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded" />
+          <div className="mt-2 h-4 w-40 bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded" />
+        </div>
+        {/* Google button skeleton */}
+        <div className="h-11 w-full bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded-xl" />
+        {/* Divider skeleton */}
+        <div className="my-6 flex items-center gap-4">
+          <div className="h-px flex-1 bg-border-light" />
+          <div className="h-3 w-32 bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded" />
+          <div className="h-px flex-1 bg-border-light" />
+        </div>
+        {/* Input field skeletons */}
+        <div className="space-y-5">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i}>
+              <div className="h-4 w-20 bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded" />
+              <div className="mt-1.5 h-11 w-full bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded-xl" />
+            </div>
+          ))}
+          {/* Submit button skeleton */}
+          <div className="h-12 w-full bg-gradient-to-r from-border-light via-surface to-border-light bg-[length:200%_100%] animate-shimmer rounded-xl" />
+        </div>
+      </div>
+    }>
       <RegisterPageInner />
     </Suspense>
   );
@@ -205,11 +233,11 @@ function RegisterPageInner() {
         </div>
       </div>
 
-      {error && <Alert className="mb-6">{error}</Alert>}
+      {error && <Alert className="mb-6 animate-fade-in">{error}</Alert>}
 
       {/* Step 1 — Account */}
       {step === 1 && (
-        <form onSubmit={handleNext} className="space-y-5">
+        <form onSubmit={handleNext} className="space-y-5 animate-fade-switch">
           <div>
             <Label htmlFor="fullName" required>{t("fullName")}</Label>
             <div className="relative mt-1.5">
@@ -270,7 +298,7 @@ function RegisterPageInner() {
             </div>
             {/* Password strength */}
             {form.password.length > 0 && (
-              <div className="mt-2">
+              <div className="mt-2 animate-fade-in">
                 <div className="flex gap-1">
                   {[1, 2, 3].map((level) => (
                     <div
@@ -306,7 +334,7 @@ function RegisterPageInner() {
               />
             </div>
             {form.confirmPassword.length > 0 && form.password === form.confirmPassword && (
-              <p className="mt-1 flex items-center gap-1 text-xs text-primary">
+              <p className="mt-1 flex items-center gap-1 text-xs text-primary animate-fade-in">
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -330,7 +358,7 @@ function RegisterPageInner() {
             </label>
           </div>
 
-          <Button type="submit" fullWidth size="lg">
+          <Button type="submit" fullWidth size="lg" className="disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200">
             {t("continue")}
             <svg className="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -341,7 +369,7 @@ function RegisterPageInner() {
 
       {/* Step 2 — Company details */}
       {step === 2 && (
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5 animate-fade-switch">
           <div className="rounded-xl border border-primary/10 bg-primary-deep/5 p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-deep/10">
@@ -441,14 +469,14 @@ function RegisterPageInner() {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center justify-center rounded-xl border-2 border-border-theme px-5 py-3 text-sm font-semibold text-text-secondary transition hover:border-primary hover:text-primary-deep"
+              className="flex items-center justify-center rounded-xl border-2 border-border-theme px-5 py-3 text-sm font-semibold text-text-secondary transition hover:border-primary hover:text-primary-deep disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200"
             >
               {t("skip")}
               <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </button>
-            <Button type="submit" disabled={loading} fullWidth size="lg">
+            <Button type="submit" disabled={loading} fullWidth size="lg" className="disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200">
               {loading ? (
                 <span className="inline-flex items-center gap-2">
                   <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">

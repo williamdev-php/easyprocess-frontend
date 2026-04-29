@@ -107,6 +107,8 @@ export function DropdownMenu({
   onOpenChange,
 }: DropdownMenuProps) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [closing, setClosing] = useState(false);
   const isControlled = controlledOpen !== undefined;
   const isOpen = isControlled ? controlledOpen : internalOpen;
 
@@ -123,6 +125,21 @@ export function DropdownMenu({
     },
     [isControlled, onOpenChange],
   );
+
+  // Exit animation lifecycle
+  useEffect(() => {
+    if (isOpen) {
+      setVisible(true);
+      setClosing(false);
+    } else if (visible) {
+      setClosing(true);
+      const timer = setTimeout(() => {
+        setVisible(false);
+        setClosing(false);
+      }, 120);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   // Close on click outside
   useEffect(() => {
@@ -157,12 +174,12 @@ export function DropdownMenu({
       <div ref={triggerRef} onClick={() => setOpen(!isOpen)} className="cursor-pointer">
         {trigger}
       </div>
-      {isOpen && (
+      {visible && (
         <Portal>
           <div
             ref={menuRef}
             style={floatingStyle}
-            className="rounded-xl border border-border-light bg-white py-1.5 shadow-xl animate-dropdown"
+            className={`rounded-xl border border-border-light bg-white py-1.5 shadow-xl ${closing ? 'animate-dropdown-out' : 'animate-dropdown'}`}
           >
             {children}
           </div>
@@ -227,6 +244,8 @@ export function Dropdown({
   disabled = false,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [closing, setClosing] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -256,6 +275,21 @@ export function Dropdown({
     }
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
+  }, [isOpen]);
+
+  // Exit animation lifecycle
+  useEffect(() => {
+    if (isOpen) {
+      setVisible(true);
+      setClosing(false);
+    } else if (visible) {
+      setClosing(true);
+      const timer = setTimeout(() => {
+        setVisible(false);
+        setClosing(false);
+      }, 120);
+      return () => clearTimeout(timer);
+    }
   }, [isOpen]);
 
   function handleSelect(val: string) {
@@ -381,12 +415,12 @@ export function Dropdown({
       </div>
 
       {/* Menu — rendered via portal */}
-      {isOpen && (
+      {visible && (
         <Portal>
           <div
             ref={menuRef}
             style={floatingStyle}
-            className="max-h-60 overflow-y-auto rounded-xl border border-border-light bg-white py-1.5 shadow-xl animate-dropdown"
+            className={`max-h-60 overflow-y-auto rounded-xl border border-border-light bg-white py-1.5 shadow-xl ${closing ? 'animate-dropdown-out' : 'animate-dropdown'}`}
           >
             {renderOptions()}
           </div>

@@ -52,7 +52,7 @@ export default async function HomePage({
               </p>
             </div>
 
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="animate-stagger mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {(["speed", "design", "seo"] as const).map((key, i) => {
                 const icons = [
                   <svg key="s" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>,

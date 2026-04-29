@@ -111,7 +111,7 @@ export default async function PricingPage({
       {/* Pricing Cards */}
       <section className="bg-background py-20 lg:py-28 -mt-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="animate-stagger grid gap-8 lg:grid-cols-3">
             {plans.map((plan) => (
               <div
                 key={plan.key}

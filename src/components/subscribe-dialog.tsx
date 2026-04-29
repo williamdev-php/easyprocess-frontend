@@ -104,11 +104,13 @@ export default function SubscribeDialog({ open, onClose, onSubscribed }: Subscri
   const hasCard = paymentMethods.length > 0;
 
   const [step, setStep] = useState<"plan" | "card">("plan");
+  const [stepKey, setStepKey] = useState(0);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingSecret, setLoadingSecret] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Reset state when dialog opens
   useEffect(() => {
@@ -118,6 +120,8 @@ export default function SubscribeDialog({ open, onClose, onSubscribed }: Subscri
       setLoadingSecret(false);
       setSubscribing(false);
       setError(null);
+      setIsClosing(false);
+      setStepKey(0);
       // Don't set step here — wait for queries to load
     }
   }, [open]);
@@ -127,9 +131,9 @@ export default function SubscribeDialog({ open, onClose, onSubscribed }: Subscri
     if (open && methodsData) {
       const cards = methodsData.myPaymentMethods || [];
       if (cards.length > 0) {
-        setStep("plan");
+        changeStep("plan");
       } else if (!clientSecret && !loadingSecret) {
-        setStep("card");
+        changeStep("card");
         fetchSetupIntent();
       }
     }
@@ -167,10 +171,23 @@ export default function SubscribeDialog({ open, onClose, onSubscribed }: Subscri
     }
   };
 
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 200);
+  }, [onClose]);
+
+  const changeStep = useCallback((newStep: "plan" | "card") => {
+    setStep(newStep);
+    setStepKey((k) => k + 1);
+  }, []);
+
   const handleCardSuccess = async () => {
     await refetchMethods();
     setClientSecret(null);
-    setStep("plan");
+    changeStep("plan");
   };
 
   const handleSelectPlan = (planKey: string) => {
@@ -178,7 +195,7 @@ export default function SubscribeDialog({ open, onClose, onSubscribed }: Subscri
     if (hasCard) {
       handleSubscribe(planKey);
     } else {
-      setStep("card");
+      changeStep("card");
       if (!clientSecret && !loadingSecret) {
         fetchSetupIntent();
       }
@@ -219,10 +236,10 @@ export default function SubscribeDialog({ open, onClose, onSubscribed }: Subscri
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${isClosing ? "animate-backdrop-out" : "animate-backdrop-in"}`} onClick={handleClose} />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto rounded-2xl border border-border-light bg-white shadow-2xl">
+      <div className={`relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto rounded-2xl border border-border-light bg-white shadow-2xl ${isClosing ? "animate-modal-out" : "animate-modal-in"}`}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
           <div>
@@ -234,7 +251,7 @@ export default function SubscribeDialog({ open, onClose, onSubscribed }: Subscri
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:bg-primary-deep/5 transition-colors"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -244,7 +261,7 @@ export default function SubscribeDialog({ open, onClose, onSubscribed }: Subscri
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4">
+        <div key={stepKey} className="px-6 py-5 space-y-4 animate-fade-switch">
           {error && (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
               <p className="text-sm font-medium text-red-700">{error}</p>
