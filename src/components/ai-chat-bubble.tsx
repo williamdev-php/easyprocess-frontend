@@ -86,6 +86,7 @@ export function AIChatBubble({
         onClick={() => setIsOpen(true)}
         className="fixed bottom-5 right-5 z-[200] flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 transition-all hover:bg-blue-500 hover:scale-105 active:scale-95 animate-[pulse_3s_ease-in-out_2]"
         title={t("title")}
+        aria-label={t("title")}
       >
         {/* Sparkle / chat icon */}
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -120,6 +121,7 @@ export function AIChatBubble({
         <button
           onClick={handleClose}
           className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition-colors"
+          aria-label={t("close")}
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -210,6 +212,7 @@ export function AIChatBubble({
             onClick={handleSend}
             disabled={!inputValue.trim() || !isConnected || isStreaming}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition-all hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+            aria-label={t("send")}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />

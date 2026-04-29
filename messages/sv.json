@@ -223,7 +223,8 @@
     "createNewSite": "Skapa ny hemsida",
     "createNewSiteDesc": "Börja från grunden med AI",
     "transformSite": "Transformera befintlig sida",
-    "transformSiteDesc": "Importera och bygg om från en URL"
+    "transformSiteDesc": "Importera och bygg om från en URL",
+    "userMenu": "Användarmeny"
   },
   "dashboardNav": {
     "overview": "Översikt",
@@ -557,40 +558,6 @@
     "marketingDescription": "Används för att visa relevanta annonser och mäta kampanjers effektivitet.",
     "savePreferences": "Spara inställningar",
     "cancel": "Avbryt"
-  },
-  "collections": {
-    "title": "Våra tjänster",
-    "description": "Utforska vårt kompletta utbud av digitala lösningar och mediatjänster.",
-    "noResults": "Inga resultat hittades.",
-    "auction": "Tjänst",
-    "fixedPrice": "Fastpris",
-    "viewDetails": "Visa detaljer"
-  },
-  "product": {
-    "title": "Tjänstdetaljer",
-    "seller": "Kontakt",
-    "condition": "Status",
-    "location": "Plats",
-    "category": "Kategori",
-    "price": "Pris",
-    "buyNow": "Kom igång",
-    "contactSeller": "Kontakta oss",
-    "description": "Beskrivning",
-    "details": "Detaljer",
-    "notFound": "Tjänsten hittades inte."
-  },
-  "auction": {
-    "title": "Projektdetaljer",
-    "currentBid": "Aktuell uppskattning",
-    "startingBid": "Startpris",
-    "endsAt": "Deadline",
-    "placeBid": "Begär offert",
-    "bidHistory": "Offerthistorik",
-    "noBids": "Inga offerter ännu.",
-    "bidAmount": "Belopp",
-    "bidder": "Kund",
-    "time": "Tid",
-    "notFound": "Projektet hittades inte."
   },
   "settings": {
     "title": "Inställningar",
@@ -1011,6 +978,11 @@
       "q8": "Är min hemsida optimerad för sökmotorer?",
       "a8": "Ja! Varje hemsida byggd med Qvicko är SEO-optimerad från dag ett. Det inkluderar meta-taggar, snabba laddningstider, mobilanpassning och strukturerat innehåll som sökmotorer älskar."
     }
+  },
+  "error": {
+    "title": "Något gick fel",
+    "description": "Ett oväntat fel inträffade. Försök igen eller kontakta oss om problemet kvarstår.",
+    "retry": "Försök igen"
   },
   "notFound": {
     "title": "Sidan hittades inte",
@@ -1921,7 +1893,8 @@
     "deleteTitle": "Ta bort fil?",
     "deleteDescription": "Filen tas bort permanent och kan inte återställas.",
     "delete": "Ta bort",
-    "select": "Välj"
+    "select": "Välj",
+    "selectedPreview": "Vald mediaförhandsvisning"
   },
   "aiChat": {
     "title": "AI Redigerare",
@@ -1930,7 +1903,9 @@
     "greeting": "Hej! Jag kan hjälpa dig redigera din sida.",
     "hint": "Beskriv vad du vill ändra, t.ex. \"Ändra rubriken till Välkommen\" eller \"Ta bort FAQ-sektionen\".",
     "placeholder": "Beskriv vad du vill ändra...",
-    "reconnect": "Anslut igen"
+    "reconnect": "Anslut igen",
+    "close": "Stäng chatt",
+    "send": "Skicka meddelande"
   },
   "helpArticle": {
     "previous": "Föregående",

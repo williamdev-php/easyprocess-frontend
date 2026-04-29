@@ -79,6 +79,7 @@ export default function HelpSearch() {
           }}
           onFocus={() => query && setOpen(true)}
           placeholder={t("searchPlaceholder")}
+          aria-label={t("searchPlaceholder")}
           className="w-full rounded-2xl border border-border-theme bg-surface py-3.5 pl-12 pr-4 text-sm text-primary-deep shadow-sm outline-none transition placeholder:text-text-muted focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
         />
       </div>

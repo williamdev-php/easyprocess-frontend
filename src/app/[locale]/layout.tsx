@@ -71,7 +71,15 @@ export default async function LocaleLayout({
         <TrackingProvider>
           <PasswordGate>
             <div className="bg-background text-text-theme min-h-full flex flex-col" lang={locale}>
+              <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:rounded-lg focus:bg-primary-deep focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+              >
+                {locale === "sv" ? "Hoppa till huvudinnehåll" : "Skip to main content"}
+              </a>
+              <div id="main-content">
               {children}
+              </div>
             </div>
           </PasswordGate>
         </TrackingProvider>

@@ -4,20 +4,65 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
+import { useQuery } from "@apollo/client/react";
+import { MY_SUBSCRIPTION } from "@/graphql/queries";
 
 type AlertType = "paymentFailed" | "expiringPlan" | "siteDeletion" | null;
+
+interface SubscriptionData {
+  mySubscription: {
+    id: string;
+    status: string;
+    currentPeriodEnd: string | null;
+    cancelAtPeriodEnd: boolean;
+    trialEnd: string | null;
+  } | null;
+}
 
 export default function SubscriptionAlert() {
   const t = useTranslations("subscriptionAlert");
   const pathname = usePathname();
   const [dismissed, setDismissed] = useState(false);
 
-  // Don't show on account page
-  if (pathname === "/dashboard/account") return null;
+  const { data } = useQuery<SubscriptionData>(MY_SUBSCRIPTION, {
+    fetchPolicy: "cache-first",
+  });
 
-  // TODO: Replace with real subscription status from API/context
-  const alertType: AlertType = null;
-  const daysLeft = 5;
+  // Don't show on account/billing pages
+  if (pathname === "/dashboard/account" || pathname === "/dashboard/billing") return null;
+
+  const sub = data?.mySubscription;
+  let alertType: AlertType = null;
+  let daysLeft = 0;
+
+  if (sub) {
+    // Payment failed
+    if (sub.status === "PAST_DUE") {
+      alertType = "paymentFailed";
+    }
+
+    // Trial ending soon (7 days or less)
+    if (sub.status === "TRIALING" && sub.trialEnd) {
+      const days = Math.ceil(
+        (new Date(sub.trialEnd).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      );
+      if (days <= 7 && days > 0) {
+        alertType = "expiringPlan";
+        daysLeft = days;
+      }
+    }
+
+    // Cancellation scheduled — site will be deleted
+    if (sub.cancelAtPeriodEnd && sub.currentPeriodEnd) {
+      const days = Math.ceil(
+        (new Date(sub.currentPeriodEnd).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      );
+      if (days <= 14 && days > 0) {
+        alertType = "siteDeletion";
+        daysLeft = days;
+      }
+    }
+  }
 
   if (!alertType || dismissed) return null;
 
@@ -41,6 +86,7 @@ export default function SubscriptionAlert() {
 
   return (
     <div
+      role="alert"
       className={`mb-6 flex items-center gap-3 rounded-2xl border px-4 py-3 animate-slide-down ${colors[alertType]}`}
     >
       <svg
@@ -49,6 +95,7 @@ export default function SubscriptionAlert() {
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={1.5}
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -74,6 +121,7 @@ export default function SubscriptionAlert() {
           viewBox="0 0 24 24"
           stroke="currentColor"
           strokeWidth={2}
+          aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>

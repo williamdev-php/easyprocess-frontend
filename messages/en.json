@@ -223,7 +223,8 @@
     "createNewSite": "Create new site",
     "createNewSiteDesc": "Start from scratch with AI",
     "transformSite": "Transform existing site",
-    "transformSiteDesc": "Import and rebuild from a URL"
+    "transformSiteDesc": "Import and rebuild from a URL",
+    "userMenu": "User menu"
   },
   "dashboardNav": {
     "overview": "Overview",
@@ -557,40 +558,6 @@
     "marketingDescription": "Used to show relevant ads and measure campaign effectiveness.",
     "savePreferences": "Save preferences",
     "cancel": "Cancel"
-  },
-  "collections": {
-    "title": "Our services",
-    "description": "Explore our full range of digital solutions and media services.",
-    "noResults": "No results found.",
-    "auction": "Service",
-    "fixedPrice": "Fixed price",
-    "viewDetails": "View details"
-  },
-  "product": {
-    "title": "Service details",
-    "seller": "Contact",
-    "condition": "Status",
-    "location": "Location",
-    "category": "Category",
-    "price": "Price",
-    "buyNow": "Get started",
-    "contactSeller": "Contact us",
-    "description": "Description",
-    "details": "Details",
-    "notFound": "Service not found."
-  },
-  "auction": {
-    "title": "Project details",
-    "currentBid": "Current estimate",
-    "startingBid": "Starting price",
-    "endsAt": "Deadline",
-    "placeBid": "Request quote",
-    "bidHistory": "Quote history",
-    "noBids": "No quotes yet.",
-    "bidAmount": "Amount",
-    "bidder": "Client",
-    "time": "Time",
-    "notFound": "Project not found."
   },
   "settings": {
     "title": "Settings",
@@ -1011,6 +978,11 @@
       "q8": "Is my website optimized for search engines?",
       "a8": "Yes! Every website built with Qvicko is SEO-optimized from day one. This includes meta tags, fast load times, mobile responsiveness, and structured content that search engines love."
     }
+  },
+  "error": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again or contact us if the problem persists.",
+    "retry": "Try again"
   },
   "notFound": {
     "title": "Page not found",
@@ -1921,7 +1893,8 @@
     "deleteTitle": "Delete file?",
     "deleteDescription": "The file will be permanently deleted and cannot be restored.",
     "delete": "Delete",
-    "select": "Select"
+    "select": "Select",
+    "selectedPreview": "Selected media preview"
   },
   "aiChat": {
     "title": "AI Editor",
@@ -1930,7 +1903,9 @@
     "greeting": "Hi! I can help you edit your page.",
     "hint": "Describe what you want to change, e.g. \"Change the heading to Welcome\" or \"Remove the FAQ section\".",
     "placeholder": "Describe what you want to change...",
-    "reconnect": "Reconnect"
+    "reconnect": "Reconnect",
+    "close": "Close chat",
+    "send": "Send message"
   },
   "helpArticle": {
     "previous": "Previous",

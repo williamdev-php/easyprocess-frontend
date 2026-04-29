@@ -142,11 +142,13 @@ export default function DashboardHeader() {
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition-colors hover:bg-primary-deep/5"
+              aria-label={t("userMenu")}
+              aria-expanded={menuOpen}
             >
               {user?.avatarUrl ? (
                 <img
                   src={user.avatarUrl}
-                  alt={user.fullName || ""}
+                  alt={user.fullName || "User avatar"}
                   className="h-9 w-9 rounded-full object-cover border border-border-light shadow-sm"
                 />
               ) : (

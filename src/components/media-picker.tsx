@@ -52,7 +52,7 @@ export function MediaPickerField({
           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border-light bg-gray-50">
             <img
               src={value}
-              alt=""
+              alt={t("selectedPreview")}
               width={48}
               height={48}
               className="h-full w-full object-cover"
@@ -286,13 +286,16 @@ export function MediaPickerDialog({
         onClick={handleAnimatedClose}
       />
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="media-picker-title"
         className={`relative z-10 flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border-light bg-white shadow-2xl ${isClosing ? "animate-modal-out" : "animate-modal-in"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
           <div>
-            <h2 className="text-lg font-bold text-primary-deep">{t("title")}</h2>
+            <h2 id="media-picker-title" className="text-lg font-bold text-primary-deep">{t("title")}</h2>
             <p className="mt-0.5 text-xs text-text-muted">
               {formatFileSize(storageUsed)} / {formatFileSize(storageLimit)} använt
             </p>

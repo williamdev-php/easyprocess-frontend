@@ -1,6 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { Instrument_Serif } from "next/font/google";
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+});
 
 export default function VideoHero() {
   return (
@@ -24,8 +32,7 @@ export default function VideoHero() {
       {/* Hero content */}
       <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-32 pb-40 py-[90px] min-h-screen">
         <h1
-          className="text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-[-2.46px] max-w-7xl font-normal text-white animate-fade-rise"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          className={`text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-[-2.46px] max-w-7xl font-normal text-white animate-fade-rise ${instrumentSerif.className}`}
         >
           You bring the{" "}
           <em className="not-italic text-white/50">vision.</em>

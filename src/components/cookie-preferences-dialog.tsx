@@ -66,8 +66,13 @@ export default function CookiePreferencesDialog({ open, onClose }: Props) {
       />
 
       {/* Dialog */}
-      <div className={`relative z-10 mx-4 w-full max-w-md rounded-2xl border border-border-theme bg-surface p-6 shadow-2xl ${isClosing ? "animate-modal-out" : "animate-modal-in"}`}>
-        <h2 className="text-lg font-semibold text-primary-deep">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cookie-dialog-title"
+        className={`relative z-10 mx-4 w-full max-w-md rounded-2xl border border-border-theme bg-surface p-6 shadow-2xl ${isClosing ? "animate-modal-out" : "animate-modal-in"}`}
+      >
+        <h2 id="cookie-dialog-title" className="text-lg font-semibold text-primary-deep">
           {t("preferencesTitle")}
         </h2>
         <p className="mt-1 text-sm text-text-muted">
